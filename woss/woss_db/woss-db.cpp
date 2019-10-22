@@ -98,8 +98,12 @@ bool WossNetcdfDb::openConnection() {
   assert( isValid() );
 
   if (netcdf_db == NULL) {
+#if defined (WOSS_NETCDF4_SUPPORT)
+    netcdf_db = new netCDF::NcFile( db_name, netCDF::NcFile::read );
+#else
     netcdf_db = new NcFile( db_name.c_str() );
-    
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+
     return ( netcdf_db != NULL );
   }
 

@@ -265,6 +265,7 @@ bool ACToolboxWoss::initSSPVector() {
    
     curr_ssp = db_manager->getSSP( tx_coordz, coordz_vector[i], current_time );
 
+
     if ( curr_ssp->isValid() ) {
       is_ssp_vector_transformable = is_ssp_vector_transformable && curr_ssp->isTransformable();
 
@@ -274,11 +275,22 @@ bool ACToolboxWoss::initSSPVector() {
       if ( curr_ssp->size() > max_ssp_depth_steps ) max_ssp_depth_steps = curr_ssp->size();
       if ( curr_ssp->size() < min_ssp_depth_steps ) min_ssp_depth_steps = curr_ssp->size();
 
-      checkSSPUnicity( curr_ssp ); 
-      ssp_vector.push_back( curr_ssp );
+      if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPVector() i = " << i 
+                             << "; ssp_addr = " << curr_ssp << "; ssp = " << *curr_ssp << ::std::endl;
+
+      if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPVector() ssp vector size = " << ssp_vector.size() 
+                             << "; unique ssp = " << ssp_unique_indexes.size() << ::std::endl;
+
+      if (true == checkSSPUnicity( curr_ssp ))
+      {
+        ssp_vector.push_back( curr_ssp );
+      }
+    }
+    else {
+      if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPVector() invalid ssp at range step i = " << i << ::std::endl;
     }
   }
-  
+
   if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPVector() ssp vector size = " << ssp_vector.size() 
                          << "; unique ssp = " << ssp_unique_indexes.size() << ::std::endl;
   
@@ -286,15 +298,16 @@ bool ACToolboxWoss::initSSPVector() {
 }
 
 
-void ACToolboxWoss::checkSSPUnicity( SSP*& ptr ) {
+bool ACToolboxWoss::checkSSPUnicity( SSP*& ptr ) {
   for( SSPVector::iterator it = ssp_vector.begin(); it != ssp_vector.end(); it++) {
     if( *ptr == **it ) {
       delete ptr;
       ptr = NULL;
-      return;
+      return false;
     }
   }
   ssp_unique_indexes.insert( ssp_vector.size() );
+  return true;
 }
 
 

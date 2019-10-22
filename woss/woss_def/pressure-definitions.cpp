@@ -85,15 +85,14 @@ Pressure& Pressure::operator=( const Pressure& press ) {
   
 bool Pressure::checkAttenuation( double distance, double frequency ) { 
   if ( std::abs( complex_pressure ) > 1.0 ) {
-    double amplitude = std::abs( complex_pressure ); 
+    double amplitude = pow( 10.0, ( getAttenuation( distance, frequency ) / -20.0 ) );
     double phase = arg( complex_pressure );
-    
-    amplitude = pow( 10.0, ( getAttenuation( distance, frequency ) / -20.0 ) );
+
     complex_pressure = std::complex<double>( (amplitude * cos(phase)), (amplitude * sin(phase)) );
-    
+
     if (debug) std::cerr << "Pressure::checkAttenuation() distance = " << distance << "; frequency = " << frequency 
                          << "; amplitude > 1, new pressure = " << complex_pressure << "; tx loss db = " << -20.0*log10( std::abs( complex_pressure ) ) << std::endl;
-    
+
     return true;
   }
   return false;

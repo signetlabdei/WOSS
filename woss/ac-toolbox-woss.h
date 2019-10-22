@@ -268,8 +268,9 @@ namespace woss {
     /**
     * Checks if the given SSP is not equal to previous values
     * @param value pointer to a valid SSP object
+    * @returns <i>true</i> if input is unique, <i>false</i> otherwise
     **/
-    virtual void checkSSPUnicity( SSP*& ptr );
+    virtual bool checkSSPUnicity( SSP*& ptr );
 
 
     /**

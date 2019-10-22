@@ -32,7 +32,7 @@
 #include <cmath>
 #include <definitions.h>
 #include "bathymetry-utm-csv-db.h"
-
+#include <sstream>
 
 using namespace woss;
 

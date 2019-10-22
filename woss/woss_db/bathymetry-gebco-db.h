@@ -42,56 +42,100 @@
 #ifdef WOSS_NETCDF_SUPPORT
 
 #include "woss-db.h"
+#include <utility>
+#if defined (WOSS_NETCDF4_SUPPORT)
+#include <ncVar.h>
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
 namespace woss {
 
 
-  static const double GEBCO_BATHY_MIN_LAT = -90.0;      /**< GEBCO One minute NetCDF mimimum latitude value [decimal degree] */
+  static const int GEBCO_1_MINUTE_BATHY_NLAT = 10801; /**< GEBCO One minute NetCDF total number of latitudes */
 
-  static const double GEBCO_BATHY_MAX_LAT = 90.0;       /**< GEBCO One minute NetCDF maximum latitude value [decimal degree] */
+  static const int GEBCO_1_MINUTE_BATHY_NLON = 21601; /**< GEBCO One minute NetCDF total number of longitudes */
 
-  static const double GEBCO_BATHY_MIN_LONG = -180.0;    /**< GEBCO One minute NetCDF mimimum longitude value [decimal degree] */
-
-  static const double GEBCO_BATHY_MAX_LONG = 180.0;     /**< GEBCO One minute NetCDF maximum longitude value [decimal degree] */
+  static const double GEBCO_1_MINUTE_BATHY_SPACING = 0.0166666666666667;   /**< GEBCO One minute NetCDF spacing between coordinates value [decimal degree] */
 
 
-  static const double GEBCO_BATHY_START_LAT = 90.0;     /**< GEBCO One minute NetCDF starting latitude value [decimal degree] */
+  static const int GEBCO_30_SECONDS_BATHY_NLAT = 21600;                      /**< GEBCO Thirty seconds NetCDF total number of latitudes */
 
-  static const double GEBCO_BATHY_START_LONG = -180.0;  /**< GEBCO One minute NetCDF starting longitude value [decimal degree] */
+  static const int GEBCO_30_SECONDS_BATHY_NLON = 43200;                      /**< GEBCO Thirty seconds NetCDF total number of longitudes */
 
-
-  static const int GEBCO_MINUTES_BATHY_NLAT = 10801; /**< GEBCO One minute NetCDF total number of latitudes */
-
-  static const int GEBCO_MINUTES_BATHY_NLON = 21601; /**< GEBCO One minute NetCDF total number of longitudes */
-
-  static const double GEBCO_MINUTES_BATHY_SPACING = 0.0166666666666667;   /**< GEBCO One minute NetCDF spacing between coordinates value [decimal degree] */
+  static const double GEBCO_30_SECONDS_BATHY_SPACING = 0.00833333333333333;  /**< GEBCO Thirty seconds NetCDF spacing between coordinates value [decimal degree] */
 
 
-  static const int GEBCO_SECONDS_BATHY_NLAT = 21600;                      /**< GEBCO Thirty seconds NetCDF total number of latitudes */
+  static const int GEBCO_15_SECONDS_BATHY_NLAT = 43200;                      /**< GEBCO Fifteen seconds NetCDF total number of latitudes */
 
-  static const int GEBCO_SECONDS_BATHY_NLON = 43200;                      /**< GEBCO Thirty seconds NetCDF total number of longitudes */
+  static const int GEBCO_15_SECONDS_BATHY_NLON = 86400;                      /**< GEBCO Fifteen seconds NetCDF total number of longitudes */
 
-  static const double GEBCO_SECONDS_BATHY_SPACING = 0.00833333333333333;  /**< GEBCO Thirty seconds NetCDF spacing between coordinates value [decimal degree] */
+  static const double GEBCO_15_SECONDS_BATHY_SPACING = 0.004166666666666665;  /**< GEBCO Fifteen seconds NetCDF spacing between coordinates value [decimal degree] */
 
 
-  static const double GEBCO_SECONDS_BATHY_MIN_LAT = -89.995833333333333335;     /**< GEBCO Thirty seconds NetCDF mimimum latitude value [decimal degree] */
+  static const double GEBCO_1_MINUTE_BATHY_MIN_LAT = -90.0;      /**< GEBCO One minute NetCDF mimimum latitude value [decimal degree] */
 
-  static const double GEBCO_SECONDS_BATHY_MAX_LAT = 89.995833333333333335;      /**< GEBCO Thirty seconds NetCDF maximum latitude value [decimal degree] */
+  static const double GEBCO_1_MINUTE_BATHY_MAX_LAT = 90.0;       /**< GEBCO One minute NetCDF maximum latitude value [decimal degree] */
 
-  static const double GEBCO_SECONDS_BATHY_MIN_LONG = -179.995833333333333335;   /**< GEBCO Thirty seconds NetCDF mimimum longitude value [decimal degree] */
+  static const double GEBCO_1_MINUTE_BATHY_MIN_LONG = -180.0;    /**< GEBCO One minute NetCDF mimimum longitude value [decimal degree] */
 
-  static const double GEBCO_SECONDS_BATHY_MAX_LONG = 179.995833333333333335;    /**< GEBCO Thirty seconds NetCDF maximum longitude value [decimal degree] */
+  static const double GEBCO_1_MINUTE_BATHY_MAX_LONG = 180.0;     /**< GEBCO One minute NetCDF maximum longitude value [decimal degree] */
 
-  static const double GEBCO_SECONDS_BATHY_START_LAT = 89.995833333333333335;    /**< GEBCO Thirty seconds NetCDF start latitude value [decimal degree] */
 
-  static const double GEBCO_SECONDS_BATHY_START_LONG = -179.995833333333333335; /**< GEBCO Thirty seconds NetCDF start longitude value [decimal degree] */
+  static const double GEBCO_30_SECONDS_BATHY_MIN_LAT = -89.995833333333333335;     /**< GEBCO Thirty seconds NetCDF mimimum latitude value [decimal degree] */
 
+  static const double GEBCO_30_SECONDS_BATHY_MAX_LAT = 89.995833333333333335;      /**< GEBCO Thirty seconds NetCDF maximum latitude value [decimal degree] */
+
+  static const double GEBCO_30_SECONDS_BATHY_MIN_LONG = -179.995833333333333335;   /**< GEBCO Thirty seconds NetCDF mimimum longitude value [decimal degree] */
+
+  static const double GEBCO_30_SECONDS_BATHY_MAX_LONG = 179.995833333333333335;    /**< GEBCO Thirty seconds NetCDF maximum longitude value [decimal degree] */
+
+
+  static const double GEBCO_15_SECONDS_BATHY_MIN_LAT = -89.9979166666666666675;     /**< GEBCO Fifteen seconds NetCDF mimimum latitude value [decimal degree] */
+
+  static const double GEBCO_15_SECONDS_BATHY_MAX_LAT = 89.9979166666666666675;      /**< GEBCO Fifteen seconds NetCDF maximum latitude value [decimal degree] */
+
+  static const double GEBCO_15_SECONDS_BATHY_MIN_LONG = -179.9979166666666666675;   /**< GEBCO Fifteen seconds NetCDF mimimum longitude value [decimal degree] */
+
+  static const double GEBCO_15_SECONDS_BATHY_MAX_LONG = 179.9979166666666666675;    /**< GEBCO Fifteen seconds NetCDF maximum longitude value [decimal degree] */
+
+
+  static const double GEBCO_1D_1_MINUTE_BATHY_START_LAT = 90.0;     /**< GEBCO 1D One minute NetCDF starting latitude value [decimal degree] */
+
+  static const double GEBCO_1D_1_MINUTE_BATHY_START_LONG = -180.0;  /**< GEBCO 1D One minute NetCDF starting longitude value [decimal degree] */
+
+
+  static const double GEBCO_1D_30_SECONDS_BATHY_START_LAT = 89.995833333333333335;    /**< GEBCO 1D Thirty seconds NetCDF start latitude value [decimal degree] */
+
+  static const double GEBCO_1D_30_SECONDS_BATHY_START_LONG = -179.995833333333333335; /**< GEBCO 1D Thirty seconds NetCDF start longitude value [decimal degree] */
+
+
+  static const double GEBCO_2D_1_MINUTE_BATHY_START_LAT = -90.0;     /**< GEBCO 2D One minute NetCDF starting latitude value [decimal degree] */
+
+  static const double GEBCO_2D_1_MINUTE_BATHY_START_LONG = -180.0;  /**< GEBCO 2D One minute NetCDF starting longitude value [decimal degree] */
+
+
+  static const double GEBCO_2D_30_SECONDS_BATHY_START_LAT = -89.995833333333333335;    /**< GEBCO 2D Thirty seconds NetCDF start latitude value [decimal degree] */
+
+  static const double GEBCO_2D_30_SECONDS_BATHY_START_LONG = -179.995833333333333335; /**< GEBCO 2D Thirty seconds NetCDF start longitude value [decimal degree] */
+
+
+  static const double GEBCO_2D_15_SECONDS_BATHY_START_LAT = -89.9979166666666666675;    /**< GEBCO 2D Fifteen seconds NetCDF start latitude value [decimal degree] */
+
+  static const double GEBCO_2D_15_SECONDS_BATHY_START_LONG = -179.9979166666666666675; /**< GEBCO 2D Fifteen seconds NetCDF start longitude value [decimal degree] */
+
+
+
+  typedef std::pair< long, long > Gebco2DIndexes; /**< GEBCO 2D netcdf indexes */
 
   /**
   * GEBCO version in use
   **/
   enum GEBCO_BATHY_TYPE {
-    GEBCO_MINUTES_BATHY_TYPE = 1, GEBCO_SECONDS_BATHY_TYPE
+    GEBCO_1D_1_MINUTE_BATHY_TYPE    = 0,  ///< GEBCO 1D, one minute of arc netcf format
+    GEBCO_1D_30_SECONDS_BATHY_TYPE = 1,  ///< GEBCO 1D, thirty seconds of arc netcf format
+    GEBCO_2D_1_MINUTE_BATHY_TYPE    = 2,  ///< GEBCO 2D, one minute of arc netcf format
+    GEBCO_2D_30_SECONDS_BATHY_TYPE = 3,  ///< GEBCO 2D, thirty seconds of arc netcf format
+    GEBCO_2D_15_SECONDS_BATHY_TYPE = 4,  ///< GEBCO 2D, fifteen seconds of arc netcf format
+    GEBCO_INVALID_BATHY_TYPE             ///< INVALID, must be last
   };
 
 
@@ -166,18 +210,47 @@ namespace woss {
     /**
     * NetCDF bathymetry variable
     **/
+#if defined(WOSS_NETCDF4_SUPPORT)
+    netCDF::NcVar bathy_var;
+#else
     NcVar* bathy_var;
+#endif // #if defined(WOSS_NETCDF4_SUPPORT)
+
+
+    /**
+    * NetCDF latitude variable
+    **/
+#if defined(WOSS_NETCDF4_SUPPORT)
+    netCDF::NcVar lat_var;
+#else
+    NcVar* lat_var;
+#endif // defined(WOSS_NETCDF4_SUPPORT)
+
+    /**
+    * NetCDF longitude variable
+    **/
+#if defined(WOSS_NETCDF4_SUPPORT)
+    netCDF::NcVar lon_var;
+#else
+    NcVar* lon_var;
+#endif // defined(WOSS_NETCDF4_SUPPORT)
 
     
     /**
-    * Returns the GEBCO index corresponding the given coordinates. This index will be used to access the NetCDF variable
+    * Returns the GEBCO 1D index corresponding the given coordinates. This index will be used to access the NetCDF variable
     * and thus retrieving the bathymetry value
     * @param coords const reference to a valid Coord object
     * @return index value 
     **/
-    int getBathyIndex( const Coord& coords ) const ;
+    long get1DBathyIndex( const Coord& coords ) const ;
 
-    
+    /**
+    * Returns the GEBCO 2D indexes corresponding the given coordinates. These indexes will be used to access the NetCDF variable
+    * and thus retrieving the bathymetry value
+    * @param coords const reference to a valid Coord object
+    * @return Gebco2DIndexes value 
+    **/
+    Gebco2DIndexes get2DBathyIndexes( const Coord& coords ) const ;
   };
 
 }

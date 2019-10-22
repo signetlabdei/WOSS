@@ -36,7 +36,7 @@
  * Provides the implementation of the woss::BathyGebcoDbCreator class
  */
 
-#ifdef WOSS_NETCDF_SUPPORT    
+#ifdef WOSS_NETCDF_SUPPORT
 
 #include <cassert>
 #include "bathymetry-gebco-db-creator.h"
@@ -46,7 +46,7 @@ using namespace woss;
 
 
 BathyGebcoDbCreator::BathyGebcoDbCreator()
-:  gebco_type( GEBCO_SECONDS_BATHY_TYPE )
+:  gebco_type( GEBCO_2D_30_SECONDS_BATHY_TYPE )
 {
 
 }

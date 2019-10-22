@@ -46,6 +46,7 @@
 
 using namespace woss;
 
+#define SSP_NOT_VALID (-1000)
 
 static const int SSP_WOA2005_STD_NLAT = 180; /**< Custom made NetCDF WOA2005 SSP total number of latitudes */
 
@@ -81,14 +82,27 @@ static int ssp_woa2005_std_depths[SSP_WOA2005_STD_NDEPTH] = { 0, 10, 20, 30, 50,
 
 SspWoa2005Db::SspWoa2005Db( const ::std::string& name ) 
 : WossNetcdfDb(name),
+#if defined (WOSS_NETCDF4_SUPPORT)
+  ssp_var()
+#else
   ssp_var(NULL)
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 { 
 }
 
 
 bool SspWoa2005Db::finalizeConnection() {
+#if defined (WOSS_NETCDF4_SUPPORT)
+  ssp_var = netcdf_db->getVar("ssp");
+  if (ssp_var.isNull()) {
+    ::std::cout << "SspWoa2005Db::finalizeConnection() ssp_var is not valid" << ::std::endl;
+    return false;
+  }
+  return true;
+#else
   ssp_var = netcdf_db->get_var( "ssp" );
   return (ssp_var != 0);
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 }
 
 
@@ -117,6 +131,25 @@ SSPIndexes SspWoa2005Db::getSSPIndexes( const Coord& coordinates ) const {
 
 
 void SspWoa2005Db::getSSPValue( const SSPIndexes& indexes, double* ssp_values ) const {
+#if defined (WOSS_NETCDF4_SUPPORT)
+  ::std::vector<size_t> index_vector, count_vector;
+
+  index_vector.push_back((size_t)indexes.first);
+  index_vector.push_back((size_t)indexes.second);
+  index_vector.push_back((size_t)0);
+
+  count_vector.push_back((size_t)1);
+  count_vector.push_back((size_t)1);
+  count_vector.push_back((size_t)SSP_WOA2005_STD_NDEPTH);
+
+  ssp_values[0] = SSP_NOT_VALID;
+
+  ssp_var.getVar(index_vector, count_vector, ssp_values);
+  if (ssp_values[0] == SSP_NOT_VALID) {
+    ::std::cerr << "SspWoa2005Db::getSSPValue() Couldn't extract ssp value" << ::std::endl;
+    exit(1);
+  }
+#else
   NcBool ret_value = ssp_var->set_cur(indexes.first, indexes.second, 0);
   if (!ret_value) {
     ::std::cerr << "SspWoa2005Db::getSSPValue() Couldn't set_cur() " << indexes.first << " , " << indexes.second << ::std::endl;
@@ -128,6 +161,7 @@ void SspWoa2005Db::getSSPValue( const SSPIndexes& indexes, double* ssp_values ) 
     ::std::cerr << "SspWoa2005Db::getSSPValue() Couldn't extract ssp value" << ::std::endl;
     exit(1);
   }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 }
 
 

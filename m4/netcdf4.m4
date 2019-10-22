@@ -1,6 +1,6 @@
 # WOSS - World Ocean Simulation System -
 # 
-# Copyright (C) 2009 Federico Guerra 
+# Copyright (C) 2019 Federico Guerra 
 # and regents of the SIGNET lab, University of Padova
 # 
 # Author: Federico Guerra - federico@guerra-tlc.com
@@ -26,39 +26,39 @@
 # whose support is gratefully acknowledged.
 
 
-AC_DEFUN([AC_ARG_WITH_NETCDF],[
+AC_DEFUN([AC_ARG_WITH_NETCDF4],[
 
-NETCDF_PATH=''
-NETCDF_CPPFLAGS=''
-NETCDF_LDFLAGS=''
-NETCDF_LIBADD=''
+NETCDF4_PATH=''
+NETCDF4_CPPFLAGS='-Wno-unused-variable '
+NETCDF4_LDFLAGS=''
+NETCDF4_LIBADD=''
 
-AC_ARG_WITH([netcdf],
-	[AS_HELP_STRING([--with-netcdf=<directory>],
-			[use netcdf installation in <directory>])],
+AC_ARG_WITH([netcdf4],
+	[AS_HELP_STRING([--with-netcdf4=<directory>],
+			[use netcdf4 installation in <directory>])],
 	[
 		if test "x$withval" != "xno" ; then
 
    		     if test -d $withval ; then
 
-   			NETCDF_PATH="${withval}"
+   			NETCDF4_PATH="${withval}"
 
-			relevantheaderfile="${NETCDF_PATH}/include/netcdfcpp.h"
+			relevantheaderfile="${NETCDF4_PATH}/include/ncFile.h"
 	    		if test ! -f "${relevantheaderfile}"  ; then
 			  	AC_MSG_WARN([could not find ${relevantheaderfile}, 
-  is --with-netcdf=${withval} correct?])
+  is --with-netcdf4=${withval} correct?])
 			fi		
 
-			NETCDF_CPPFLAGS="$NETCDF_CPPFLAGS -I${NETCDF_PATH}/include"
-			NETCDF_LDFLAGS="$NETCDF_LDFLAGS -L${NETCDF_PATH}/lib"
-		        NETCDF_LIBADD="$NETCDF_LIBADD -lnetcdf_c++ -lnetcdf"
+			NETCDF4_CPPFLAGS="$NETCDF4_CPPFLAGS -I${NETCDF4_PATH}/include"
+			NETCDF4_LDFLAGS="$NETCDF4_LDFLAGS -L${NETCDF4_PATH}/lib"
+			NETCDF4_LIBADD="$NETCDF4_LIBADD -lnetcdf_c++4 -lnetcdf -lhdf5"
 
-			NETCDF_DISTCHECK_CONFIGURE_FLAGS="--with-netcdf=$withval"
-			AC_SUBST(NETCDF_DISTCHECK_CONFIGURE_FLAGS)
+			NETCDF4_DISTCHECK_CONFIGURE_FLAGS="--with-netcdf4=$withval"
+			AC_SUBST(NETCDF4_DISTCHECK_CONFIGURE_FLAGS)
 
    		     else	
 
-			AC_MSG_WARN([netcdf path $withval is not a directory])
+			AC_MSG_WARN([netcdf4 path $withval is not a directory])
 	
 		     fi
 
@@ -67,46 +67,46 @@ AC_ARG_WITH([netcdf],
 	])
 
 
-AC_SUBST(NETCDF_CPPFLAGS)
-AC_SUBST(NETCDF_LDFLAGS)
-AC_SUBST(NETCDF_LIBADD)
+AC_SUBST(NETCDF4_CPPFLAGS)
+AC_SUBST(NETCDF4_LDFLAGS)
+AC_SUBST(NETCDF4_LIBADD)
 
 ])
 
 
 
-AC_DEFUN([AC_CHECK_NETCDF],[
+AC_DEFUN([AC_CHECK_NETCDF4],[
 	
-# temporarily add NS_CPPFLAGS and NETCDF_CPPFLAGS to CPPFLAGS
+# temporarily add NS_CPPFLAGS and NETCDF4_CPPFLAGS to CPPFLAGS
 BACKUP_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS $NS_CPPFLAGS $NETCDF_CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $NS_CPPFLAGS $NETCDF4_CPPFLAGS"
 
 
 AC_LANG_PUSH(C++)
 
-AC_MSG_CHECKING([for netcdf headers])
+AC_MSG_CHECKING([for netcdf4 headers])
 
 
 AC_PREPROC_IFELSE(
 	[AC_LANG_PROGRAM([[
-		#include <netcdfcpp.h>
+		#include <ncFile.h>
 		NcFile* file; 
 		]],[[
 		]]  )],
 		[
 		 AC_MSG_RESULT([yes])
-		 found_netcdf=yes
+		 found_netcdf4=yes
 		[$1]
 		],
 		[
 		 AC_MSG_RESULT([no])
-		 found_netcdf=no
+		 found_netcdf4=no
 		[$2]
-		AC_MSG_WARN([could not find netcdf])
+		AC_MSG_WARN([could not find netcdf4])
 		])
 
 
-AM_CONDITIONAL([HAVE_NETCDF], [test x$found_netcdf = xyes])
+AM_CONDITIONAL([HAVE_NETCDF4], [test x$found_netcdf4 = xyes])
 
 # Restoring to the initial value
 CPPFLAGS="$BACKUP_CPPFLAGS"

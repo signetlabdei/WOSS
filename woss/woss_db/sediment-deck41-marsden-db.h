@@ -46,7 +46,9 @@
 
 #include <sediment-definitions.h>
 #include "woss-db.h"
-
+#if defined (WOSS_NETCDF4_SUPPORT)
+#include <ncVar.h>
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
 namespace woss {
   
@@ -99,13 +101,20 @@ namespace woss {
     /**
     * NetCDF variable representing main DECK41 floortype 
     **/
+#if defined (WOSS_NETCDF4_SUPPORT)
+    netCDF::NcVar main_sedim_var_marsden;
+#else
     NcVar* main_sedim_var_marsden;
-
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+    
     /**
     * NetCDF variable representing secondary DECK41 floortype 
     **/
+#if defined (WOSS_NETCDF4_SUPPORT)
+    netCDF::NcVar sec_sedim_var_marsden;
+#else
     NcVar* sec_sedim_var_marsden;
-
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
   };
 

@@ -64,6 +64,7 @@ namespace woss {
   enum BellhopArrSyntax {
     BELLHOP_CREATOR_ARR_FILE_SYNTAX_0 = 0, ///< Pre 31 august 2016 syntax, without imaginary time delay
     BELLHOP_CREATOR_ARR_FILE_SYNTAX_1, ///< Post 31 August 2016 syntax, with imaginary time delay
+    BELLHOP_CREATOR_ARR_FILE_SYNTAX_2, ///< Post 31 March 2019 syntax, with different header syntax
     BELLHOP_CREATOR_ARR_FILE_INVALID ///< invalid syntax, must always be the last element
   };
   

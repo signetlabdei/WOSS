@@ -94,11 +94,11 @@ set opt(tracefile) [open $opt(tracefilename) w]
 set opt(cltracefilename) "/dev/null"
 set opt(cltracefile) [open $opt(cltracefilename) w]
 
-# set opt(db_path)        "insert_db_path_here"
-set opt(db_path)        "/home/fedwar/ns/ocean_database/dbs/"
+set opt(db_path)        "insert_db_path_here"
+#set opt(db_path)        "/home/fedwar/ns/ocean_database/dbs/"
 
-# set opt(db_path_gebco)  "insert_db_path_gebco_path_here"
-set opt(db_path_gebco)  "/home/fedwar/ns/ocean_database/dbs/"
+set opt(db_path_gebco)  "insert_db_path_gebco_path_here"
+#set opt(db_path_gebco)  "/home/fedwar/ns/ocean_database/dbs/"
 
 set opt(db_res_path)    "."
 
@@ -156,9 +156,6 @@ WOSS/Creator/Database/NetCDF/Sediment/DECK41 set debug         0
 WOSS/Creator/Database/NetCDF/Sediment/DECK41 set woss_db_debug 0
 
 set db_sedim [new "WOSS/Creator/Database/NetCDF/Sediment/DECK41"]
-# $db_sedim setUpDeck41CoordinatesDb	"${opt(db_path)}/sea_floor/DECK41_coordinates.nc"
-# $db_sedim setUpDeck41MarsdenDb		"${opt(db_path)}/sea_floor/DECK41_mardsen_square.nc"
-# $db_sedim setUpDeck41MarsdenOneDb	"${opt(db_path)}/sea_floor/DECK41_mardsen_one_degree.nc"
 $db_sedim setUpDeck41CoordinatesDb  "${opt(db_path)}/seafloor_sediment/DECK41_coordinates.nc"
 $db_sedim setUpDeck41MarsdenDb      "${opt(db_path)}/seafloor_sediment/DECK41_mardsen_square.nc"
 $db_sedim setUpDeck41MarsdenOneDb   "${opt(db_path)}/seafloor_sediment/DECK41_mardsen_one_degree.nc"
@@ -168,7 +165,6 @@ WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set debug          0
 WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set woss_db_debug  0
 
 set db_ssp [new "WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage"]
-#$db_ssp setDbPathName "${opt(db_path)}/ssp/standard_depth/2WOA2009_SSP_April.nc"
  $db_ssp setDbPathName "${opt(db_path)}/ssp/2WOA2009_SSP_April.nc"
 
 
@@ -177,9 +173,16 @@ WOSS/Creator/Database/NetCDF/Bathymetry/GEBCO set woss_db_debug   0
 
 set db_bathy [new "WOSS/Creator/Database/NetCDF/Bathymetry/GEBCO"]
 #$db_bathy setDbPathName "${opt(db_path)}/bathymetry/gebco_08.nc"
-$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/gebco_08.nc"
-$db_bathy useThirtySecondsPrecision
+#$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GRIDONE_2D.nc" 
+#$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2014_2D.nc"
+$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2019.nc" 
 
+
+#$db_bathy useOneMinutePrecision
+#$db_bathy useThirtySecondsPrecision
+#$db_bathy use2DOneMinutePrecision
+#$db_bathy use2DThirtySecondsPrecision
+$db_bathy use2DFifteenSecondsPrecision
 
 WOSS/Database/Manager set debug 0
 
@@ -202,7 +205,7 @@ set db_manager [new "WOSS/Database/Manager"]
 WOSS/Creator/Bellhop set debug                        0.0
 WOSS/Creator/Bellhop set woss_debug                   0.0
 WOSS/Creator/Bellhop set woss_clean_workdir           1.0
-WOSS/Creator/Bellhop set bellhop_arr_syntax           1
+WOSS/Creator/Bellhop set bellhop_arr_syntax           2
 WOSS/Creator/Bellhop set evolution_time_quantum      -1.0
 WOSS/Creator/Bellhop set total_runs                   5
 WOSS/Creator/Bellhop set frequency_step               0.0

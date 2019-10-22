@@ -214,17 +214,20 @@ double WossMPropagation::computeGain(Packet* p)  {
   hdr_woss->attenuation = *pressure;
   hdr_woss->frequency = curr_freq;
 
+  double gain = pow( pressure->abs(), 2.0 );
+
   if(debug_) cout << NOW 
               << "  WossMPropagation::computeGain()" 
               << " dist = " << curr_dist
               << "; freq = " << curr_freq
               << "; atten_db = " << Pressure::getTxLossDb(hdr_woss->attenuation)
+              << "; gain = " << gain
               << endl;
 
   delete pressure;
-  return( pow( pressure->abs(), 2.0 ) );
-}
 
+  return gain;
+}
 
 void WossMPropagation::writeStdGainMatrix() {
 

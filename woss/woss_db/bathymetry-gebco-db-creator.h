@@ -78,6 +78,19 @@ namespace woss {
     **/
     virtual WossDb* const createWossDb();
 
+    /**
+    * Sets the GEBCO_BATHY_TYPE related to the netcdf db that will be opened
+    * @param bathy_type netcdf file format
+    * @return reference to <b>*this</b>
+    */
+    BathyGebcoDbCreator& setGebcoBathyType( GEBCO_BATHY_TYPE bathy_type ) { 
+      gebco_type = bathy_type; return *this; }
+
+    /**
+    * Gets the GEBCO_BATHY_TYPE related to the netcdf db that will be opened
+    * @return gebco_type
+    */
+    GEBCO_BATHY_TYPE getGebcoBathyType() { return gebco_type; }
 
     protected:
 

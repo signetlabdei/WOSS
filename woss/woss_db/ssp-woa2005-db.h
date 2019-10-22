@@ -46,7 +46,9 @@
 
 #include <ssp-definitions.h>
 #include "woss-db.h"
-
+#if defined (WOSS_NETCDF4_SUPPORT)
+#include <ncVar.h>
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
 namespace woss {
   
@@ -111,8 +113,11 @@ namespace woss {
   /**
     * NetCDF variable representing SSP
     **/
+#if defined (WOSS_NETCDF4_SUPPORT)
+    netCDF::NcVar ssp_var;
+#else
     NcVar* ssp_var;
-
+#endif // defined (WOSS_NETCDF4_SUPPORT)
     
     /**
     * Returns the indexes used by the NetCDF variable to get the SSP values
