@@ -81,7 +81,7 @@ BellhopCreatorTcl::BellhopCreatorTcl()
   bind( "frequency_step", &ccfrequency_step.accessAllLocations());
   bind( "evolution_time_quantum", &ccevolution_time_quantum.accessAllLocations());
   bind( "total_runs", &cctotal_runs.accessAllLocations());
-  bind( "bellhop_arr_syntax", &bellhop_arr_syntax_); //!< 1 new syntax, 0 old syntax
+  bind( "bellhop_arr_syntax", &bellhop_arr_syntax_); 
   
   if ( ccfrequency_step.accessAllLocations() <= 0.0 ) ccfrequency_step.accessAllLocations() = WOSS_CREATOR_MAX_FREQ_STEP;
   

@@ -205,7 +205,7 @@ $db_manager setCustomSSP        $time_evo_ssp_1 "./ssp-custom-hamb-port.txt"
 WOSS/Creator/Bellhop set debug                        0.0
 WOSS/Creator/Bellhop set woss_debug                   0.0
 WOSS/Creator/Bellhop set woss_clean_workdir           1.0
-WOSS/Creator/Bellhop set bellhop_arr_syntax           1
+WOSS/Creator/Bellhop set bellhop_arr_syntax           2
 WOSS/Creator/Bellhop set evolution_time_quantum      -1.0
 WOSS/Creator/Bellhop set total_runs                   1
 WOSS/Creator/Bellhop set frequency_step               0.0

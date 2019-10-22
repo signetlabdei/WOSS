@@ -192,7 +192,9 @@ double WossMPhyBpsk::getTxPower(Packet* p) {
       if ( attenuation <= 0.0 ) {
         if (debug_) cout << NOW << "  WossMPhyBpsk(" << mac_addr << ")::getTxPower() no reception possible, tx at max power = " 
                          << max_SPL << endl;
-        
+
+        delete press_temp;
+
         return pow( 10.0, max_SPL / 10.0 );
       }
       

@@ -26,7 +26,7 @@
 # whose support is gratefully acknowledged.
 
 
-AC_INIT(WOSS,1.8.0)
+AC_INIT(WOSS,1.9.0)
 AM_INIT_AUTOMAKE
 
 AC_MSG_NOTICE([WOSS AC_PACKAGE_VERSION])
@@ -52,6 +52,13 @@ AC_CHECK_NETCDF([have_netcdf=yes],[have_netcdf=no])
 #if test x$have_netcdf != xyes ; then
 #  AC_MSG_ERROR([Could not find netcdf,
 #    is --with-netcdf set correctly?])
+#fi  
+
+AC_ARG_WITH_NETCDF4
+AC_CHECK_NETCDF4([have_netcdf4=yes],[have_netcdf4=no])
+#if test x$have_netcdf != xyes ; then
+#  AC_MSG_ERROR([Could not find netcdf,
+#    is --with-netcdf4 set correctly?])
 #fi  
 
 
@@ -85,6 +92,15 @@ then
   AC_MSG_NOTICE([NETCDF support will be built.])
 else
   AC_MSG_NOTICE([NETCDF support will NOT be built.])
+fi
+
+if test "$have_netcdf4" == "yes"
+then
+  UW_WOSS_CPPFLAGS="$UW_WOSS_CPPFLAGS "'-DWOSS_NETCDF_SUPPORT -DWOSS_NETCDF4_SUPPORT'
+  UW_WOSS_PHY_CPPFLAGS="$UW_WOSS_PHY_CPPFLAGS "'-DWOSS_NETCDF_SUPPORT -DWOSS_NETCDF4_SUPPORT'
+  AC_MSG_NOTICE([NETCDF4 support will be built.])
+else
+  AC_MSG_NOTICE([NETCDF4 support will NOT be built.])
 fi
 
 if test "$have_nsallinone" == "yes"

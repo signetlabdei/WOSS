@@ -272,8 +272,10 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
   bool using_ssp_file;
   static NormSSPMap randomized_ssp_map;
 
-  if (normalized_ssp_map.size() > 1) using_ssp_file = true;
-  else using_ssp_file = false;
+  if (normalized_ssp_map.size() > 1) 
+    using_ssp_file = true;
+  else 
+    using_ssp_file = false;
     
   if (using_ssp_file == false) { 
     f_out << "\'CVW";
@@ -332,7 +334,7 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
     ssp_out << normalized_ssp_map.size() << ::std::endl;
      
     for (NSMIter it = normalized_ssp_map.begin(); it != normalized_ssp_map.end(); it++) {
-      ssp_out << ::std::setw(18) << ((double) it->first / 1000.0); // write ranges
+      ssp_out << ::std::setw(30) << ((double) it->first / 1000.0); // write ranges
        
       if ( curr_run > 0 ) {
         randomized_ssp_map[it->first] = it->second->randomize( 0.0001 );
@@ -350,7 +352,7 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
       for (NSMIter it = write_ssp_map->begin(); it != write_ssp_map->end(); it++) {
         DConstIter it2 = it->second->at(i);
         assert( it2 != it->second->end() );
-        ssp_out << ::std::setw(18) << it2->second; // write ssp
+        ssp_out << ::std::setw(30) << it2->second; // write ssp
       }
       ssp_out << ::std::endl;
     }    
@@ -762,7 +764,7 @@ bool BellhopWoss::run() {
       ::std::string command = str_out.str();
       str_out.str("");
       
-      int ret_value;
+      int ret_value = -1;
       if (system(NULL)) ret_value = system(command.c_str());
       if (ret_value != 0) {
         ::std::cerr << "BellhopWoss(" << woss_id << ")::run() error! bellhop.exe aborted!" << ::std::endl;

@@ -42,14 +42,20 @@
 #include <cstdlib>
 #include "sediment-deck41-coord-db.h" 
 
+#define SEDIMENT_NOT_FOUND (-100000000)
 
 using namespace woss;
 
 
 SedimDeck41CoordDb::SedimDeck41CoordDb( const ::std::string& name ) 
 : WossNetcdfDb( name ),
-  main_sedim_var_coord(0),
-  sec_sedim_var_coord(0)
+#if defined (WOSS_NETCDF4_SUPPORT)
+  main_sedim_var_coord(),
+  sec_sedim_var_coord()
+#else
+  main_sedim_var_coord(NULL),
+  sec_sedim_var_coord(NULL)
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 {
   
 }
@@ -72,16 +78,45 @@ int SedimDeck41CoordDb::getSedimIndex( const Coord& coords ) const {
 }
 
 bool SedimDeck41CoordDb::finalizeConnection() {
+#if defined (WOSS_NETCDF4_SUPPORT)
+  main_sedim_var_coord = netcdf_db->getVar("seafloor_main_type");
+  if (main_sedim_var_coord.isNull()) {
+    ::std::cout << "SedimDeck41CoordDb::finalizeConnection() main_sedim_var_coord is not valid" << ::std::endl;
+    return false;
+  }
+  sec_sedim_var_coord = netcdf_db->getVar("seafloor_secondary_type");
+  if (sec_sedim_var_coord.isNull()) {
+    ::std::cout << "SedimDeck41CoordDb::finalizeConnection() sec_sedim_var_coord is not valid" << ::std::endl;
+    return false;
+  }
+  return true;
+#else
   main_sedim_var_coord = netcdf_db->get_var("seafloor_main_type");
   sec_sedim_var_coord = netcdf_db->get_var("seafloor_secondary_type");
   return ( (main_sedim_var_coord != 0) && (sec_sedim_var_coord != 0) );
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 }
 
 Deck41Types SedimDeck41CoordDb::getSeaFloorType( const Coord& coordinates ) const {
   int index = getSedimIndex(coordinates);
+  int main_type = SEDIMENT_NOT_FOUND;
+  int secondary_type = SEDIMENT_NOT_FOUND;
 
-  int main_type, secondary_type;
- 
+#if defined (WOSS_NETCDF4_SUPPORT)
+  ::std::vector<size_t> index_vector(1, index);
+
+  main_sedim_var_coord.getVar(index_vector, &main_type);
+  if (main_type == SEDIMENT_NOT_FOUND) {
+    ::std::cout << "SedimDeck41CoordDb::getSeaFloorType() Couldn't extract current main_type" << ::std::endl;
+    exit(1);
+  }
+
+  sec_sedim_var_coord.getVar(index_vector, &secondary_type);
+  if (secondary_type == SEDIMENT_NOT_FOUND) {
+    ::std::cout << "SedimDeck41CoordDb::getSeaFloorType() Couldn't extract current secondary_type" << ::std::endl;
+    exit(1);
+  }
+#else
   NcBool ret_val = main_sedim_var_coord->set_cur(index);
   if (!ret_val) {
     ::std::cout << "SedimDeck41CoordDb::getSeaFloorType() Couldn't set_cur() of main_sedim_var_coord;" 
@@ -107,6 +142,7 @@ Deck41Types SedimDeck41CoordDb::getSeaFloorType( const Coord& coordinates ) cons
     ::std::cout << "SedimDeck41CoordDb::getSeaFloorType() Couldn't extract current secondary_type" << ::std::endl;
     exit(1);
   }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
   if (debug) ::std::cout << "SedimDeck41CoordDb::getSeaFloorType() lat = " << coordinates.getLatitude() << "; long = " 
 		        << coordinates.getLongitude() << "; main type = " << main_type 

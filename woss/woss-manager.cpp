@@ -318,8 +318,10 @@ TimeArr* WossManagerResDb::getWossTimeArr( const CoordZ& tx_coordz, const CoordZ
   for( FreqSIt it = curr_woss->freq_lower_bound( start_frequency ); it == curr_woss->freq_lower_bound( end_frequency ); it++ ) {
     curr_time_arr = curr_woss->getTimeArr( *it, tx_coordz.getDepth(), rx_coordz.getDepth(), tx_coordz.getGreatCircleDistance( rx_coordz ) ) ; 
 
-    if ( debug && curr_time_arr != NULL ) ::std::cout << "WossManagerResDb::getWossTimeArr() " << i << "-th TimeArr " << *curr_time_arr << ::std::endl; 
-    
+    assert(curr_time_arr != NULL);
+
+    if ( debug ) ::std::cout << "WossManagerResDb::getWossTimeArr() " << i << "-th TimeArr " << *curr_time_arr << ::std::endl; 
+
     dbInsertTimeArr( tx_coordz, rx_coordz, *it, *time, *curr_time_arr );
     *sum += *curr_time_arr;
     delete curr_time_arr;
@@ -520,6 +522,7 @@ PressureVector WossManagerResDbMT::getWossPressure( const CoordZPairVect& coordi
     if ( total_thread_created < total_queries ) {
       index_thd %= MAX_TOTAL_PTHREAD;
       ret = pthread_create( &thread_arr[index_thd], NULL, WMSMTcreateThreadPressure , (void*)this );
+      assert( ret == 0 );
       total_thread_created++;
       index_thd++;
     }
@@ -565,6 +568,7 @@ PressureVector WossManagerResDbMT::getWossPressure( const CoordZPairVect& coordi
     if ( total_thread_created < total_queries ) {
       index_thd %= MAX_TOTAL_PTHREAD;
       ret = pthread_create( &thread_arr[index_thd], NULL, WMSMTcreateThreadPressure , (void*)this );
+      assert( ret == 0 );
       total_thread_created++;
       index_thd++;
     }
@@ -611,6 +615,7 @@ TimeArrVector WossManagerResDbMT::getWossTimeArr( const CoordZPairVect& coordina
     if ( total_thread_created < total_queries ) {
       index_thd %= MAX_TOTAL_PTHREAD;
       ret = pthread_create( &thread_arr[index_thd], NULL, WMSMTcreateThreadTimeArr , (void*)this );
+      assert( ret == 0 );
       total_thread_created++;
       index_thd++;
     }
@@ -656,6 +661,7 @@ TimeArrVector WossManagerResDbMT::getWossTimeArr( const CoordZPairVect& coordina
     if ( total_thread_created < total_queries ) {
       index_thd %= MAX_TOTAL_PTHREAD;
       ret = pthread_create( &thread_arr[index_thd], NULL, WMSMTcreateThreadTimeArr , (void*)this );
+      assert( ret == 0 );
       total_thread_created++;
       index_thd++;
     }

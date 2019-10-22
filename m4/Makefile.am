@@ -25,4 +25,4 @@
 # E-mail: pao@cmre.nato.int), 
 # whose support is gratefully acknowledged.
 
-EXTRA_DIST = nsallinone.m4 nsmiracle.m4 underwatermiracle.m4 netcdf.m4
+EXTRA_DIST = nsallinone.m4 nsmiracle.m4 underwatermiracle.m4 netcdf.m4 netcdf4.m4

@@ -40,6 +40,7 @@
 #ifdef WOSS_NS_MIRACLE_SUPPORT
 
 #include <iostream>
+#include <cstdlib>
 #include "bathymetry-gebco-db-creator-tcl.h"
 
 
@@ -81,14 +82,35 @@ int BathyGebcoDbCreatorTcl::command(int argc, const char*const* argv) {
     if(strcasecmp(argv[1], "useOneMinutePrecision") == 0) {
       if (debug) ::std::cout << "BathyGebcoDbCreatorTcl::command() useOneMinutePrecision called"  << ::std::endl;
 
-      gebco_type = GEBCO_MINUTES_BATHY_TYPE;
+      gebco_type = GEBCO_1D_1_MINUTE_BATHY_TYPE;
 
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "useThirtySecondsPrecision") == 0) {
       if (debug) ::std::cout << "BathyGebcoDbCreatorTcl::command() useThirtySecondsPrecision called"  << ::std::endl;
 
-      gebco_type = GEBCO_SECONDS_BATHY_TYPE;
+      gebco_type = GEBCO_1D_30_SECONDS_BATHY_TYPE;
+
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "use2DOneMinutePrecision") == 0) {
+      if (debug) ::std::cout << "BathyGebcoDbCreatorTcl::command() use2DOneMinutePrecision called"  << ::std::endl;
+
+      gebco_type = GEBCO_2D_1_MINUTE_BATHY_TYPE;
+
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "use2DThirtySecondsPrecision") == 0) {
+      if (debug) ::std::cout << "BathyGebcoDbCreatorTcl::command() use2DThirtySecondsPrecision called"  << ::std::endl;
+
+      gebco_type = GEBCO_2D_30_SECONDS_BATHY_TYPE;
+
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "use2DFifteenSecondsPrecision") == 0) {
+      if (debug) ::std::cout << "BathyGebcoDbCreatorTcl::command() use2DFifteenSecondsPrecision called"  << ::std::endl;
+
+      gebco_type = GEBCO_2D_15_SECONDS_BATHY_TYPE;
 
       return TCL_OK;
     }

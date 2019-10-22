@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.8.0
+ * @version 1.9.0
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -893,37 +893,68 @@
  * \note <b>No super-user credentials are needed for any of these installations</b>. <br> <br>
  * WOSS now supports the installation as a stand alone library (e.g. with no NS2 and NS-Miracle support).
  * This installation method is useful if you require the library to work in any project that doesn't need 
- * NS2/NS-Miracle libraries and related source code.  
+ * NS2/NS-Miracle libraries and related source code.
  *
- * \section  WOSS-req Requirements
- * 
+ * \section  WOSS-comp Compatibilities
+ *
+ * The current WOSS version has the following compatibilities:
  * <ul>
- *    <li> Download the <b>latest</b> Bellhop program from http://oalib.hlsresearch.com/Modes/AcousticsToolbox 
+ *    <li> <b>Acoustic Toolbox</b>: 31 March 2019
+ *    <li> <b>HDF5 library</b>: v1.8.13
+ *    <li> <b>NetCDF C library</b>: v4.7.3
+ *    <li> <b>NetCDF4 C++ library</b>: v4.3.1
+ *    <li> <b>GEBCO databases</b>: 1D and 2D, 2008, 2014 and 2019
+ * </ul>
+
+ * \section  WOSS-req Requirements
+ *
+ * <ul>
+ *    <li> Download the <b>recommended</b> <a href="http://telecom.dei.unipd.it/ns/woss/files/at.zip">Acoustic Toolbox Library</a>
  *         and follow installation instructions. The directory path that contains
- *         the binaries should be in the $PATH environment.<br>
- *         <b>This is now mandatory also for all users, since WOSS 1.5.0 is now compliant with latest Bellhop arr file 
- *            syntax (acoustic toolbox version >= 16 Aug 2016). WOSS is also supporting the previous syntax</b>. <br>
-           @see woss::BellhopCreator::setBellhopArrSyntax or tcl binded value bellhop_arr_syntax 
- *         
- *    <li> If you want to use NetCDF classes and databases, download the <b>latest</b> NetCDF library for C and the <b>legacy</b> C++ from http://www.unidata.ucar.edu/downloads/netcdf/index.jsp ; 
- *         NetCDF has to be built <b>with support for dynamic libraries</b> and with <b>no support for HDF</b>. 
+ *         the binaries should be in the $PATH environment.
+ *    <li> woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 is compliant with latest Bellhop arr file 
+ *         syntax (acoustic toolbox version >= 16 Aug 2016). WOSS is also supporting the previous syntax. 
+ *    <li> woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_2 is compliant with latest Bellhop arr file 
+ *         syntax (acoustic toolbox version >= 31 March 2019). This is the new factory value but WOSS is also supporting the previous syntaxes. 
+ *         @see woss::BellhopCreator::setBellhopArrSyntax or tcl binded value bellhop_arr_syntax.
+ *    <li> <b>In order to use the latest GEBCO 2019 15 seconds of arc database, NetCDF4 + HDF5 support had to be added to the framework.</b>
+ *         If you wish to use NetCDF classes and databases, download the recommended <a href="http://telecom.dei.unipd.it/ns/woss/files/hdf5-1.8.13.tar.gz">HDF5 library</a>
+ *         <a href="http://telecom.dei.unipd.it/ns/woss/files/netcdf-c-4.7.3.tar.gz">NetCDF C library</a>
+ *         and <a href="http://telecom.dei.unipd.it/ns/woss/files/netcdf-cxx4-4.3.1.tar.gz">NetCDF C++ library</a> ; \n
+ *         All libraries have to be built <b>with support for dynamic libraries</b> and with <b>NetCDF4 support</b>. \n
  *         Please refer to NetCDF documentation for comprehensive set of installation instructions of the C and C++ libraries.
-           Please note that the <tt>--prefix=\<optional_netcdf_install_path\> </tt> option is strongly suggested.
+ *         Please note that the <tt>--prefix=\<optional_netcdf4_install_path\> </tt> option is strongly suggested, and should be the same for HDF5, NetCDF-C and NetCDF-C++4. \n
+ *         <i>The previous NetCDF legacy installation instrucions are still supported by are obsolete and not recommended</i>. \n
  *         A simple installation script is given here as example:
- *         <ul> 
- *         <li> install the latest NETCDF C library with <tt>./configure --prefix=\<optional_netcdf_install_path\> --disable-netcdf-4 --enable-shared --disable-dap</tt>
- *         <li> <tt>make check install</tt>
-           <li> install the legacy NETCDF C++ library with 
-               <tt>./configure --prefix=\<optional_netcdf_install_path\> --enable-shared CPPFLAGS="$CPPFLAGS -I<netcdf_c_src_path>/include" LDFLAGS="$LDFLAGS -L<optional_netcdf_install_path>/lib"</tt>
-           <li> <tt> make check install </tt>
+ *         <ul>
+ *         <li> install the recommended HDF5 library with these exact steps:
+ *            <ul>
+ *              <li><tt>./configure --enable-shared --prefix=\<optional_netcdf4_install_path\></tt>
+ *              <li><tt>make</tt>
+ *              <li><tt>make check</tt>
+ *              <li>should any test fail, based on the test severity you could still try to continue with the installation by issuing <tt>make install</tt>
+ *            </ul>
+ *         <li> install the recommended NETCDF4 C library by passing the common installation path in both CPPFLAGS and LDFLAGS: 
+ *            <ul>
+ *               <li><tt>./configure --prefix=\<optional_netcdf4_install_path\> --enable-netcdf-4 --enable-shared --disable-dap CPPFLAGS="$CPPFLAGS -I<optional_netcdf4_install_path>/include" LDFLAGS="$LDFLAGS -L<optional_netcdf4_install_path>/lib</tt>
+ *               <li><tt>make</tt>
+ *               <li><tt>make check</tt>
+ *              <li>should any test fail, based on the test severity you could still try to continue with the installation by issuing <tt>make install</tt>
+ *            </ul>
+ *         <li> install the recommended NETCDF4 C++ library by passing the common installation path in both CPPFLAGS and LDFLAGS:
+ *           <ul>
+ *              <li><tt>./configure --prefix=\<optional_netcdf4_install_path\> --enable-shared CPPFLAGS="$CPPFLAGS -I<optional_netcdf4_install_path>/include" LDFLAGS="$LDFLAGS -L<optional_netcdf4_install_path>/lib"</tt>
+ *              <li><tt>make</tt>
+ *              <li><tt>make check</tt>
+ *              <li><tt>make install</tt>
+ *          </ul>
  *         </ul>
- *    <li> Download the <b>latest</b> version of NS-Miracle from the official SVN repository as instructed here: \n
- *         http://telecom.dei.unipd.it/pages/read/58/ \n
+ *    <li> If you wish to add NS-Miracle support, download the <b>latest</b> version of NS-Miracle from the official git repository as instructed <a href="http://telecom.dei.unipd.it/pages/read/58/">here</a>: \n
  *         Read documentation provided in the above link for installation instructions.
- *    <li> If you want to use WOSS with world data, download and extract the provided databases. 
- *         Register yourself and download the GEBCO_08 Grid and/or the GEBCO One Minute Grid database from:
- *         http://www.gebco.net/data_and_products/gridded_bathymetry_data/
- *         and put it in the same directory.
+ *    <li> If you wish to use WOSS with world data, download and extract the provided databases. 
+ *         Download the <a href="https://www.bodc.ac.uk/data/open_download/gebco/GEBCO_15SEC/zip/">GEBCO 2019 2D Fifteen seconds zip archive</a> 
+ *         or any of the <a href="https://www.gebco.net/data_and_products/historical_data_sets">previous data sets</a> 
+ *         and put them in the same directory.
  * </ul>
  *
  * \section extensions How to install WOSS library
@@ -935,11 +966,11 @@
  *         <ul>
  *             <li> <tt>--with-ns-allinone=\<<i>ns2-allinone_path</i>\></tt> <i> <b>optional</b>, needed if you want to compile the library for NS2 and NSMIRACLE.</i>
  *             <li> <tt>--with-nsmiracle=\<<i>ns-miracle_path</i>\></tt> <i> <b>optional</b>, needed if you want to compile the library for NS2 and NSMIRACLE.</i>
- *             <li> <tt>--with-netcdf=\<<i>NetCDF_install_path</i>\></tt> <i> <b>optional</b>, needed if you want to use NetCDF databases.
- *                                                                           (The path is the same mentioned in the Requirements section, if NetCDF 
+ *             <li> <tt>--with-netcdf4=\<<i>NetCDF4_install_path</i>\></tt> <i> <b>optional</b>, needed if you want to use NetCDF4 + HDF5 databases.
+ *                                                                           (The path is the same mentioned in the Requirements section, if NetCDF4
  *                                                                         was installed with no --prefix, the default path SHOULD be
  *                                                                         /usr/local) </i>
- *             <li> <tt>--with-pthread</tt> <i><b>optional</b> and useless unless a multi-core processor is installed</i>
+ *             <li> <tt>--with-pthread</tt> <i>optional</i> but <b>recommended</b>
  *             <li> <tt>--prefix=\<<i>path_where_libraries_will_be_installed</i>\></tt> 
  *                  \n this path is optional and should be the same one used with NS-Miracle installation.
  *                  If used, this path should be added to the environmental variable <i>LD_LIBRARY_PATH</i>. 
@@ -951,13 +982,13 @@
  *
  * \section ex_inst Examples
  *
- * The following line would install WOSS with pthread, and NetCDF, but with no NS2/NS-Miracle support (stand-alone library).
+ * The following line would install WOSS with pthread, and NetCDF4, but with no NS2/NS-Miracle support (stand-alone library).
  * 
- * <tt>./configure --with-netcdf=\<<i>NetCDF_install_path</i>\> --with-pthread --prefix=\<<i>path_where_libraries_will_be_installed</i>\></tt>
+ * <tt>./configure --with-netcdf4=\<<i>NetCDF4_install_path</i>\> --with-pthread --prefix=\<<i>path_where_libraries_will_be_installed</i>\></tt>
  *
- * The next line would install WOSS with NS2 and NS-Miracle support.
+ * The next line would install WOSS with NetCDF4, NS2 and NS-Miracle support
  *
- * <tt>./configure --with-netcdf=\<<i>NetCDF_install_path</i>\> --with-ns-allinone=\<<i>ns2-allinone_path</i>\> 
+ * <tt>./configure --with-netcdf4=\<<i>NetCDF4_install_path</i>\> --with-ns-allinone=\<<i>ns2-allinone_path</i>\> 
  * --with-nsmiracle=\<<i>ns-miracle_path</i>\> --with-pthread --prefix=\<<i>path_where_libraries_will_be_installed</i>\></tt>
 **/
  
@@ -969,18 +1000,6 @@
 *
 * <b>PLEASE NOTE</b>: WOSS is in its development stage, API changes will be limited at minimum, 
 *                     but this cannot be guaranteed. 
-*
-* <b>NOTE</b>: from version 1.2.0, the standard configuration of MIRACLE's MIV interface retrieves 
-*              multiple arrivals from WOSS and computes interference using a Gaussian model or, 
-*              equivalently, by summing all taps related to the interferers the same way as in 
-*              Bellhop's "incoherent mode".
-*              In addition, if the interference level varies throughout the duration of a packet, 
-*              the typically different error rates that result are separately accounted for in 
-*              the computation of the overall packet error rate. This is the default version now. 
-*              <br><i>This change has been applied as part of the work for the CLAM project, 
-*              funded by the European Commission, G.A. 258359</i>.
-* 
-*              Credits to Roberto Petroccia, University of Rome, for helping with the implementation.
 *
 * <ul>
 *   <li> <b>v1.0.0</b> <ul> <li> release version 
@@ -1034,8 +1053,17 @@
 *                            <li> test_aloha_no_dbs.tcl, test_aloha_with_dbs.tcl : now channel estimation process properly works
 *                            <li> new tcl sample added @see samples subdirectory
 *                            <li> doxygen basic samples page removed, all the comments are inline within the tcl files
+*                            <li> <b>NOTE</b>: from version 1.2.0, the standard configuration of MIRACLE's MIV interface retrieves 
+*                                 multiple arrivals from WOSS and computes interference using a Gaussian model or, 
+*                                 equivalently, by summing all taps related to the interferers the same way as in 
+*                                 Bellhop's "incoherent mode".
+*                                 In addition, if the interference level varies throughout the duration of a packet, 
+*                                 the typically different error rates that result are separately accounted for in 
+*                                 the computation of the overall packet error rate. This is the default version now. 
+*                                 <br><i>This change has been applied as part of the work for the CLAM project, 
+*                                 funded by the European Commission, G.A. 258359</i>.\n
+*                                 Credits to <b>Roberto Petroccia</b>, University of Rome, for helping with the implementation.
 *                       </ul>  
-*
 *   <li> <b>v.1.3.0</b> <ul> <li> WossChannelModule : <i>channel_eq_time_</i>, <i>channel_eq_snr_threshold_db_</i> and <i>channel_symbol_time_</i> introduced, 
 *                                 <i>channel_time_resolution_</i> removed
 *												     <ul> 
@@ -1122,6 +1150,17 @@
 *  <li> <b>v.1.8.0</b> <ul>
 *                            <li> new UTM CSV Database model added
 *                            <li> minor fixes in WossChannelModule
+*                      </ul>
+*  <li> <b>v.1.9.0</b> <ul>
+*                            <li>Added support for NetCDF4 and HDF5, which is required in order to open_
+*                                the latest GEBCO 2019 database.
+*                            <li>A new bellhop arr file syntax option has been introduced,
+*                                in order to be aligned with Acoustic Toolbox >= 31 March 2019.
+*                            <li>BE ADVISED THAT factory value is using the latest syntax 
+*                                (i.e. acoustic toolbox >= 31 March 2019)
+*                            <li>Credits to <b>Randall Plate</b> for helping with the implementation.
+*                            <li>WossDb GEBCO has been refactored in order to support 2D netcdf format.
+*                            <li>Bug fixes and improvements in woss::ACToolboxWoss and woss::BellhopWoss
 *                      </ul>
 * </ul>
 **/

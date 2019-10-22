@@ -67,38 +67,74 @@
 #include <cstdlib>
 #include "sediment-deck41-marsden-db.h" 
 
+#define SEDIMENT_NOT_FOUND (-1000)
 
 using namespace woss;
 
 
 SedimDeck41MarsdenDb::SedimDeck41MarsdenDb( const ::std::string& name ) 
 : WossNetcdfDb( name ),
-  main_sedim_var_marsden(0),
-  sec_sedim_var_marsden(0)
+#if defined (WOSS_NETCDF4_SUPPORT)
+  main_sedim_var_marsden(),
+  sec_sedim_var_marsden()
+#else
+  main_sedim_var_marsden(NULL),
+  sec_sedim_var_marsden(NULL)
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 {
-  
+
 }
 
 
 bool SedimDeck41MarsdenDb::finalizeConnection() {
+#if defined (WOSS_NETCDF4_SUPPORT)
+  main_sedim_var_marsden = netcdf_db->getVar("seafloor_main_type");
+  if (main_sedim_var_marsden.isNull()) {
+    ::std::cout << "SedimDeck41MarsdenDb::finalizeConnection() main_sedim_var_marsden is not valid" << ::std::endl;
+    return false;
+  }
+  sec_sedim_var_marsden = netcdf_db->getVar("seafloor_secondary_type");
+  if (sec_sedim_var_marsden.isNull()) {
+    ::std::cout << "SedimDeck41MarsdenDb::finalizeConnection() sec_sedim_var_marsden is not valid" << ::std::endl;
+    return false;
+  }
+  return true;
+#else
   main_sedim_var_marsden = netcdf_db->get_var("seafloor_main_type");
   sec_sedim_var_marsden = netcdf_db->get_var("seafloor_secondary_type");
   return ( (main_sedim_var_marsden != 0) && (sec_sedim_var_marsden != 0) );
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 }
 
 
 Deck41Types SedimDeck41MarsdenDb::getSeaFloorType( const Marsden& marsden_square ) const {
-  int main_type, secondary_type;
+  int main_type = SEDIMENT_NOT_FOUND;
+  int secondary_type = SEDIMENT_NOT_FOUND;
 
   if (debug) ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() marsden square = " << marsden_square << ::std::endl;
-  
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+  ::std::vector<size_t> index_vector (1, (size_t)marsden_square);
+
+  main_sedim_var_marsden.getVar(index_vector, &main_type);
+  if (main_type == SEDIMENT_NOT_FOUND) {
+    ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't extract current main_type" << ::std::endl;
+    exit(1);
+  }
+
+  sec_sedim_var_marsden.getVar(index_vector, &secondary_type);
+  if (secondary_type == SEDIMENT_NOT_FOUND) {
+    ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't extract current secondary_type" << ::std::endl;
+    exit(1);
+  }
+#else
   NcBool ret_val = main_sedim_var_marsden->set_cur(marsden_square);
   if (!ret_val) {
     ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't set_cur() of main_sedim_var_coord;" 
 	      << " current marsden = " << marsden_square << ::std::endl;
     exit(1);
   }
-  
+
   ret_val = sec_sedim_var_marsden->set_cur(marsden_square); 
   if (!ret_val) {
     ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't set_cur() of sec_sedim_var_coord;"
@@ -117,6 +153,7 @@ Deck41Types SedimDeck41MarsdenDb::getSeaFloorType( const Marsden& marsden_square
     ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't extract current secondary_type" << ::std::endl;
     exit(1);
   }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
   if (debug) ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() marsden = " << marsden_square << "; main type = " << main_type 
 		        << "; secondary type = " << secondary_type << ::std::endl;

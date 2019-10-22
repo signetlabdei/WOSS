@@ -112,3 +112,13 @@ v1.7.0 - bug fixing in WossManager
 
 v1.8.0 - new UTM CSV Database model added
        - WossChannel minor fixes
+
+v1.9.0 - added support for NetCDF4 and HDF5, which is required in order to open_
+         the latest GEBCO 2019 database.
+       - a new bellhop arr file syntax option has been introduced in order to be aligned
+         Acoustic Toolbox >= 31 March 2019.
+       - BE ADVISED THAT factory value is using the latest syntax 
+         (i.e. acoustic toolbox >= 31 March 2019)
+       - Credits to Randall Plate for helping with the implementation.
+       - WossDb GEBCO has been refactored in order to support 2D netcdf format.
+       - Bug fixes and improvements in woss::ACToolboxWoss and woss::BellhopWoss

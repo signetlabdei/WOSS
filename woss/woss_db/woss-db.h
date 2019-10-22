@@ -42,9 +42,11 @@
 
 #include <fstream>
 
-#ifdef WOSS_NETCDF_SUPPORT
+#if defined(WOSS_NETCDF4_SUPPORT)
+#include <ncFile.h>
+#elif defined(WOSS_NETCDF_SUPPORT)
 #include <netcdfcpp.h>
-#endif // WOSS_NETCDF_SUPPORT
+#endif
 
 #include <definitions.h>
 #include <coordinates-definitions.h>
@@ -223,8 +225,11 @@ namespace woss {
     /**
     * NcFile pointer to a NetCDF database descriptor. It will be properly initialized by openConnection()
     **/
+#if defined(WOSS_NETCDF4_SUPPORT)
+    netCDF::NcFile* netcdf_db;
+#else
     NcFile* netcdf_db;
-
+#endif // defined(WOSS_NETCDF4_SUPPORT)
 
   };
 #endif // WOSS_NETCDF_SUPPORT

@@ -77,8 +77,9 @@ namespace woss {
     * Sets the char separator used in CSV textual db
     * 
     * @param new_separator separator char
+    * @return reference to <b>*this</b>
     **/
-    void setCSVSeparator( const char new_separator ) { separator = new_separator; }
+    BathyUtmCsvDbCreator& setCSVSeparator( const char new_separator ) { separator = new_separator; return *this; }
     
     /**
     * Returns the current char separator
@@ -91,8 +92,9 @@ namespace woss {
     * Sets db resolution, in meters
     * 
     * @param spacing space resolution in meters
+    * @return reference to <b>*this</b>
     **/
-    void setDbSpacing( double spacing ) { db_spacing = spacing; }
+    BathyUtmCsvDbCreator& setDbSpacing( double spacing ) { db_spacing = spacing; return *this; }
     
    /**
     * Returns the current db spatial resolution
@@ -106,10 +108,12 @@ namespace woss {
     * 
     * @param nnorth db total northing points. should be >= 0
     * @param neast db total easting points. should be >= 0
+    * @return reference to <b>*this</b>
     **/
-    void setDbTotalValues(int nnorth, int neast) { 
+    BathyUtmCsvDbCreator& setDbTotalValues(int nnorth, int neast) { 
       total_northing_values = nnorth; 
       total_easting_values = neast;
+      return *this;
     }
 
     /**
@@ -126,10 +130,12 @@ namespace woss {
     * 
     * @param start easting range start
     * @param end easting range end
+    * @return reference to <b>*this</b>
     **/
-    void setDbRangeEasting(double start, double end) {
+    BathyUtmCsvDbCreator& setDbRangeEasting(double start, double end) {
       range_easting_start = start;
       range_easting_end = end;
+      return *this;
     }
     
     /**
@@ -146,10 +152,12 @@ namespace woss {
     * 
     * @param start northing range start
     * @param end northing range end
+    * @return reference to <b>*this</b>
     **/
-    void setDbRangeNorthing(double start, double end) {
+    BathyUtmCsvDbCreator& setDbRangeNorthing(double start, double end) {
       range_northing_start = start;
       range_northing_end = end;
+      return *this;
     }
 
     /**
@@ -164,9 +172,11 @@ namespace woss {
     /** Sets land approximation flag
     * 
     * @param flag land approximation flag
+    * @return reference to <b>*this</b>
     **/
-    void setLandApproximationFlag(bool flag) {
+    BathyUtmCsvDbCreator& setLandApproximationFlag(bool flag) {
       approx_land_to_sea_surface = flag;
+      return *this;
     }
 
     /**
