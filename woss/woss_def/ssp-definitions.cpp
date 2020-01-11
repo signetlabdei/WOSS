@@ -56,7 +56,8 @@ bool SSP::debug = false;
 
     
 SSP::SSP( long double prec ) 
-: min_ssp_value(HUGE_VAL),
+: ssp_eq_type(SSP_EQ_TEOS_10_EXACT),
+  min_ssp_value(HUGE_VAL),
   max_ssp_value(0.0),
   depth_precision(prec),
   ssp_map(),
@@ -69,6 +70,7 @@ SSP::SSP( long double prec )
 
 
 SSP::SSP( const SSP& copy ) {
+  ssp_eq_type = copy.ssp_eq_type;
   min_ssp_value = copy.min_ssp_value;
   max_ssp_value = copy.max_ssp_value;
   depth_precision = copy.depth_precision;
@@ -81,7 +83,8 @@ SSP::SSP( const SSP& copy ) {
 
 
 SSP::SSP( DepthMap& ssp_m, DepthMap& temp_map, DepthMap& sal_map, DepthMap& press_map, long double depth_p )
-  : min_ssp_value(HUGE_VAL),
+  : ssp_eq_type(SSP_EQ_TEOS_10_EXACT),
+    min_ssp_value(HUGE_VAL),
     max_ssp_value(0.0),
     depth_precision(depth_p)
 {
@@ -93,7 +96,8 @@ SSP::SSP( DepthMap& ssp_m, DepthMap& temp_map, DepthMap& sal_map, DepthMap& pres
 
 
 SSP::SSP( DepthMap& ssp_m, long double depth_p ) 
-  : min_ssp_value(HUGE_VAL),
+  : ssp_eq_type(SSP_EQ_TEOS_10_EXACT),
+    min_ssp_value(HUGE_VAL),
     max_ssp_value(0.0),
     depth_precision(depth_p)
 {
@@ -126,7 +130,7 @@ SSP& SSP::insertValue( double depth, double ssp_value ) {
 
 SSP& SSP::insertValue( double depth, double temperature, double salinity, const Coord& coordinates ) {
   assert( temperature > -20.0 && temperature < 50.0 );
-  assert( salinity > 10.0 && salinity < 60.0 );
+  assert( salinity >= 0.0 && salinity <= 60.0 );
   assert( coordinates.isValid() );
   
   double pressure = getPressureFromDepth( coordinates, depth );
@@ -148,7 +152,7 @@ SSP& SSP::insertValue( double depth, double temperature, double salinity, const 
   
 SSP& SSP::insertValue( double depth, double temperature, double salinity, const std::complex<double>& pressure, double ssp_value ) {
   assert( temperature > -20.0 && temperature < 50.0 );
-  assert( salinity > 10.0 && salinity < 60.0 );
+  assert( salinity >= 0.0 && salinity <= 60.0 );
   assert( pressure.real() >= 0 );
   assert( ssp_value > 0 && depth >= 0);
 
@@ -168,7 +172,7 @@ SSP& SSP::insertValue( double depth, double temperature, double salinity, const 
 
 SSP& SSP::insertValue( double temperature, double salinity, const std::complex<double>& pressure, const Coord& coordinates ) {
   assert( temperature > -20.0 && temperature < 50.0 );
-  assert( salinity > 10.0 && salinity < 60.0 );
+  assert( salinity >= 0.0 && salinity <= 60.0 );
   assert( pressure.real() >= 0 );
   assert( coordinates.isValid() );
 

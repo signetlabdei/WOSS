@@ -26,17 +26,21 @@
 # whose support is gratefully acknowledged.
 
 
-AC_INIT(WOSS,1.9.0)
-AM_INIT_AUTOMAKE
+AC_INIT([WOSS], [1.10.0], [woss@guerra-tlc.com])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_MSG_NOTICE([WOSS AC_PACKAGE_VERSION])
 
 AC_PROG_CXX
 AC_PROG_MAKE_SET
 
-AC_DISABLE_STATIC 
+AC_DISABLE_STATIC
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+
+AC_CONFIG_MACRO_DIRS([m4])
+
+AC_MSG_NOTICE([checking user options])
 
 AC_PATH_NS_ALLINONE([have_nsallinone=yes],[have_nsallinone=no])
 
@@ -144,6 +148,8 @@ AM_CONDITIONAL([NS_MIRACLE_BUILD], [test "x$have_nsmiracle" = xyes -a "x$have_ns
 
 AC_DEFINE(CPP_NAMESPACE,std)
 
+AC_MSG_NOTICE([generating header files and makefiles])
+
 AC_CONFIG_FILES([Makefile
                             doxy/Makefile
                             doxy/imgs/Makefile
@@ -156,4 +162,4 @@ AC_CONFIG_FILES([Makefile
                             woss_phy/tcl_hooks/Makefile
                             ])
 		
-AC_OUTPUT
+AC_OUTPUT()
