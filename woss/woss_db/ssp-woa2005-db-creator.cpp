@@ -47,10 +47,21 @@
 using namespace woss;
 
 
-SspWoa2005DbCreator::SspWoa2005DbCreator() {
+SspWoa2005DbCreator::SspWoa2005DbCreator()
+: WossDbCreator(),
+  woa_db_type(WOA_DB_TYPE_2005)
+{
 
 }
 
+#if defined (WOSS_NETCDF4_SUPPORT)
+SspWoa2005DbCreator::SspWoa2005DbCreator( WOADbType db_type )
+: WossDbCreator(),
+  woa_db_type(db_type)
+{
+
+}
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
 SspWoa2005DbCreator::~SspWoa2005DbCreator() {
 
@@ -59,9 +70,13 @@ SspWoa2005DbCreator::~SspWoa2005DbCreator() {
 
 WossDb* const SspWoa2005DbCreator::createWossDb() {
   assert( pathname.length() > 0 );
-  
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+  SspWoa2005Db* woss_db = new SspWoa2005Db( pathname, woa_db_type );
+#else
   SspWoa2005Db* woss_db = new SspWoa2005Db( pathname );
-  
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+
   assert( initializeDb( woss_db ) );
   
   return( woss_db );

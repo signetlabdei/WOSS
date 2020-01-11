@@ -161,11 +161,17 @@ $db_sedim setUpDeck41MarsdenDb      "${opt(db_path)}/seafloor_sediment/DECK41_ma
 $db_sedim setUpDeck41MarsdenOneDb   "${opt(db_path)}/seafloor_sediment/DECK41_mardsen_one_degree.nc"
 
 
-WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set debug          0
-WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set woss_db_debug  0
+#WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set debug          0
+#WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set woss_db_debug  0
 
-set db_ssp [new "WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage"]
- $db_ssp setDbPathName "${opt(db_path)}/ssp/2WOA2009_SSP_April.nc"
+#set db_ssp [new "WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage"]
+#$db_ssp setDbPathName "${opt(db_path)}/ssp/WOA2009/2WOA2009_SSP_June.nc"
+
+WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set debug          0
+WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set woss_db_debug  0
+
+set db_ssp [new "WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage"]
+$db_ssp setDbPathName "${opt(db_path)}/ssp/WOA2013/WOA2013_SSP_June.nc"
 
 
 WOSS/Creator/Database/NetCDF/Bathymetry/GEBCO set debug           0
