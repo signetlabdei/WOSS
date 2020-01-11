@@ -71,6 +71,7 @@ static const char* WOSS_BELLHOP_ENV = ".env";  /**< Bellhop configuration file e
 
 static const char* WOSS_BATHYMETRY_MODE_DISCRETE = "D"; /**< Bathymetry write method: Discrete */
 
+static const double BELLHOP_QUAD_SSP_RANGE_FACTOR = 1.05; /**< Bellhop range factor multiplier, used in SSP quad file */
 
 using namespace woss;
 
@@ -319,7 +320,7 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
     delete curr_ssp;
     curr_ssp = NULL;
   }
-  if (using_ssp_file == true) {       
+  if (using_ssp_file == true) {
     if ( curr_run > 0 ) {
       for ( NSMIter it = randomized_ssp_map.begin(); it != randomized_ssp_map.end(); it++ ) {
         delete it->second;
@@ -331,8 +332,18 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
     ::std::ofstream ssp_out ( ssp_file.c_str() );
     ssp_out.precision(18);
    
-    ssp_out << normalized_ssp_map.size() << ::std::endl;
-     
+    /*
+     * Bellhop does NOT extrapolate SSP
+     * Therefore we need to add two additional SSPs
+     * - the first one at -box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR
+     * - the last one at box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR
+     */
+    ssp_out << normalized_ssp_map.size() + 2 << ::std::endl;
+
+    // first box range
+    ssp_out << ::std::setw(30) << (-box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR) / 1000.0;
+
+    //write actual ranges
     for (NSMIter it = normalized_ssp_map.begin(); it != normalized_ssp_map.end(); it++) {
       ssp_out << ::std::setw(30) << ((double) it->first / 1000.0); // write ranges
        
@@ -340,22 +351,43 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
         randomized_ssp_map[it->first] = it->second->randomize( 0.0001 );
       }
     }
-    ssp_out << ::std::endl;
+    
+    // last box range
+    ssp_out << ::std::setw(30) << (box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR) / 1000.0 << ::std::endl;
+
  
     NormSSPMap* write_ssp_map;
-    if ( curr_run > 0 ) {   
+    if ( curr_run > 0 ) {
       write_ssp_map = &randomized_ssp_map;
     }
     else write_ssp_map = &normalized_ssp_map;
-     
+
+    NSMIter first_it = write_ssp_map->begin();
+    NSMRIter last_it = write_ssp_map->rbegin();
+
+    assert (first_it != write_ssp_map->end());
+    assert (last_it != write_ssp_map->rend());
+
     for (int i = 0; i < curr_norm_ssp_depth_steps; i++) {
+      // write first SSP at first box range
+      DConstIter first_it2 = first_it->second->at(i);
+      assert( first_it2 != first_it->second->end() );
+      ssp_out << ::std::setw(30) << first_it2->second;
+
+      // write actual SSPs
       for (NSMIter it = write_ssp_map->begin(); it != write_ssp_map->end(); it++) {
         DConstIter it2 = it->second->at(i);
         assert( it2 != it->second->end() );
-        ssp_out << ::std::setw(30) << it2->second; // write ssp
+        ssp_out << ::std::setw(30) << it2->second;
       }
+
+      // write last SSP at last box range
+      DConstIter last_it2 = last_it->second->at(i);
+      assert( last_it2 != last_it->second->end() );
+      ssp_out << ::std::setw(30) << last_it2->second;
+
       ssp_out << ::std::endl;
-    }    
+    }
 
     ssp_out.close();
   }

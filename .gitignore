@@ -33,4 +33,6 @@
 ***/missing
 ***/*.trs
 ***/.clang-format
+***/*.dirstamp
 woss_phy/woss-phy-embeddedtcl.cc
+woss/WossWOADbCreator

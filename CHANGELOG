@@ -122,3 +122,6 @@ v1.9.0 - added support for NetCDF4 and HDF5, which is required in order to open_
        - Credits to Randall Plate for helping with the implementation.
        - WossDb GEBCO has been refactored in order to support 2D netcdf format.
        - Bug fixes and improvements in woss::ACToolboxWoss and woss::BellhopWoss
+
+v1.10.0 - Added support for SSP NetCDF4 databases generated from WOA2013 dataset.
+        - Fix for Bellhop quad SSP scenario

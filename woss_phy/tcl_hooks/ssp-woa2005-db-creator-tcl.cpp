@@ -46,6 +46,28 @@
 using namespace woss;
 
 
+#if defined (WOSS_NETCDF4_SUPPORT)
+static class SspWoa2013DbCreatorClass : public TclClass {
+public:
+  SspWoa2013DbCreatorClass() : TclClass("WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage") {}
+  TclObject* create(int, const char*const*) {    
+    return( new SspWoa2005DbCreatorTcl(WOA_DB_TYPE_2013) );
+  }
+} class_SspWoa2013DbCreator;
+#else
+#include <cstdlib>
+
+static class SspWoa2013DbCreatorClass : public TclClass {
+public:
+  SspWoa2013DbCreatorClass() : TclClass("WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage") {}
+  TclObject* create(int, const char*const*) {
+    ::std::cerr << "WOSS/Creator/Database/NetCDF/SSP/WOA2013 can't be instantiated. NETCDF4 support was not enabled!" 
+                << ::std::endl;
+    exit(1);    
+  }
+} class_SspWoa2013DbCreator;
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+
 static class SspWoa2005DbCreatorClass : public TclClass {
 public:
   SspWoa2005DbCreatorClass() : TclClass("WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage") {}
@@ -65,6 +87,18 @@ SspWoa2005DbCreatorTcl::SspWoa2005DbCreatorTcl()
   woss_db_debug = (bool) woss_db_debug_;
 }
 
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+SspWoa2005DbCreatorTcl::SspWoa2005DbCreatorTcl( WOADbType db_type )
+: SspWoa2005DbCreator(db_type)
+{
+  bind("debug", &debug_);
+  bind("woss_db_debug", &woss_db_debug_);
+
+  debug = (bool) debug_;
+  woss_db_debug = (bool) woss_db_debug_;
+}
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
 int SspWoa2005DbCreatorTcl::command(int argc, const char*const* argv) {
   if ( argc == 3 ) {

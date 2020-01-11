@@ -48,61 +48,73 @@ using namespace woss;
 
 #define SSP_NOT_VALID (-1000)
 
-static const int SSP_WOA2005_STD_NLAT = 180; /**< Custom made NetCDF WOA2005 SSP total number of latitudes */
-
-static const int SSP_WOA2005_STD_NLON = 360; /**< Custom made NetCDF WOA2005 SSP total number of longitudes */
-
-static const double SSP_WOA2005_STD_SPACING = 1.0; /**< Spacing between coordinates value [decimal degree] */
-
-
-static const double SSP_WOA2005_STD_MIN_LAT = -89.5; /**< Custom made NetCDF WOA2005 SSP mimimum latitude */
-
-static const double SSP_WOA2005_STD_MAX_LAT = 89.5; /**< Custom made NetCDF WOA2005 SSP maximum latitude */
-
-
-static const double SSP_WOA2005_STD_MIN_LONG = -179.5; /**< Custom made NetCDF WOA2005 SSP mimimum longitude */
-
-static const double SSP_WOA2005_STD_MAX_LONG = 179.5; /**< Custom made NetCDF WOA2005 SSP maximum longitude */
-
-
-static const double SSP_WOA2005_STD_START_LAT = 89.5; /**< Custom made NetCDF WOA2005 SSP start latitude */
-
-static const double SSP_WOA2005_STD_START_LONG = -179.5; /**< Custom made NetCDF WOA2005 SSP start longitude */
-
-
-static const int SSP_WOA2005_STD_NDEPTH = 33;  /**< Custom made NetCDF WOA2005 SSP total number of depth of a SSP */
-
-/**
-* Standard depths of any created SSP
-**/
-static int ssp_woa2005_std_depths[SSP_WOA2005_STD_NDEPTH] = { 0, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300,
-                                                              400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500,
-                                                              1750, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500 };
-
 
 SspWoa2005Db::SspWoa2005Db( const ::std::string& name ) 
 : WossNetcdfDb(name),
+  woa_db_type(WOA_DB_TYPE_2005),
 #if defined (WOSS_NETCDF4_SUPPORT)
-  ssp_var()
+  ssp_var(),
+  lat_var(),
+  lon_var()
 #else
   ssp_var(NULL)
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 { 
 }
 
+#if defined (WOSS_NETCDF4_SUPPORT)
+SspWoa2005Db::SspWoa2005Db( const ::std::string& name, WOADbType db_type )
+: WossNetcdfDb(name),
+  woa_db_type(db_type),
+  ssp_var(),
+  lat_var(),
+  lon_var()
+{ 
+}
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+
 
 bool SspWoa2005Db::finalizeConnection() {
+  if (woa_db_type == WOA_DB_TYPE_2005) {
 #if defined (WOSS_NETCDF4_SUPPORT)
-  ssp_var = netcdf_db->getVar("ssp");
-  if (ssp_var.isNull()) {
-    ::std::cout << "SspWoa2005Db::finalizeConnection() ssp_var is not valid" << ::std::endl;
+    ssp_var = netcdf_db->getVar("ssp");
+    if (ssp_var.isNull()) {
+      ::std::cout << "SspWoa2005Db::finalizeConnection() 2005 ssp_var is not valid" << ::std::endl;
+      return false;
+    }
+    return true;
+  #else
+    ssp_var = netcdf_db->get_var( "ssp" );
+    return (ssp_var != 0);
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+  }
+#if defined (WOSS_NETCDF4_SUPPORT)
+  else if (woa_db_type == WOA_DB_TYPE_2013) {
+    ssp_var = netcdf_db->getVar("ssp");
+    if (ssp_var.isNull()) {
+      ::std::cout << "SspWoa2005Db::finalizeConnection() 2013 ssp_var is not valid" << ::std::endl;
+      return false;
+    }
+
+    lat_var = netcdf_db->getVar("latitude");
+    if (lat_var.isNull()) {
+      ::std::cout << "SspWoa2005Db::finalizeConnection() 2013 lat_var is not valid" << ::std::endl;
+      return false;
+    }
+
+    lon_var = netcdf_db->getVar("longitude");
+    if (lon_var.isNull()) {
+      ::std::cout << "SspWoa2005Db::finalizeConnection() 2013 lon_var is not valid" << ::std::endl;
+      return false;
+    }
+
+    return true;
+  }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+  else {
+    ::std::cout << "SspWoa2005Db::finalizeConnection() woa_db_type is not valid" << ::std::endl;
     return false;
   }
-  return true;
-#else
-  ssp_var = netcdf_db->get_var( "ssp" );
-  return (ssp_var != 0);
-#endif // defined (WOSS_NETCDF4_SUPPORT)
 }
 
 
@@ -113,60 +125,146 @@ bool SspWoa2005Db::insertValue( const Coord& coordinates, const Time& time_value
 
 
 SSPIndexes SspWoa2005Db::getSSPIndexes( const Coord& coordinates ) const {
- 
+  if (woa_db_type == WOA_DB_TYPE_2005) {
   double lat = floor(coordinates.getLatitude()) + 0.5;
   double lon = floor(coordinates.getLongitude()) + 0.5;
 
   int quantized_latitude = (int) ::std::abs(lat - SSP_WOA2005_STD_MAX_LAT);
   int quantized_longitude = (int) (lon + SSP_WOA2005_STD_MAX_LONG);
 
-  if (debug) ::std::cout << "SspWoa2005Db::getSSPIndexes() latitude = " << coordinates.getLatitude() << "; longitude = " 
+  if (debug) ::std::cout << "SspWoa2005Db::getSSPIndexes() 2005 latitude = " << coordinates.getLatitude() << "; longitude = " 
                         << coordinates.getLongitude() << "; lat = " << lat << "; lon = " << lon 
                         << "; quant lat = " << quantized_latitude << "; quantized_longitude = " 
                         << quantized_longitude << ::std::endl;
 //   debugWaitForUser();
  
   return ( ::std::make_pair(quantized_latitude, quantized_longitude) );
-} 
-
-
-void SspWoa2005Db::getSSPValue( const SSPIndexes& indexes, double* ssp_values ) const {
+  }
 #if defined (WOSS_NETCDF4_SUPPORT)
-  ::std::vector<size_t> index_vector, count_vector;
+  else if (woa_db_type == WOA_DB_TYPE_2013) {
+    double quantized_latitude = abs((coordinates.getLatitude() - SSP_WOA2013_STD_START_LAT) / SSP_WOA2013_STD_SPACING ); 
+    if ( quantized_latitude - floor(quantized_latitude)  >= 0.5 ) quantized_latitude = ceil(quantized_latitude); 
+    else quantized_latitude = floor(quantized_latitude);
 
-  index_vector.push_back((size_t)indexes.first);
-  index_vector.push_back((size_t)indexes.second);
-  index_vector.push_back((size_t)0);
+    assert(quantized_latitude >= 0 && quantized_latitude <= SSP_WOA2013_STD_NLAT);
 
-  count_vector.push_back((size_t)1);
-  count_vector.push_back((size_t)1);
-  count_vector.push_back((size_t)SSP_WOA2005_STD_NDEPTH);
+    double quantized_longitude = abs( ( coordinates.getLongitude() - SSP_WOA2013_STD_START_LON ) / SSP_WOA2013_STD_SPACING ); 
+    if ( quantized_longitude - floor(quantized_longitude)  >= 0.5 ) quantized_longitude = ceil(quantized_longitude);
+    else quantized_longitude = floor(quantized_longitude);
 
-  ssp_values[0] = SSP_NOT_VALID;
+    assert(quantized_longitude >= 0 && quantized_longitude <= SSP_WOA2013_STD_NLON);
 
-  ssp_var.getVar(index_vector, count_vector, ssp_values);
-  if (ssp_values[0] == SSP_NOT_VALID) {
-    ::std::cerr << "SspWoa2005Db::getSSPValue() Couldn't extract ssp value" << ::std::endl;
-    exit(1);
-  }
-#else
-  NcBool ret_value = ssp_var->set_cur(indexes.first, indexes.second, 0);
-  if (!ret_value) {
-    ::std::cerr << "SspWoa2005Db::getSSPValue() Couldn't set_cur() " << indexes.first << " , " << indexes.second << ::std::endl;
-    exit(1);
-  }
-  
-  ret_value = ssp_var->get(ssp_values, 1, 1, SSP_WOA2005_STD_NDEPTH);
-  if (!ret_value) {
-    ::std::cerr << "SspWoa2005Db::getSSPValue() Couldn't extract ssp value" << ::std::endl;
-    exit(1);
+    if (debug)
+      ::std::cout << "SspWoa2005Db::getSSPIndexes() 2013 q_lat = " << quantized_latitude << "; q_lon = " << quantized_longitude << ::std::endl;
+
+    return ( ::std::make_pair(quantized_latitude, quantized_longitude) );
   }
 #endif // defined (WOSS_NETCDF4_SUPPORT)
+  else {
+    ::std::cout << "SspWoa2005Db::getSSPIndexes() wrong woa_db_type" << ::std::endl;
+    return ( ::std::make_pair(SSP_NOT_VALID, SSP_NOT_VALID) );
+  }
+} 
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+void SspWoa2005Db::getSSPValue( const Coord& coords, const SSPIndexes& indexes, double ssp_values[] ) const
+#else
+void SspWoa2005Db::getSSPValue( const SSPIndexes& indexes, double* ssp_values ) const
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+{
+  if (woa_db_type == WOA_DB_TYPE_2005) {
+#if defined (WOSS_NETCDF4_SUPPORT)
+    ::std::vector<size_t> index_vector, count_vector;
+
+    index_vector.push_back((size_t)indexes.first);
+    index_vector.push_back((size_t)indexes.second);
+    index_vector.push_back((size_t)0);
+
+    count_vector.push_back((size_t)1);
+    count_vector.push_back((size_t)1);
+    count_vector.push_back((size_t)SSP_STD_NDEPTH);
+
+    ssp_values[0] = SSP_NOT_VALID;
+
+    ssp_var.getVar(index_vector, count_vector, ssp_values);
+    if (ssp_values[0] == SSP_NOT_VALID) {
+      ::std::cerr << "SspWoa2005Db::getSSPValue() 2005 Couldn't extract ssp value" << ::std::endl;
+      exit(1);
+    }
+#else
+    NcBool ret_value = ssp_var->set_cur(indexes.first, indexes.second, 0);
+    if (!ret_value) {
+      ::std::cerr << "SspWoa2005Db::getSSPValue() 2005 Couldn't set_cur() " << indexes.first << " , " << indexes.second << ::std::endl;
+      exit(1);
+    }
+    
+    ret_value = ssp_var->get(ssp_values, 1, 1, SSP_STD_NDEPTH);
+    if (!ret_value) {
+      ::std::cerr << "SspWoa2005Db::getSSPValue() 2005 Couldn't extract ssp value" << ::std::endl;
+      exit(1);
+    }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+  }
+#if defined (WOSS_NETCDF4_SUPPORT)
+  else if (woa_db_type == WOA_DB_TYPE_2013) {
+    ::std::vector<size_t> index_vector, count_vector;
+    double lat = SSP_NOT_VALID;
+    double lon = SSP_NOT_VALID;
+
+    index_vector.push_back((size_t)indexes.first);
+
+    lat_var.getVar(index_vector, &lat);
+    if (lat == SSP_NOT_VALID) {
+      ::std::cout << "SspWoa2005Db::getSSPValue() 2013 Couldn't extract current lat" << ::std::endl;
+      exit(1);
+    }
+
+    if (debug)
+      ::std::cout << "SspWoa2005Db::getSSPValue() 2013 got lat = " << lat << ::std::endl;
+
+    index_vector.clear();
+    index_vector.push_back((size_t)indexes.second);
+
+    lon_var.getVar(index_vector, &lon);
+    if (lon == SSP_NOT_VALID) {
+      ::std::cout << "SspWoa2005Db::getSSPValue() 2013 Couldn't extract current lon" << ::std::endl;
+      exit(1);
+    }
+
+    if (debug)
+      ::std::cout << "SspWoa2005Db::getSSPValue() 2013 got lon = " << lon << ::std::endl;
+
+    assert(::std::abs(coords.getLatitude() - lat) <= SSP_WOA2013_STD_SPACING);
+    assert(::std::abs(coords.getLongitude() - lon) <= SSP_WOA2013_STD_SPACING);
+
+    index_vector.clear();
+
+    index_vector.push_back((size_t)indexes.first);
+    index_vector.push_back((size_t)indexes.second);
+    index_vector.push_back((size_t)0);
+
+    count_vector.push_back((size_t)1);
+    count_vector.push_back((size_t)1);
+    count_vector.push_back((size_t)SSP_STD_NDEPTH);
+
+    ssp_values[0] = SSP_NOT_VALID;
+
+    ssp_var.getVar(index_vector, count_vector, ssp_values);
+    if (ssp_values[0] == SSP_NOT_VALID) {
+      ::std::cerr << "SspWoa2005Db::getSSPValue() 2013 Couldn't extract ssp value" << ::std::endl;
+      exit(1);
+    }
+  }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+  else {
+    ::std::cerr << "SspWoa2005Db::getSSPValue() wrong woa_db_type" << ::std::endl;
+    exit(1);
+  }
 }
 
 
 SSP* SspWoa2005Db::getValue( const Coord& coordinates, const Time& time, long double ssp_depth_precision ) const {
-  static double curr_ssp[SSP_WOA2005_STD_NDEPTH];
+  static double curr_ssp[SSP_STD_NDEPTH];
 
   DepthMap ssp_map;
   
@@ -175,11 +273,15 @@ SSP* SspWoa2005Db::getValue( const Coord& coordinates, const Time& time, long do
   if(debug) ::std::cout << "SspWoa2005Db::getValue() coordinates = " << coordinates << "; indexes = " << curr_ind.first << " , " 
                        << curr_ind.second << ::std::endl;
 
+#if defined (WOSS_NETCDF4_SUPPORT)
+  getSSPValue( coordinates, curr_ind, curr_ssp );
+#else
   getSSPValue( curr_ind, curr_ssp );
-
-  for (int i = 0; i < SSP_WOA2005_STD_NDEPTH; i++) {
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+  
+  for (int i = 0; i < SSP_STD_NDEPTH; i++) {
     
-    if(debug) ::std::cout << "SspWoa2005Db::getValue() depth = " << ssp_woa2005_std_depths[i] << "; ssp value = " << curr_ssp[i] << ::std::endl;
+    if(debug) ::std::cout << "SspWoa2005Db::getValue() depth = " << ssp_std_depths[i] << "; ssp value = " << curr_ssp[i] << ::std::endl;
 
     // if ssp_values = 0.0 ===> coords are quantized on land
     if ( curr_ssp[i] == 0.0 ) {
@@ -188,7 +290,7 @@ SSP* SspWoa2005Db::getValue( const Coord& coordinates, const Time& time, long do
 
       return SDefHandler::instance()->getSSP()->create();
     }
-    ssp_map.insert( ::std::make_pair( PDouble( ssp_woa2005_std_depths[i], ssp_depth_precision ), curr_ssp[i] ) );
+    ssp_map.insert( ::std::make_pair( PDouble( ssp_std_depths[i], ssp_depth_precision ), curr_ssp[i] ) );
   }
 
   return( SDefHandler::instance()->getSSP()->create( ssp_map, ssp_depth_precision ) );

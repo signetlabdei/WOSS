@@ -5,8 +5,7 @@ Please refer to:
   - COPYRIGHY for copyright terms
   - LICENSE for license terms
   - ACKNOWLEDGEMENTS for acknowledgements info
-  - please be advised that WOSS is now requiring 
-    acoustic toolbox version >= 16 Aug 2016 in order to work out of the box
+  - CHANGELOG for changelog info
 
 A detailed doxygen documentation is embedded in the source code.
 If you need to read it in html format please install doxygen on 

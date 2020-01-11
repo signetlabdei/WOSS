@@ -53,6 +53,9 @@ WOSS/Creator/Database/NetCDF/Sediment/DECK41 set woss_db_debug    0
 WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set debug          0
 WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set woss_db_debug  0
 
+WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set debug          0
+WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set woss_db_debug  0
+
 WOSS/Creator/Database/Textual/Results/TimeArr set debug           0
 WOSS/Creator/Database/Textual/Results/TimeArr set woss_db_debug   0
 WOSS/Creator/Database/Textual/Results/TimeArr set space_sampling  0

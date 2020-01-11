@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.9.0
+ * @version 1.10.0
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -150,11 +150,11 @@
  *    <li> interface implementation for the Bellhop ray tracing program [4], [woss::BellhopWoss, 
  *         woss::BellhopCreator];
  *    <li> interface implementation and custom NetCDF db of monthly averaged SSPs taken 
- *         from the World Ocean Atlas database of 2009 [6], [woss::SspWoa2005Db, woss::SspWoa2005DbCreator];
+ *         from the World Ocean Atlas database of 2009 [6] and 2013 [7], [woss::SspWoa2005Db, woss::SspWoa2005DbCreator];
  *    <li> interface implementation for the GEBCO NetCDF bathymetry databases 
- *         (both ‘03 and ’09 versions) [7], [woss::BathyGebcoDb, woss::BathyGebcoDbCreator];
+ *         (all versions: 1D, 2D, 2008, 2014, 2019) [8], [woss::BathyGebcoDb, woss::BathyGebcoDbCreator];
  *    <li> interface implementation and custom NetCDF data analysis taken from the DECK41 database, 
- *         for bottom sediments composition [8], [woss::SedimDeck41Db, woss::SedimDeck41DbCreator, woss::SedimDeck41CoordDb,
+ *         for bottom sediments composition [9], [woss::SedimDeck41Db, woss::SedimDeck41DbCreator, woss::SedimDeck41CoordDb,
  *         woss::SedimDeck41MarsdenDb, woss::SedimDeck41MarsdenOneDb];
  *    <li> A <b>multi-threaded</b> version that allows the parallel execution of multiple channel simulators
  *         [woss::WossManagerResDbMT];
@@ -174,10 +174,12 @@
  *    <li> F. Jensen, W. Kuperman, M. Porter, and H. Schmidt, <i>Computational Ocean Acoustics</i>. Springer-Verlag, 2000.
  *    <li> Bellhop code, http://oalib.hlsresearch.com/Rays/index.html .
  *    <li> P. C. Etter, <i>Underwater acoustic modeling and simulation</i>. Spon Press, Taylor & Francis group, 2003.
- *    <li> World ocean atlas, http://www.nodc.noaa.gov/OC5/WOA09/pr_woa09.html .
+ *    <li> World ocean atlas 2009, http://www.nodc.noaa.gov/OC5/WOA09/pr_woa09.html .
+ *    <li> World ocean atlas 2013, https://www.nodc.noaa.gov/OC5/woa13/ .
  *    <li> General bathymetric chart of the oceans, http://www.gebco.net .
- *    <li> National geophysical data center, seafloor surficial sediment descriptions, 
+ *    <li> National geophysical data center, seafloor surficial sediment descriptions,
  *         http://www.ngdc.noaa.gov/mgg/geology/deck41.html .
+ *    <li> TEOS-10 source code http://www.TEOS-10.org .
  * </ol> 
 **/
 
@@ -199,13 +201,42 @@
  * <b>0, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 600, 700, 800,
  * 900, 1000, 1100, 1200, 1300, 1400, 1500, 1750, 2000, 2500, 3000,
  * 3500, 4000, 4500, 5000, 5500</b>.<p>
- * The NetCDF file has the following dimensions: 
+ * The NetCDF files have been generated with NetCDF classic and are compatible with NetCDF4 library.
+ * Each NetCDF file has the following dimensions:
  * <ul>
  *    <li> <i>latitude</i>: 180 values, from 89.5° to -89.5°
  *    <li> <i>longitude</i>: 360 values, from -179.5° to 179.5° 
  *    <li> <i>depth</i>: 33 values (standard depths).
  * </ul>
- * The NetCDF file has the following variables description:
+ * Each NetCDF file has the following variables description:
+ * <ul>
+ *    <li> <i>float ssp(latitude, longitude, depth)</i> ; \n
+ *                ssp:units = "m/s" ;
+ *    <li> <i>float latitude(latitude)</i> ; \n
+ *                latitude:units = "decimal degrees" ;
+ *    <li> <i>float longitude(longitude)</i> ; \n
+ *                longitude:units = "decimal degrees" ;
+ *    <li> <i>short depth(depth)</i> ; \n
+ *                depth:units = "m" ;
+ * </ul>
+ * @see woss::SSP, woss::SspWoa2005Db, woss::SspWoa2005DbCreator
+ *
+ *
+ * \section ssp_db_2013 World Ocean Atlas 2013 SSP Database
+ * 
+ * These databases contain monthly, seasonal and annual average of sound speed profiles. 
+ * The available resolution is 0.25° x 0.25°. Data are provided at <i>standard depths</i> [m] : <p>
+ * <b>0, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 600, 700, 800,
+ * 900, 1000, 1100, 1200, 1300, 1400, 1500, 1750, 2000, 2500, 3000,
+ * 3500, 4000, 4500, 5000, 5500</b>.<p>
+ * The databases require NetCDF4 + HDF5 support.
+ * Each NetCDF4 file has the following dimensions: 
+ * <ul>
+ *    <li> <i>latitude</i>: 720 values, from -89.875° to 89.875°
+ *    <li> <i>longitude</i>: 1440 values, from -179.875° to 179.875° 
+ *    <li> <i>depth</i>: 33 values (standard depths).
+ * </ul>
+ * Each NetCDF4 file has the following variables description:
  * <ul>
  *    <li> <i>float ssp(latitude, longitude, depth)</i> ; \n
  *                ssp:units = "m/s" ;
@@ -912,10 +943,11 @@
  *    <li> Download the <b>recommended</b> <a href="http://telecom.dei.unipd.it/ns/woss/files/at.zip">Acoustic Toolbox Library</a>
  *         and follow installation instructions. The directory path that contains
  *         the binaries should be in the $PATH environment.
- *    <li> woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 is compliant with latest Bellhop arr file 
- *         syntax (acoustic toolbox version >= 16 Aug 2016). WOSS is also supporting the previous syntax. 
- *    <li> woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_2 is compliant with latest Bellhop arr file 
- *         syntax (acoustic toolbox version >= 31 March 2019). This is the new factory value but WOSS is also supporting the previous syntaxes. 
+ *    <li> woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 is compliant with Bellhop arr file 
+ *         syntax of the acoustic toolbox library up until the 16 Aug 2016 version.
+ *    <li> woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_2 is compliant with Bellhop arr file 
+ *         syntax of the acoustic toolbox library >= 31 March 2019 version. 
+ *         This is the new factory value. 
  *         @see woss::BellhopCreator::setBellhopArrSyntax or tcl binded value bellhop_arr_syntax.
  *    <li> <b>In order to use the latest GEBCO 2019 15 seconds of arc database, NetCDF4 + HDF5 support had to be added to the framework.</b>
  *         If you wish to use NetCDF classes and databases, download the recommended <a href="http://telecom.dei.unipd.it/ns/woss/files/hdf5-1.8.13.tar.gz">HDF5 library</a>
@@ -1162,6 +1194,10 @@
 *                            <li>WossDb GEBCO has been refactored in order to support 2D netcdf format.
 *                            <li>Bug fixes and improvements in woss::ACToolboxWoss and woss::BellhopWoss
 *                      </ul>
+*  <li> <b>v.1.10.0</b> <ul>
+*                            <li> Added support for SSP NetCDF4 databases generated from WOA2013 dataset.
+*                            <li> Fix for Bellhop quad SSP scenario
+*                      </ul>
 * </ul>
 **/
 
@@ -1295,6 +1331,47 @@
 * 
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*
+* ---------------------------------------------------------------------------- \n
+* ----------------------------------------------------------------------------
+* 
+* TEOS-10 SSP formula code has been taken from has been taken from 
+* Gibbs SeaWater (GSW) Oceanographic Toolbox, which has published under the folllowing copyright:
+*
+*
+* Copyright (c) 2011, SCOR/IAPSO WG127 (Scientific Committee on Oceanic Research/
+* International Association for the Physical Sciences of the Oceans, Working Group 127).
+*
+* All rights reserved.
+*
+* Redistribution and use, in source and binary forms, without modification, is permitted
+* provided that the following conditions are met:
+*
+* • Redistributions of source code must retain the above copyright notice, this list
+*   of conditions and the following disclaimer.
+* 
+* • Redistributions in binary form must reproduce the above copyright notice, this
+*   list of conditions and the following disclaimer in the documentation and/or other
+*   materials provided with the distribution.
+*
+* • Neither the name of SCOR/IAPSO WG127 nor the names of its contributors may be used
+*   to endorse or promote products derived from this software without specific prior
+*   written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+* OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+* SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+* TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+* BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+* ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+* DAMAGE.
+*
+* The software is available from http://www.TEOS-10.org
+*
 **/
 
 

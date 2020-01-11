@@ -12,11 +12,11 @@ Requirements
   -   Download the recommended Acoustic Toolbox library from http://telecom.dei.unipd.it/ns/woss/files/at.zip
       and follow installation instructions. The directory path that contains
       the binaries should be in the $PATH environment.
-  -   woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 is compliant with latest Bellhop arr file 
-      syntax (acoustic toolbox version >= 16 Aug 2016). WOSS is also supporting the previous syntax. 
-  -   woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_2 is compliant with latest Bellhop arr file 
-      syntax (acoustic toolbox version >= 31 March 2019). 
-      This is the new factory value, but WOSS is also supporting the previous syntaxes.
+  -   woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 is compliant with Bellhop arr file 
+      syntax of the acoustic toolbox library up until the 16 Aug 2016 version.
+  -   woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_2 is compliant with Bellhop arr file 
+      syntax of the acoustic toolbox library >= 31 March 2019 version. 
+      This is the new factory value. 
   -   WOSS is now requiring NetCDF4 with HDF5 support in order to be able to read the latest GEBCO 2019 dataset.
   -   IF you wish to compile NetCDF4 software features, download the recommended HDF5, NetCDF library for C and 
       the C++4 from 

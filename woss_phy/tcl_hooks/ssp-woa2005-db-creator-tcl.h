@@ -69,6 +69,14 @@ namespace woss {
     * Default SspWoa2005DbCreatorTcl constructor
     **/    
     SspWoa2005DbCreatorTcl();
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+    /**
+    * SspWoa2005DbCreatorTcl constructor
+    * @param db_type WOADbType of the database
+    **/
+    SspWoa2005DbCreatorTcl( WOADbType db_type );
+#endif // defined (WOSS_NETCDF4_SUPPORT)
     
     virtual ~SspWoa2005DbCreatorTcl() { }
   

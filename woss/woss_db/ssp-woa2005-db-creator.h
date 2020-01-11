@@ -45,7 +45,7 @@
 
 
 #include "woss-db-creator.h"
-
+#include "ssp-woa2005-db.h"
 
 namespace woss {
   
@@ -54,8 +54,6 @@ namespace woss {
   * \brief WossDbCreator for the custom made NetCDF WOA2005 SSP database
   *
   * Specialization of WossDbCreator for the  custom made NetCDF WOA2005 SSP database
-  *
-  * It also provides a Tcl interpreter for NS-2 implementation
   *
   **/
   class SspWoa2005DbCreator : public WossDbCreator {
@@ -68,6 +66,14 @@ namespace woss {
     * Default SspWoa2005DbCreator constructor
     **/    
     SspWoa2005DbCreator();
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+    /**
+    * SspWoa2005DbCreator constructor
+    * @param db_type WOADbType of the database
+    **/
+    SspWoa2005DbCreator( WOADbType db_type );
+#endif // defined (WOSS_NETCDF4_SUPPORT)
     
     virtual ~SspWoa2005DbCreator();
     
@@ -79,6 +85,20 @@ namespace woss {
     virtual WossDb* const createWossDb();
 
 
+    /**
+    * Returns current WOADbType
+    * @return current WOADbType
+    **/
+    WOADbType getWoaDbType() const { return woa_db_type; }
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+    /**
+    * Set current WOADbType
+    * @param type valid WOADbType
+    **/
+    SspWoa2005DbCreator& setWoaDbType(WOADbType type) { woa_db_type = type; return *this; }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+
     protected:
     
     
@@ -88,8 +108,8 @@ namespace woss {
     * @return <i>true</i> if the method succeed, <i>false</i> otherwise
     **/           
     virtual bool initializeDb( WossDb* const woss_db );
-    
-    
+
+    WOADbType woa_db_type;
   };
 
 }
