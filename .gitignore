@@ -33,3 +33,4 @@
 ***/missing
 ***/*.trs
 ***/.clang-format
+woss_phy/woss-phy-embeddedtcl.cc
