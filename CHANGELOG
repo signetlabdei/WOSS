@@ -1,0 +1,114 @@
+WOSS changelog:
+
+please note: WOSS is in its development stage, API changes will be limited at minimum, 
+             but this cannot be guaranteed. 
+
+
+v1.0.0 - release version
+
+v1.0.1 - woss::Coord, woss::CoordZ : latitude, longitude and depth are now double value (instead of woss::PDouble)
+       - woss::ResPressureTxtDb, woss::ResTimeArrTxtDb : added a space_sampling feature
+       - woss::WossDbManager : the managing of custom enviromental data has been reworked, check doxygen documentation
+         and test_aloha_no_dbs.tcl
+       - WossCbrModule : new class added
+
+v1.1.0 - databases : data from WOA2009 has been released; these files are fully compatible with the 2005 version.
+       - woss::CustomDataContainer : bugs fixed.
+       - woss::Location : class for positioning added. 
+       - WossPosition : WOSS now expect a WossPosition as Miracle Position class, see updated tcl examples for usage.
+       - WossWpPosition : class has been reworked. 
+       - woss::WossCreatorContainer: class has been added.
+       - woss::WossCreator, woss::BellhopCreator : interfaces expanded, they now handles custom values. 
+         for woss::Location objects. In this way transmitter movement is properly handled. 
+       - woss::ACToolboxWoss : bugs fixed.
+       - woss::BellhopWoss : bugs fixed.
+       - woss::TimeReference, woss::TimeReferenceTcl : classes for providing WOSS a time reference.
+       - woss::RandomGenerator, woss::RandomGeneratorTcl: classes for providing WOSS a random numbers generators.
+       - WossRandomGenerator, WossRandomGeneratorTcl : hooks for NS2 random generators.
+       - woss::DefHandler : now can set and return a time reference and a random generator objects.
+       - woss::SSP : class has been updated to work with woss::RandomGenerator.
+
+v1.2.0 - woss::RandomGenerator : bug fixed.
+       - woss::WossManagerResDbMT : some bugs fixed in thread allocation.
+       - woss::ACToolboxWoss : bug fixed.
+       - woss::ResTimeArrBinDb, woss::ResTimeArrBinDbCreator, woss::ResPressureBinDb, woss::ResPressureBinDbCreator :
+         classes for storing computed results in a binary file.
+       - ChannelEstimator, ChannelEstimatorPlugin : now works with MAC address instead of IP address to permit power control at MAC level.
+         this now requires that only the MLL ARP table has to be filled instead of routing tables and ARP tables.
+         Space sampling capability added.
+       - woss::Transducer : transducer definitions added.
+       - woss::TransducerHandler : transducer handler definitions added.
+       - woss::BellhopWoss : addded beam pattern capabilities.
+       - woss::BellhopCreator : added custom transducer capabilities.
+       - woss::Location : default comparison_distance value changed, added support for dinamic vertical
+         beam pattern orientation.
+       - WossPosition, WossWpPosition : added support for dynamic vertical beam pattern orientation.
+       - UnderwaterMPhyBpsk : some tcl variables renamed. PLEASE SEE SOURCE CODE AND EXAMPLES FOR MORE INFO
+       - UwMPhyBpskTransducer, WossMPhyBpsk : added support for woss::Transducer, to properly simulate SPL and 
+         energy consumption.
+       - added transducer descriptions of BTech, ITC, ITT, RESON.
+       - new tcl sample added. 
+       - old samples: now channel estimation properly works
+       - doxygen basic samples page removed, all the comments are inline within the tcl files.
+
+v1.3.0 - WossChannelModule : channel_eq_time_, channel_symbol_time_ and channel_eq_threshold_db_ introduced, channel_time_resolution_ removed;
+															- the channel now coherently sums all taps at channel_symbol_resolution_ 
+                              - from channel_eq_snr_threshold_db_ the attenuation threshold is calculated
+                              - the first tap that has txloss <= channel_eq_att_threshold_db is found
+															- then all taps after the above tap + channel_equalization_time_ are incoherently summed
+                                   if channel_equalization_time_ == 0 no eq is done
+                                   if channel_equalization_time_ < 0 then all taps are incoherently summed 
+															- all taps after channel_equalization_time_ are left untouched
+       - Altimetry concept introduced.
+       - Altimetry time evolution introduced.
+       - Woss, WossManager, WossCreator: time evolution concept introduced.
+       - WossDbManager: custom SSP with time evolution introduced.
+       - WOSS can now be installed: with/without NS-Miracle, with/without NetCDF, with/without pthread
+
+v1.3.1 - TCL dependancies moved to WossPhy library
+
+v1.3.2 - minor bug fixes
+
+v1.3.3 - minor bug fixes
+
+v1.3.4 - minor bug fixes
+
+v1.3.5 - minor bug fixes
+       - UwmStd lib has been moved to NS-Miracle for a better compatibility with DESERT framework.
+       
+v1.3.6 - warnings removal and minor bug fixes
+
+v1.3.7 - warnings system revised. 
+       - tcl warnings removed
+       - bug fixes (thanks to Raúl Sáez Cañete)
+
+v1.3.8 - minor bug fixes
+       - license changed to GPLv2
+
+v1.3.9 - minor bug fixes
+       - syntax now compliant with C++11 standard
+       
+v1.4.0 - minor bug fixes
+         
+v1.5.0 - memory leak fixed (thanks to Raúl Sáez Cañete)
+       - new bathymetry write mode introduced (thanks to Randall Plate)
+       - new attenuation complex tap calculation introduced:
+         travel time phase is now properly used
+         a bellhop arr file syntax option has been introduced, in order to make WOSS work with both
+         acoustic tool box >= 16 Aug 2016 and previous versions.
+         BE ADVISED THAT factory value is using the latest syntax (i.e. acoustic toolbox >= 16 Aug 2016)
+
+v1.5.1 - gcc-6 warning removal
+
+v1.6.0 - bug fix in volumetrical attenuation computations
+       - new APIs introduced
+       
+v1.6.1 - license changed
+
+v1.6.2 - bug fix in box depth and box range for ns2 tcl hooks
+
+v1.7.0 - bug fixing in WossManager
+       - new feature in WossChannelModule
+
+v1.8.0 - new UTM CSV Database model added
+       - WossChannel minor fixes
