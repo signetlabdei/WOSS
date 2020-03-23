@@ -1,0 +1,403 @@
+BODY,P,CENTER,TD,TH,UL,DL,DIV {
+        font-family: Arial, Helvetica, sans-serif;
+}
+H1,H2,H3,H4,H5,H6 {
+        font-family: Arial, Helvetica, sans-serif;
+}
+BODY,TD {
+        font-size: 12px;
+        line-height: 125%;
+}
+BODY {
+        background: white;
+        color: black;
+        width: 800px;
+        margin: 0 auto;
+        min-height: 1000px;
+}
+H1 {
+        text-align: center;
+        font-size: 24px;
+}
+H1 br {
+        margin: 10px 0;
+}
+H2 {
+        font-size: 18px;
+}
+h2 a.anchor {
+       text-decoration: none;
+}
+H3 {
+        font-size: 14px;
+}
+CAPTION { 
+        font-weight: bold 
+}
+div#footer {
+        text-align:center;
+        font-size: 9px;
+        margin: 10px 0px;
+}
+div#footer img {
+        vertical-align: middle;
+}
+DIV.qindex {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 14px; 
+        background-color: #f5f5f5;
+        border: 1px solid #cccccc;
+        text-align: center;
+        margin: 4px 0px;
+        padding: 8px;
+        line-height: 140%;
+}
+DIV.navpath {
+        background-color: #e8eef2;
+        border: 0px none #84b0c7;
+        text-align: center;
+        margin: 0px;
+        padding: 20px 0px;
+}
+DIV.navtab {
+       display: none;
+       background-color: #f5f5f5;
+       border: 1px solid #cccccc;
+       text-align: center;
+       margin: 2px;
+       margin-right: 15px;
+       padding: 2px;
+}
+TD.navtab {
+}
+A.qindex {
+       text-decoration: none;
+       font-weight: bold;
+}
+/*A.qindex:visited {
+       text-decoration: none;
+       font-weight: bold;
+       color: #1A419D
+}
+A.qindex:hover {
+        text-decoration: none;
+        background-color: #ddddff;
+}
+A.qindexHL {
+        text-decoration: none;
+        font-weight: bold;
+        background-color: #6666cc;
+        color: #ffffff;
+        border: 1px double #9295C2;
+}
+A.qindexHL:hover {
+        text-decoration: none;
+        background-color: #6666cc;
+        color: #ffffff;
+}
+A.qindexHL:visited { 
+        text-decoration: none; 
+        background-color: #6666cc; 
+        color: #ffffff 
+}*/
+A.el { 
+        text-decoration: none; 
+        font-weight: bold 
+}
+A.elRef { 
+        font-weight: bold 
+}
+A.code:link { 
+        text-decoration: none; 
+        font-weight: normal; 
+        color: #0000FF
+}
+A.code:visited { 
+        text-decoration: none; 
+        font-weight: normal; 
+        color: #0000FF
+}
+A.codeRef:link { 
+        font-weight: normal; 
+        color: #0000FF
+}
+A.codeRef:visited { 
+        font-weight: normal; 
+        color: #0000FF
+}
+A:hover { 
+        text-decoration: underline;     
+}
+DL.el { 
+        margin-left: -1cm 
+}
+.fragment {
+       font-family: monospace, fixed;
+       font-size: 11px;
+}
+PRE.fragment {
+        border: 1px solid #CCCCCC;
+        background-color: #f5f5f5;
+        margin: 4px 0px;
+        padding: 4px 10px;
+}
+DIV.ah { 
+        background-color: black; 
+        font-weight: bold; 
+        color: #ffffff; 
+        margin-bottom: 3px; 
+        margin-top: 3px 
+}
+
+DIV.groupHeader {
+       margin-left: 16px;
+       margin-top: 12px;
+       margin-bottom: 6px;
+       font-weight: bold;
+}
+DIV.groupText { 
+        margin-left: 16px; 
+        font-style: italic; 
+}
+TD.indexkey {
+        width: 200px;
+        background-color: #f5f5f5;
+        font-weight: bold;
+        padding : 2px 10px;
+        margin: 2px 0px;
+        /*border: 1px solid #CCCCCC;*/
+}
+TD.indexvalue {
+        width: 600px;
+        background-color: #f5f5f5;
+        font-style: italic;
+        padding : 2px 10px;
+        margin: 2px 0px;
+        /*border: 1px solid #CCCCCC;*/
+}
+TR.memlist {
+        background-color: #f0f0f0; 
+}
+P.formulaDsp { 
+        text-align: center; 
+}
+IMG.formulaDsp {
+}
+IMG.formulaInl { 
+        vertical-align: middle; 
+}
+SPAN.keyword       { color: #008000 }
+SPAN.keywordtype   { color: #604020 }
+SPAN.keywordflow   { color: #e08000 }
+SPAN.comment       { color: #800000 }
+SPAN.preprocessor  { color: #806020 }
+SPAN.stringliteral { color: #002080 }
+SPAN.charliteral   { color: #008080 }
+SPAN.vhdldigit     { color: #ff00ff }
+SPAN.vhdlchar      { color: #000000 }
+SPAN.vhdlkeyword   { color: #700070 }
+SPAN.vhdllogic     { color: #ff0000 }
+
+.mdescLeft {
+        padding: 0px 8px 4px 8px;
+        font-style: italic;
+        font-size: 11px;
+        background-color: #f5f5f5;
+        border-top: 1px none #cccccc;
+        margin: 0px;
+        color: #606060;
+}
+.mdescRight {
+        padding: 0px 8px 4px 8px;
+        font-style: italic;
+        font-size: 11px;
+        background-color: #f5f5f5;
+        border-top: 1px none #cccccc;
+        margin: 0px;
+        color: #606060;
+}
+.memItemLeft {
+        width: 200px;
+        padding: 1px 0px 0px 8px;
+        border-top: 1px #cccccc solid;
+        border-bottom: 1px #f5f5f5 solid;
+        background-color: #f5f5f5;
+}
+.memItemRight {
+        width: 600px;
+        padding: 2px 8px 0px 8px;
+        border-top: 1px #cccccc solid;
+        border-bottom: 2px #f5f5f5 solid;
+        background-color: #f5f5f5;
+}
+.memTemplItemLeft {
+        padding: 0px 0px 0px 8px;
+        border-bottom: 2px #f5f5f5 solid;
+        background-color: #f5f5f5;
+}
+.memTemplItemRight {
+        padding: 0px 8px 0px 8px;
+        border-bottom: 1px #f5f5f5 solid;
+        background-color: #f5f5f5;
+}
+.memTemplParams {
+        font-size: 9px;
+        padding: 2px 0px 0px 8px;
+        border-top: 1px #cccccc solid;
+        border-bottom: 1px #f5f5f5 solid;
+        background-color: #f5f5f5;
+        color: #606060;
+}
+.search { 
+        color: #003399;
+        font-weight: bold;
+}
+FORM.search {
+        margin-bottom: 0px;
+        margin-top: 0px;
+}
+INPUT.search { 
+        color: #000080;
+        font-weight: normal;
+        background-color: #e8eef2;
+}
+TD.tiny { 
+}
+a {
+        color: #204070;
+}
+a:visited {
+        color: #204070;
+}
+.dirtab { 
+        padding: 4px;
+        border-collapse: collapse;
+        border: 1px solid #84b0c7;
+}
+TH.dirtab { 
+        background: #e8eef2;
+        font-weight: bold;
+}
+HR { 
+        height: 1px;
+        border: none;
+        border-top: 1px solid #cccccc;
+}
+
+/* Style for detailed member documentation */
+.memtemplate {
+        color: #606060;
+        font-weight: normal;
+        margin-left: 3px;
+} 
+.memnav { 
+        background-color: #e8eef2;
+        border: 1px solid #84b0c7;
+        text-align: center;
+        margin: 2px;
+        margin-right: 15px;
+        padding: 2px;
+}
+.memitem {
+        /*background-color: #f5f5f5;*.
+        padding: 4px;
+        /*border-width: 1px;
+        border-style: solid;
+        border-color: #dedeee;
+        -moz-border-radius: 8px 8px 8px 8px;*/
+        padding-bottom: 10px;
+}
+.memname {
+        white-space: nowrap;
+        font-weight: bold;
+}
+.memdoc{
+        padding-left: 10px;
+}
+.memproto {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-bottom: 1px #cccccc solid;
+        border-top: 1px #cccccc solid;
+        font-weight: bold;
+}
+.paramkey {
+        text-align: right;
+}
+.paramtype {
+        white-space: nowrap;
+}
+.paramname {
+        color: #602020;
+        font-style: italic;
+        white-space: nowrap;
+}
+/* End Styling for detailed member documentation */
+
+/* for the tree view */
+.ftvtree {
+        font-family: sans-serif;
+        margin:0.5em;
+}
+/* these are for tree view when used as main index */
+.directory { 
+        font-weight: bold; 
+}
+.directory h3 { 
+        margin: 0px; 
+        margin-top: 1em; 
+}
+
+/* The following two styles can be used to replace the root node title */
+/* with an image of your choice.  Simply uncomment the next two styles, */
+/* specify the name of your image and be sure to set 'height' to the */
+/* proper pixel height of your image. */
+
+/* .directory h3.swap { */
+/*      height: 61px; */
+/*      background-repeat: no-repeat; */
+/*      background-image: url("yourimage.gif"); */
+/* } */
+/* .directory h3.swap span { */
+/*      display: none; */
+/* } */
+
+.directory > h3 { 
+        margin-top: 0; 
+}
+.directory p { 
+        margin: 0px; 
+        white-space: nowrap; 
+}
+.directory div { 
+        display: none; 
+        margin: 0px; 
+}
+.directory img { 
+        vertical-align: -30%; 
+}
+/* these are for tree view when not used as main index */
+.directory-alt { 
+        font-size: 100%; 
+        font-weight: bold; 
+}
+.directory-alt h3 { 
+        margin: 0px; 
+        margin-top: 1em; 
+        font-size: 11pt; 
+}
+.directory-alt > h3 { 
+        margin-top: 0; 
+}
+.directory-alt p { 
+        margin: 0px; 
+        white-space: nowrap; 
+}
+.directory-alt div { 
+        display: none; 
+        margin: 0px; 
+}
+.directory-alt img { 
+        vertical-align: -30%; 
+}
+

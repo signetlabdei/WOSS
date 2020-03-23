@@ -1,0 +1,45 @@
+PLEASE NOTE : no super-user credentials are needed for any of these installations.
+
+Requirements
+ 
+  -   Download and install the latest Bellhop program from 
+      http://oalib.hlsresearch.com/Modes/AcousticsToolbox 
+      The directory path that contains the binaries should be in the $PATH environment.
+  -   IF you want to compile NetCDF software features download the latest NetCDF library for C and 
+      the legacy C++ from http://www.unidata.ucar.edu/downloads/netcdf/index.jsp 
+      NetCDF has to be built with support for dynamic libraries and with no support for HDF. 
+      Please refer to NetCDF documentation for comprehensive set of installation instructions. 
+      Please note that the option --prefix is strongly suggested.
+      A simple installation script is given here as example: 
+          - install the NETCDF C library with
+            - ./configure --prefix=<optional_netcdf_install_path> --disable-dap --enable-shared
+            - make check install
+          - install the NETCDF C++ library with
+            - ./configure --prefix=<optional_netcdf_install_path> --enable-shared CPPFLAGS="$CPPFLAGS -I<netcdf_c_src_path>/include" LDFLAGS="$LDFLAGS -L<optional_netcdf_install_path>/lib"
+            - make check install
+  -   IF you want to compile NS-Miracle features download the latest version of NS2 allinone and of NS-Miracle 
+      from the official SVN repository as instructed here:
+      http://telecom.dei.unipd.it/pages/read/58/
+      Read documentation provided in the above link for installation instructions.
+  -   If you want to use WOSS with world data, download and extract the provided databases. 
+      Register yourself and download the GEBCO_08 Grid and/or the GEBCO One Minute Grid database from:
+      http://www.gebco.net/data_and_products/gridded_bathymetry_data/
+      and put it in the same directory.
+
+How to install WOSS library
+
+  1) extract the compressed file in a directory of your choice;
+  2) open a terminal and cd into that directory;
+  3)  run ./autogen.sh 
+  4)  run ./configure with the following options:
+        --with-ns-allinone=<ns2-allinone_path> (optional)
+        --with-nsmiracle=<ns-miracle_path> (optional)
+        --with-netcdf=<NetCDF_installation_path> (optional, the same mentioned in the Requirements section, if NetCDF 
+                                                  was installed with no --prefix, the default path SHOULD be
+                                                  /usr/local)
+        --with-pthread (optional and useless unless a multi-core processor is installed)
+        --prefix=<path_where_libraries_will_be_installed> (optional)
+           this path should be the same one used with NS-Miracle installation.
+           Please refer to NS-Miracle documentation for more info
+  5) run make
+  6) run make install
