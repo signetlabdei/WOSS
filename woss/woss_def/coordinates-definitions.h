@@ -106,8 +106,15 @@ namespace woss {
   **/
   class Coord {
 
-    
-    public: 
+    public:
+
+    static const double COORD_MIN_LATITUDE; ///< Minimum valid Latitude
+
+    static const double COORD_MAX_LATITUDE; ///< Maximum valid Latitude
+
+    static const double COORD_MIN_LONGITUDE; ///< Minimum valid Longitude
+
+    static const double COORD_MAX_LONGITUDE; ///< Maximum valid Longitude
 
     /**
     * Coord constructor.
@@ -123,7 +130,6 @@ namespace woss {
     Coord( const Coord& copy );
 
     virtual ~Coord() { }
-
 
     /**
     * Sets the mean earth radius
@@ -155,8 +161,8 @@ namespace woss {
     * Checks the validity of coordinates provided
     * @return <i>true</i> if coordinates are valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() const { return( latitude >= -90.0 && latitude <= 90.0
-                                        && longitude >= -180.0 && longitude <= 180.0 ); }
+    virtual bool isValid() const { return( latitude >= COORD_MIN_LATITUDE && latitude <= COORD_MAX_LATITUDE
+                                        && longitude >= COORD_MIN_LONGITUDE && longitude <= COORD_MAX_LONGITUDE ); }
 
     /**
     * Gets the latitude value
@@ -195,6 +201,13 @@ namespace woss {
     * @return initial bearing measured in <i>radians</i>
     **/
     double getInitialBearing( const Coord& destination ) const ;
+
+    /**
+    * Gets the final bearing of a trajectory
+    * @param destination destination Coord instance 
+    * @return initial bearing measured in <i>radians</i>
+    **/
+    double getFinalBearing( const Coord& destination ) const ;
 
     /**
     * Gets calculates great-circle distances between the two points – that is, 
@@ -394,7 +407,9 @@ namespace woss {
 
     
     public:
-    
+
+    static const double COORDZ_MIN_DEPTH; ///< Minimum valid depth
+
     /**
     * CoordZ constructor.
     * @param lat <b>decimal degree</b> latitude value. Default value makes the instance <i>not valid</i>
@@ -534,7 +549,7 @@ namespace woss {
     * Checks the validity of coordinates and depth provided
     * @return <i>true</i> if coordinates and depth are valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() const { return( Coord::isValid() && depth >= 0.0 ); }
+    virtual bool isValid() const { return( Coord::isValid() && depth >= COORDZ_MIN_DEPTH ); }
 
 
     /**
@@ -844,7 +859,9 @@ namespace woss {
 
 
   inline ::std::ostream& operator<<(::std::ostream& os, const Coord& x) {
-    os << "Latitude = " << x.latitude << "; Longitude = " << x.longitude;
+    os << "Latitude = " << x.latitude << "; Longitude = " << x.longitude
+       << "; Marsden square = " << x.marsden_square
+       << "; Marsden One Degree square = " << x.marsden_one_degree;
     return os;
   }
 
@@ -889,7 +906,9 @@ namespace woss {
 
 
   inline ::std::ostream& operator<<( ::std::ostream& os, const CoordZ& instance ) {
-    os << "Latitude = " << instance.latitude << "; Longitude = " << instance.longitude << "; Depth = " << instance.depth;
+    os << "Latitude = " << instance.latitude << "; Longitude = " << instance.longitude << "; Depth = " << instance.depth
+       << "; Marsden square = " << instance.marsden_square
+       << "; Marsden One Degree square = " << instance.marsden_one_degree;
     return os;
   }
 

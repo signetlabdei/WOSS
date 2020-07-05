@@ -1,6 +1,6 @@
 # WOSS - World Ocean Simulation System -
 # 
-# Copyright (C) 2009 Federico Guerra 
+# Copyright (C) 2020 Federico Guerra 
 # and regents of the SIGNET lab, University of Padova
 # 
 # Author: Federico Guerra - federico@guerra-tlc.com
@@ -26,18 +26,30 @@
 # whose support is gratefully acknowledged.
 
 
-SUBDIRS = doxy doxy/imgs woss woss/woss_def woss/woss_db woss_phy woss_phy/tcl_hooks samples tests m4
+AM_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @UW_WOSS_PHY_CPPFLAGS@ @NETCDF_CPPFLAGS@ @NETCDF4_CPPFLAGS@ @UW_WOSS_PHY_WARN@
+AM_LDFLAGS  =  @NS_LDFLAGS@  @NSMIRACLE_LDFLAGS@  @UW_WOSS_PHY_LDFLAGS@  @NETCDF_LDFLAGS@  @NETCDF4_LDFLAGS@
+LDADD       =   @NS_LIBADD@   @NSMIRACLE_LIBADD@   @UW_WOSS_PHY_LIBADD@   @NETCDF_LIBADD@   @NETCDF4_LIBADD@
 
-EXTRA_DIST = autogen.sh CHANGELOG COPYRIGHT INSTALL LICENSE ACKNOWLEDGEMENTS doc-woss.cfg
 
-ACLOCAL_AMFLAGS = -I m4
+#TEST_EXTENSIONS = .sh
 
-if NS_MIRACLE_BUILD
-DISTCHECK_CONFIGURE_FLAGS = @NS_ALLINONE_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NSMIRACLE_DISTCHECK_CONFIGURE_FLAGS@  \
-                            @NETCDF_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NETCDF4_DISTCHECK_CONFIGURE_FLAGS@
-else
-DISTCHECK_CONFIGURE_FLAGS = @NETCDF_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NETCDF4_DISTCHECK_CONFIGURE_FLAGS@
-endif 
+# These are the tests programs.
+TESTPROGRAMS = woss-coord-definitions-test-bin
+
+if NETCDF_BUILD
+#TESTPROGRAMS += 
+endif # NETCDF_BUILD
+
+
+check_PROGRAMS = $(TESTPROGRAMS)
+
+TESTS = $(TESTPROGRAMS)
+
+# Here's the source code for the programs.
+woss_coord_definitions_test_bin_SOURCES = woss-test.cpp woss-coord-definitions-test.cpp
+
+#
+#EXTRA_DIST = 
+
+# Cleaning up files created during the process.
+#CLEANFILES =

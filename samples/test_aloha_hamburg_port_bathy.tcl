@@ -148,20 +148,17 @@ WOSS/Creator/Database/NetCDF/Sediment/DECK41 set debug         0
 WOSS/Creator/Database/NetCDF/Sediment/DECK41 set woss_db_debug 0
 
 set db_sedim [new "WOSS/Creator/Database/NetCDF/Sediment/DECK41"]
-# $db_sedim setUpDeck41CoordinatesDb	"${opt(db_path)}/sea_floor/DECK41_coordinates.nc"
-# $db_sedim setUpDeck41MarsdenDb		"${opt(db_path)}/sea_floor/DECK41_mardsen_square.nc"
-# $db_sedim setUpDeck41MarsdenOneDb	"${opt(db_path)}/sea_floor/DECK41_mardsen_one_degree.nc"
-$db_sedim setUpDeck41CoordinatesDb  "${opt(db_path)}/seafloor_sediment/DECK41_coordinates.nc"
-$db_sedim setUpDeck41MarsdenDb      "${opt(db_path)}/seafloor_sediment/DECK41_mardsen_square.nc"
-$db_sedim setUpDeck41MarsdenOneDb   "${opt(db_path)}/seafloor_sediment/DECK41_mardsen_one_degree.nc"
+$db_sedim setDeck41DbTypeV2
+$db_sedim setUpDeck41CoordinatesDb  "${opt(db_path)}/seafloor_sediment/DECK41_V2_coordinates.nc"
+$db_sedim setUpDeck41MarsdenDb      "${opt(db_path)}/seafloor_sediment/DECK41_V2_mardsen_square.nc"
+$db_sedim setUpDeck41MarsdenOneDb   "${opt(db_path)}/seafloor_sediment/DECK41_V2_mardsen_one_degree.nc"
 
 
-WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set debug          0
-WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage set woss_db_debug  0
+WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set debug          0
+WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set woss_db_debug  0
 
-set db_ssp [new "WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage"]
-#$db_ssp setDbPathName "${opt(db_path)}/ssp/standard_depth/2WOA2009_SSP_April.nc"
- $db_ssp setDbPathName "${opt(db_path)}/ssp/2WOA2009_SSP_April.nc"
+set db_ssp [new "WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage"]
+$db_ssp setDbPathName "${opt(db_path)}/ssp/WOA2018/WOA2018_SSP_April.nc"
 
 
 WOSS/Creator/Database/Textual/Bathymetry/UMT_CSV set debug                0

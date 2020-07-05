@@ -46,6 +46,7 @@
 
 #include <sediment-definitions.h>
 #include "woss-db.h"
+#include "sediment-deck41-coord-db.h"
 #if defined (WOSS_NETCDF4_SUPPORT)
 #include <ncVar.h>
 #endif // defined (WOSS_NETCDF4_SUPPORT)
@@ -62,13 +63,22 @@ namespace woss {
 
 
     public:
-      
 
     /**
     * SedimDeck41MarsdenOneDb default constructor. Default constructed object are not valid
     * @param name pathname of database
+    * @param db_type DECK41 db type
     **/
     SedimDeck41MarsdenOneDb( const ::std::string& name = DB_NAME_NOT_SET );
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+    /**
+    * SedimDeck41MarsdenOneDb default constructor. Default constructed object are not valid
+    * @param name pathname of database
+    * @param db_type DECK41 db type
+    **/
+    SedimDeck41MarsdenOneDb( const ::std::string& name, DECK41DbType db_type );
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
     virtual ~SedimDeck41MarsdenOneDb() { }
 
@@ -85,7 +95,9 @@ namespace woss {
     * Checks the validity of SedimDeck41MarsdenOneDb 
     * @return <i>true</i> if pathname is valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() { return( WossNetcdfDb::isValid() && db_name != DB_NAME_NOT_SET ); }
+    virtual bool isValid() { return( WossNetcdfDb::isValid() 
+                                    && db_name != DB_NAME_NOT_SET
+                                   && deck41_db_type != DECK41_DB_INVALID_TYPE ); }
 
 
     /**
@@ -94,7 +106,21 @@ namespace woss {
     **/
     virtual bool finalizeConnection();
 
-    
+#if defined (WOSS_NETCDF4_SUPPORT)
+    /**
+    * Sets the current DECK41 Db type
+    * @param db_type DECK41DbType 
+    **/
+    void setDeck41DbType( DECK41DbType db_type ) { deck41_db_type = db_type; }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+
+    /**
+     * Returns the current DECK41 DB type
+     * @returns current deck41 db type
+     */
+    DECK41DbType getDeck41DbType() const { return deck41_db_type; }
+
+
     protected:
       
 
@@ -115,7 +141,27 @@ namespace woss {
 #else
     NcVar* sec_sedim_var_marsden_one;
 #endif // defined (WOSS_NETCDF4_SUPPORT)
+    /**
+    * NetCDF marsden square variable
+    **/
+#if defined(WOSS_NETCDF4_SUPPORT)
+    netCDF::NcVar marsden_square_var;
+#else
+    NcVar* marsden_square_var;
+#endif // defined(WOSS_NETCDF4_SUPPORT)
+    /**
+    * NetCDF marsden one degree square variable
+    **/
+#if defined(WOSS_NETCDF4_SUPPORT)
+    netCDF::NcVar marsden_one_square_var;
+#else
+    NcVar* marsden_one_square_var;
+#endif // defined(WOSS_NETCDF4_SUPPORT)
 
+    /**
+     * DECK41 database type
+     */
+    DECK41DbType deck41_db_type;
 
   };
 

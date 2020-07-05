@@ -1,11 +1,11 @@
 PLEASE NOTE : no super-user credentials are needed for any of these installations.
 
 The current WOSS version has the following compatibilities:
-  -   Acoustic Toolbox: 31 March 2019
+  -   Acoustic Toolbox: June 2020
   -   HDF5 library: v1.8.13
   -   NetCDF C library: v4.7.3
   -   NetCDF4 C++ library: v4.3.1
-  -   GEBCO databases: 1D and 2D, 2008, 2014 and 2019
+  -   GEBCO databases: 1D and 2D, 2008, 2014, 2019 and 2020
  
 Requirements
  
@@ -47,7 +47,7 @@ Requirements
       http://telecom.dei.unipd.it/pages/read/58/
       Read documentation provided in the above link for installation instructions.
   -   If you want to use WOSS with world data, download and extract the provided databases. 
-      Download the GEBCO 2019 2D Fifteen seconds zip archive from https://www.bodc.ac.uk/data/open_download/gebco/GEBCO_15SEC/zip/
+      Download the GEBCO 2020 2D Fifteen seconds zip archive from https://www.bodc.ac.uk/data/open_download/gebco/gebco_2020/zip/
       or any of the previous datasets from https://www.gebco.net/data_and_products/historical_data_sets
       and put them in the same directory.
 
@@ -56,8 +56,8 @@ How to install WOSS library
 
   1) extract the compressed file in a directory of your choice;
   2) open a terminal and cd into that directory;
-  3) run ./autogen.sh 
-  4) run ./configure with the following options:
+  3) run './autogen.sh' 
+  4) run './configure' with the following options:
         --with-ns-allinone=<ns2-allinone_path> (optional)
         --with-nsmiracle=<ns-miracle_path> (optional)
         --with-netcdf4=<NetCDF4_installation_path> (optional, the same mentioned in the Requirements section, if NetCDF4
@@ -67,5 +67,6 @@ How to install WOSS library
         --prefix=<path_where_libraries_will_be_installed> (optional)
            this path should be the same one used with NS-Miracle installation.
            Please refer to NS-Miracle documentation for more info
-  5) run make
-  6) run make install
+  5) run 'make'
+  6) run 'make check' in order to run WOSS tests
+  6) run 'make install'

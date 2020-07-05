@@ -64,6 +64,7 @@
 
 #ifdef WOSS_NETCDF_SUPPORT
 
+#include <cassert>
 #include <cstdlib>
 #include "sediment-deck41-marsden-db.h" 
 
@@ -71,20 +72,31 @@
 
 using namespace woss;
 
-
-SedimDeck41MarsdenDb::SedimDeck41MarsdenDb( const ::std::string& name ) 
+SedimDeck41MarsdenDb::SedimDeck41MarsdenDb( const ::std::string& name )
 : WossNetcdfDb( name ),
 #if defined (WOSS_NETCDF4_SUPPORT)
   main_sedim_var_marsden(),
-  sec_sedim_var_marsden()
+  sec_sedim_var_marsden(),
+  marsden_square_var(),
 #else
   main_sedim_var_marsden(NULL),
-  sec_sedim_var_marsden(NULL)
+  sec_sedim_var_marsden(NULL),
+  marsden_square_var(NULL),
 #endif // defined (WOSS_NETCDF4_SUPPORT)
+  deck41_db_type(DECK41_DB_V1_TYPE)
 {
-
 }
 
+#if defined (WOSS_NETCDF4_SUPPORT)
+SedimDeck41MarsdenDb::SedimDeck41MarsdenDb( const ::std::string& name, DECK41DbType db_type )
+: WossNetcdfDb( name ),
+  main_sedim_var_marsden(),
+  sec_sedim_var_marsden(),
+  marsden_square_var(),
+  deck41_db_type(db_type)
+{
+}
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
 bool SedimDeck41MarsdenDb::finalizeConnection() {
 #if defined (WOSS_NETCDF4_SUPPORT)
@@ -98,11 +110,18 @@ bool SedimDeck41MarsdenDb::finalizeConnection() {
     ::std::cout << "SedimDeck41MarsdenDb::finalizeConnection() sec_sedim_var_marsden is not valid" << ::std::endl;
     return false;
   }
+  if (deck41_db_type == DECK41_DB_V2_TYPE) {
+    marsden_square_var = netcdf_db->getVar("marsden_square");
+    if (marsden_square_var.isNull()) {
+      ::std::cout << "SedimDeck41MarsdenDb::finalizeConnection() marsden_square_var is not valid" << ::std::endl;
+      return false;
+    }
+  }
   return true;
 #else
   main_sedim_var_marsden = netcdf_db->get_var("seafloor_main_type");
   sec_sedim_var_marsden = netcdf_db->get_var("seafloor_secondary_type");
-  return ( (main_sedim_var_marsden != 0) && (sec_sedim_var_marsden != 0) );
+  return ( (main_sedim_var_marsden != NULL) && (sec_sedim_var_marsden != NULL) );
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 }
 
@@ -114,7 +133,31 @@ Deck41Types SedimDeck41MarsdenDb::getSeaFloorType( const Marsden& marsden_square
   if (debug) ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() marsden square = " << marsden_square << ::std::endl;
 
 #if defined (WOSS_NETCDF4_SUPPORT)
-  ::std::vector<size_t> index_vector (1, (size_t)marsden_square);
+  ::std::vector<size_t> index_vector;
+
+  if (deck41_db_type == DECK41_DB_V2_TYPE) {
+    Marsden mars_square = SEDIMENT_NOT_FOUND;
+
+    index_vector.push_back((size_t)marsden_square - 1);
+
+    marsden_square_var.getVar(index_vector, &mars_square);
+    if (mars_square == SEDIMENT_NOT_FOUND) {
+      ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't extract current mars_square" << ::std::endl;
+      exit(1);
+    }
+
+    if (debug)
+      ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() got mars_square = " << mars_square << ::std::endl;
+
+    assert(mars_square == marsden_square);
+  }
+  else if (deck41_db_type == DECK41_DB_V1_TYPE) {
+    index_vector.push_back((size_t)marsden_square);
+  }
+  else {
+    ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() invalid deck41_db_type = " << (int)deck41_db_type << ::std::endl;
+    exit(1);
+  }
 
   main_sedim_var_marsden.getVar(index_vector, &main_type);
   if (main_type == SEDIMENT_NOT_FOUND) {
@@ -128,39 +171,45 @@ Deck41Types SedimDeck41MarsdenDb::getSeaFloorType( const Marsden& marsden_square
     exit(1);
   }
 #else
-  NcBool ret_val = main_sedim_var_marsden->set_cur(marsden_square);
-  if (!ret_val) {
-    ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't set_cur() of main_sedim_var_coord;" 
-	      << " current marsden = " << marsden_square << ::std::endl;
+  if (deck41_db_type == DECK41_DB_V1_TYPE) {
+    NcBool ret_val = main_sedim_var_marsden->set_cur(marsden_square);
+    if (!ret_val) {
+      ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't set_cur() of main_sedim_var_coord;" 
+                  << " current marsden = " << marsden_square << ::std::endl;
+      exit(1);
+    }
+
+    ret_val = sec_sedim_var_marsden->set_cur(marsden_square); 
+    if (!ret_val) {
+      ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't set_cur() of sec_sedim_var_coord;"
+                  << " current marsden = " << marsden_square << ::std::endl;
+      exit(1);
+    }
+  }
+  else {
+    ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() invalid deck41_db_type = " << (int)deck41_db_type << ::std::endl;
     exit(1);
   }
 
-  ret_val = sec_sedim_var_marsden->set_cur(marsden_square); 
-  if (!ret_val) {
-    ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't set_cur() of sec_sedim_var_coord;"
-	      << " current marsden = " << marsden_square << ::std::endl;
-    exit(1);
-  }
-
-  ret_val = main_sedim_var_marsden->get(&main_type,1);
+  ret_val = main_sedim_var_marsden->get(&main_type, 1);
   if (!ret_val) {
     ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't extract current main_type" << ::std::endl;
     exit(1);
   }
-  
-  ret_val = sec_sedim_var_marsden->get(&secondary_type,1);
+
+  ret_val = sec_sedim_var_marsden->get(&secondary_type, 1);
   if (!ret_val) {
     ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() Couldn't extract current secondary_type" << ::std::endl;
     exit(1);
   }
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 
-  if (debug) ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() marsden = " << marsden_square << "; main type = " << main_type 
-		        << "; secondary type = " << secondary_type << ::std::endl;
+  if (debug) {
+    ::std::cout << "SedimDeck41MarsdenDb::getSeaFloorType() marsden = " << marsden_square << "; main type = " << main_type 
+                << "; secondary type = " << secondary_type << ::std::endl;
+  }
 
-  return( ::std::make_pair( main_type, secondary_type ) );    
+  return( ::std::make_pair( main_type, secondary_type ) );
 }
-
-
 #endif // WOSS_NETCDF_SUPPORT
 

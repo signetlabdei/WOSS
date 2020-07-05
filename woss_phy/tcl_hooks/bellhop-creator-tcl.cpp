@@ -81,7 +81,8 @@ BellhopCreatorTcl::BellhopCreatorTcl()
   bind( "frequency_step", &ccfrequency_step.accessAllLocations());
   bind( "evolution_time_quantum", &ccevolution_time_quantum.accessAllLocations());
   bind( "total_runs", &cctotal_runs.accessAllLocations());
-  bind( "bellhop_arr_syntax", &bellhop_arr_syntax_); 
+  bind( "bellhop_arr_syntax", &bellhop_arr_syntax_);
+  bind( "bellhop_shd_syntax", &bellhop_shd_syntax_); 
   
   if ( ccfrequency_step.accessAllLocations() <= 0.0 ) ccfrequency_step.accessAllLocations() = WOSS_CREATOR_MAX_FREQ_STEP;
   
@@ -89,7 +90,7 @@ BellhopCreatorTcl::BellhopCreatorTcl()
   debug = (bool) debug_;
   woss_clean_workdir = (bool) woss_clean_workdir_;
   bellhop_arr_syntax = (BellhopArrSyntax) bellhop_arr_syntax_;
-  
+  bellhop_shd_syntax = (BellhopShdSyntax) bellhop_shd_syntax_;
   updateDebugFlag();  
 }
 

@@ -95,14 +95,30 @@ DefHandler& DefHandler::operator=( const DefHandler& copy ) {
     
     
 DefHandler::~DefHandler() {
-  delete ssp_creator;
-  delete sediment_creator;
-  delete pressure_creator;
-  delete time_arr_creator;
-  delete time_reference;
-  delete rand_generator;
-  delete transducer;
-  delete altimetry_creator;
+  if (ssp_creator != NULL) {
+    delete ssp_creator;
+  }
+  if (sediment_creator != NULL) {
+    delete sediment_creator;
+  }
+  if (pressure_creator != NULL) {
+    delete pressure_creator;
+  }
+  if (time_arr_creator != NULL) {
+    delete time_arr_creator;
+  }
+  if (time_reference != NULL) {
+    delete time_reference;
+  }
+  if (rand_generator != NULL) {
+    delete rand_generator;
+  }
+  if (transducer != NULL) {
+    delete transducer;
+  }
+  if (altimetry_creator != NULL) {
+    delete altimetry_creator;
+  }
 }
 
 

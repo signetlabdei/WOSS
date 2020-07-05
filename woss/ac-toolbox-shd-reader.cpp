@@ -43,6 +43,7 @@
 #include <cassert>
 #include <cstdlib>
 #include "woss.h"
+#include "bellhop-woss.h"
 #include <definitions-handler.h>
 #include "ac-toolbox-shd-reader.h"
 
@@ -223,18 +224,33 @@ bool ShdResReader::getShdFile()
   
   if(!file_reader) return false;
 
+  const BellhopWoss* bwoss_ptr = dynamic_cast<const BellhopWoss*>(woss_ptr);
+  assert( NULL != bwoss_ptr );
+
   float* press = new float[2*shd_file.Nrr];
+
+  if (woss_ptr->usingDebug())
+    ::std::cout << "ShdResReader(" << woss_ptr->getWossId() << ")::getShdFile() syntax " 
+                << (int)bwoss_ptr->getBellhopShdSyntax() << ::std::endl;
 
   for (int itheta = 0; itheta < shd_file.Ntheta; itheta++) {
 
     for (int isd = 0; isd < shd_file.Nsd; isd++) {
 
-      if (woss_ptr->usingDebug()) ::std::cout << "ShdResReader(" << woss_ptr->getWossId() << ")::getShdFile() Reading data for source " << isd << " of " 
+      if (woss_ptr->usingDebug()) 
+        ::std::cout << "ShdResReader(" << woss_ptr->getWossId() << ")::getShdFile() Reading data for source " << isd << " of " 
                                        << shd_file.Nsd << ::std::endl;
 
       for (int ird = 0; ird < shd_file.Nrd; ird++) {
 
-        int recnum = 7 + itheta * shd_file.Nsd * shd_file.Nrx_per_range + isd * shd_file.Nrx_per_range + ird;
+        int recnum = itheta * shd_file.Nsd * shd_file.Nrx_per_range + isd * shd_file.Nrx_per_range + ird;
+
+        if (bwoss_ptr->getBellhopShdSyntax() == BELLHOP_CREATOR_SHD_FILE_SYNTAX_0) {
+          recnum += 7;
+        }
+        else if (bwoss_ptr->getBellhopShdSyntax() == BELLHOP_CREATOR_SHD_FILE_SYNTAX_1) {
+          recnum += 10;
+        }
 
         file_reader.seekg( recnum * 4 * shd_file.record_length, ::std::ios_base::beg ); //Move to end of previous record
         if ( !file_reader.good()) {
