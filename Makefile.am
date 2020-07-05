@@ -26,7 +26,7 @@
 # whose support is gratefully acknowledged.
 
 
-SUBDIRS = doxy doxy/imgs woss woss/woss_def woss/woss_db woss_phy woss_phy/tcl_hooks samples m4
+SUBDIRS = doxy doxy/imgs woss woss/woss_def woss/woss_db woss_phy woss_phy/tcl_hooks samples tests m4
 
 EXTRA_DIST = autogen.sh CHANGELOG COPYRIGHT INSTALL LICENSE ACKNOWLEDGEMENTS doc-woss.cfg
 

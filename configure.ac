@@ -26,7 +26,7 @@
 # whose support is gratefully acknowledged.
 
 
-AC_INIT([WOSS], [1.10.0], [woss@guerra-tlc.com])
+AC_INIT([WOSS], [1.12.0], [woss@guerra-tlc.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_MSG_NOTICE([WOSS AC_PACKAGE_VERSION])
@@ -60,7 +60,7 @@ AC_CHECK_NETCDF([have_netcdf=yes],[have_netcdf=no])
 
 AC_ARG_WITH_NETCDF4
 AC_CHECK_NETCDF4([have_netcdf4=yes],[have_netcdf4=no])
-#if test x$have_netcdf != xyes ; then
+#if test x$have_netcdf4 != xyes ; then
 #  AC_MSG_ERROR([Could not find netcdf,
 #    is --with-netcdf4 set correctly?])
 #fi  
@@ -146,6 +146,8 @@ AC_SUBST(UW_WOSS_PHY_LIBADD)
 
 AM_CONDITIONAL([NS_MIRACLE_BUILD], [test "x$have_nsmiracle" = xyes -a "x$have_nsallinone" = xyes])
 
+AM_CONDITIONAL([NETCDF_BUILD], [test "x$have_netcdf" = xyes -o "x$have_netcdf4" = xyes])
+
 AC_DEFINE(CPP_NAMESPACE,std)
 
 AC_MSG_NOTICE([generating header files and makefiles])
@@ -160,6 +162,7 @@ AC_CONFIG_FILES([Makefile
                             samples/Makefile
                             woss_phy/Makefile
                             woss_phy/tcl_hooks/Makefile
+                            tests/Makefile
                             ])
 		
 AC_OUTPUT()

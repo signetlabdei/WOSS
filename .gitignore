@@ -6,6 +6,7 @@
 .vscode*
 ***/Makefile.in
 ***/aclocal.m4
+***/test-driver
 ***/ar-lib
 ***/autom4te.cache/
 ***/compile
@@ -36,3 +37,4 @@
 ***/*.dirstamp
 woss_phy/woss-phy-embeddedtcl.cc
 woss/WossWOADbCreator
+tests/*bin

@@ -64,14 +64,14 @@ namespace woss {
   static const double SSP_WOA2005_STD_MAX_LAT = 89.5; /**< Custom made NetCDF WOA2005 SSP maximum latitude */
 
 
-  static const double SSP_WOA2005_STD_MIN_LONG = -179.5; /**< Custom made NetCDF WOA2005 SSP mimimum longitude */
+  static const double SSP_WOA2005_STD_MIN_LON = -179.5; /**< Custom made NetCDF WOA2005 SSP mimimum longitude */
 
-  static const double SSP_WOA2005_STD_MAX_LONG = 179.5; /**< Custom made NetCDF WOA2005 SSP maximum longitude */
+  static const double SSP_WOA2005_STD_MAX_LON = 179.5; /**< Custom made NetCDF WOA2005 SSP maximum longitude */
 
 
   static const double SSP_WOA2005_STD_START_LAT = 89.5; /**< Custom made NetCDF WOA2005 SSP start latitude */
 
-  static const double SSP_WOA2005_STD_START_LONG = -179.5; /**< Custom made NetCDF WOA2005 SSP start longitude */
+  static const double SSP_WOA2005_STD_START_LON = -179.5; /**< Custom made NetCDF WOA2005 SSP start longitude */
 
   
   static const int SSP_WOA2013_STD_NLAT = 720; /**< Custom made NetCDF WOA2013 SSP total number of latitudes */
@@ -110,8 +110,8 @@ namespace woss {
   typedef ::std::pair< int, int > SSPIndexes;
 
   enum WOADbType {
-    WOA_DB_TYPE_2005 = 0, ///< 2005 and 2009 NetCDF Classic Db type
-    WOA_DB_TYPE_2013 = 1, ///< 2013 NetCDF4 Db type
+    WOA_DB_TYPE_2005 = 0, ///< 2005 and 2009 NetCDF Db type, 1 degree resolution
+    WOA_DB_TYPE_2013 = 1, ///< 2013, 2001 and 2018 NetCDF4 Db type, 0.25 degree resolution
     WOA_DB_TYPE_INVALID ///< Must always be the last
   };
 

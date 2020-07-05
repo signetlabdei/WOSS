@@ -98,7 +98,37 @@ int SedimDeck41DbCreatorTcl::command(int argc, const char*const* argv) {
       db_marsden_one_name = argv[2];
 
       return TCL_OK;
-    }   
+    }
+  }
+  else if (argc == 2) {
+    if(strcasecmp(argv[1], "setDeck41DbTypeV1") == 0) {
+      if (debug) ::std::cout << "SedimDeck41DbCreatorTcl::command() setDeck41DbTypeV1 called"  << ::std::endl;
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+      deck41_db_type = DECK41_DB_V1_TYPE;
+
+      return TCL_OK;
+#else
+      ::std::cerr << "setDeck41DbTypeV2 can't be executed. NETCDF4 support was not enabled!" 
+                  << ::std::endl;
+
+      return TCL_ERROR;
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+    }
+    else if(strcasecmp(argv[1], "setDeck41DbTypeV2") == 0) {
+      if (debug) ::std::cout << "SedimDeck41DbCreatorTcl::command() setDeck41DbTypeV2 called"  << ::std::endl;
+
+#if defined (WOSS_NETCDF4_SUPPORT)
+      deck41_db_type = DECK41_DB_V2_TYPE;
+
+      return TCL_OK;
+#else
+      ::std::cerr << "setDeck41DbTypeV2 can't be executed. NETCDF4 support was not enabled!" 
+                  << ::std::endl;
+
+      return TCL_ERROR;
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+    }
   }
   return( TclObject::command(argc,argv) );
 }

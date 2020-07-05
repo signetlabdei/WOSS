@@ -125,3 +125,12 @@ v1.9.0 - added support for NetCDF4 and HDF5, which is required in order to open_
 
 v1.10.0 - Added support for SSP NetCDF4 databases generated from WOA2013 dataset.
         - Fix for Bellhop quad SSP scenario
+
+v1.11.0 - Added support for SSP NetCDF4 databases generated from WOA2018 and WOA2001 dataset.
+        - Fix for woss::BellhopWoss ray angles env file write operation.
+        - Added support for Bellhop latest shade file reader syntax.
+
+v1.12.0 - Added support for DECK41V2 databases in NetCDF4 format with revised data format.
+        - Added support for GEBCO 2020 database.
+        - Added support for autotools tests, installation procedure has been updated.
+        - Fix for woss::BellhopWoss SSP max depth

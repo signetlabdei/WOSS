@@ -131,7 +131,7 @@ namespace woss {
     * @param name string name
     * @return reference to <b>*this</b>
     **/
-    Sediment& setType( ::std::string name ) { type = name; return *this; }
+    Sediment& setType( const ::std::string& name ) { type = name; return *this; }
 
     /**
     * Sets compressional wave velocity
@@ -186,7 +186,7 @@ namespace woss {
     * @param bottom_depth bottom depth ( > 0 ) [m] 
     * @return reference to <b>*this</b>
     **/
-    Sediment& set( ::std::string name, double velc, double vels, double dens, double attc , double atts, double bottom_depth ) { 
+    Sediment& set( const ::std::string& name, double velc, double vels, double dens, double attc , double atts, double bottom_depth ) { 
                         type = name; vel_c = velc; vel_s = vels, density = dens;
                         att_c = attc; att_s = atts; depth = bottom_depth; return *this; }
 

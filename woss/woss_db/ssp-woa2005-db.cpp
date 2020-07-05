@@ -130,7 +130,7 @@ SSPIndexes SspWoa2005Db::getSSPIndexes( const Coord& coordinates ) const {
   double lon = floor(coordinates.getLongitude()) + 0.5;
 
   int quantized_latitude = (int) ::std::abs(lat - SSP_WOA2005_STD_MAX_LAT);
-  int quantized_longitude = (int) (lon + SSP_WOA2005_STD_MAX_LONG);
+  int quantized_longitude = (int) (lon + SSP_WOA2005_STD_MAX_LON);
 
   if (debug) ::std::cout << "SspWoa2005Db::getSSPIndexes() 2005 latitude = " << coordinates.getLatitude() << "; longitude = " 
                         << coordinates.getLongitude() << "; lat = " << lat << "; lon = " << lon 

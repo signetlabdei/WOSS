@@ -242,7 +242,7 @@ namespace woss {
     void clear() { altimetry_map.clear(); }
     
 
-/**
+   /**
     * Sets debug flag for all instances
     * @param flag debug bool
     **/

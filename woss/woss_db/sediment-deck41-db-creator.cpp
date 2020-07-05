@@ -49,7 +49,8 @@ using namespace woss;
 SedimDeck41DbCreator::SedimDeck41DbCreator()
 : db_coord_name(),
   db_marsden_name(),
-  db_marsden_one_name()
+  db_marsden_one_name(),
+  deck41_db_type(DECK41_DB_V1_TYPE)
 {
 
 }
@@ -74,12 +75,15 @@ bool SedimDeck41DbCreator::initializeSedimDb( SedimDeck41Db* const woss_db ) {
   bool valid = true;
   
   woss_db->sediment_coord_db.setDbName( db_coord_name );
+  woss_db->sediment_coord_db.setDeck41DbType( deck41_db_type );
   valid = valid && initializeDb( & woss_db->sediment_coord_db );
   
   woss_db->sediment_marsden_db.setDbName( db_marsden_name );
+  woss_db->sediment_marsden_db.setDeck41DbType( deck41_db_type );
   valid = valid && initializeDb( & woss_db->sediment_marsden_db );
   
   woss_db->sediment_marsden_one_db.setDbName( db_marsden_one_name );
+  woss_db->sediment_marsden_one_db.setDeck41DbType( deck41_db_type );
   valid = valid && initializeDb( & woss_db->sediment_marsden_one_db );
   
   return valid;

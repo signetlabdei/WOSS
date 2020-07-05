@@ -232,14 +232,22 @@ void BellhopWoss::normalizeDbSSP() {
   bool is_normalized_matrix = ( min_ssp_depth_set.size() == 1 && max_ssp_depth_set.size() == 1 
                              && min_ssp_depth_steps == max_ssp_depth_steps );
 
-  if ( is_ssp_vector_transformable ) {
-    min_normalized_ssp_depth = ::std::min( min_altimetry_depth, *( min_ssp_depth_set.begin() ) );
-    max_normalized_ssp_depth = ::std::max( max_bathy_depth, *( max_ssp_depth_set.rbegin() ) );
+  if (debug) ::std::cout << "BellhopWoss::normalizeDbSSP() is_ssp_vector_transformable = " << is_ssp_vector_transformable
+                         << "; transform_ssp_depth_steps = " << transform_ssp_depth_steps 
+                         << "; is_normalized_matrix = " << is_normalized_matrix << ::std::endl;
 
-//     ::std::cout.precision(18);
+  if ((is_ssp_vector_transformable == true) && (transform_ssp_depth_steps > 0)) {  
+    min_normalized_ssp_depth = ::std::min( min_altimetry_depth, *( min_ssp_depth_set.begin() ) );
+
+    if (max_bathy_depth <= *( max_ssp_depth_set.rbegin()))
+      max_normalized_ssp_depth = max_bathy_depth;
+    else
+      max_normalized_ssp_depth = *( max_ssp_depth_set.rbegin());
+
     if (debug) ::std::cout << "BellhopWoss::normalizeDbSSP() min norm ssp depth = " << min_normalized_ssp_depth
                            << "; min alt depth = " << min_altimetry_depth 
-                           << "; max_normalized_ssp_depth " << max_normalized_ssp_depth << ::std::endl;
+                           << "; max_normalized_ssp_depth " << max_normalized_ssp_depth 
+                           << "; max_bathy_depth = " << max_bathy_depth << ::std::endl;
     
     for ( ::std::set<int>::iterator it = ssp_unique_indexes.begin(); it != ssp_unique_indexes.end(); it++) {
       normalized_ssp_map[range_vector[*it]] = ssp_vector[*it]->transform( tx_coordz, min_normalized_ssp_depth, max_normalized_ssp_depth, transform_ssp_depth_steps);
@@ -778,7 +786,7 @@ bool BellhopWoss::initTimeArrResReader( double curr_frequency ) {
 bool BellhopWoss::run() { 
   is_running = true;
   
-  assert(bellhop_arr_syntax != BELLHOP_CREATOR_ARR_FILE_INVALID);
+  assert((bellhop_arr_syntax != BELLHOP_CREATOR_ARR_FILE_INVALID) && (bellhop_shd_syntax != BELLHOP_CREATOR_SHD_FILE_INVALID));
 
   ::std::stringstream str_out;
   

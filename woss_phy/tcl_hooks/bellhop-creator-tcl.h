@@ -165,6 +165,8 @@ namespace woss {
     double woss_clean_workdir_;
     
     int bellhop_arr_syntax_;
+
+    int bellhop_shd_syntax_;
     
   };
 

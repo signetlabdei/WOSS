@@ -59,15 +59,25 @@ namespace woss {
   typedef NormSSPMap::const_reverse_iterator NSMCRIter;
 
   /*
-    * .arr file syntax to be used during parsing
-    */
+   * .arr file syntax to be used during parsing
+   */
   enum BellhopArrSyntax {
     BELLHOP_CREATOR_ARR_FILE_SYNTAX_0 = 0, ///< Pre 31 august 2016 syntax, without imaginary time delay
     BELLHOP_CREATOR_ARR_FILE_SYNTAX_1, ///< Post 31 August 2016 syntax, with imaginary time delay
     BELLHOP_CREATOR_ARR_FILE_SYNTAX_2, ///< Post 31 March 2019 syntax, with different header syntax
     BELLHOP_CREATOR_ARR_FILE_INVALID ///< invalid syntax, must always be the last element
   };
-  
+
+
+  /*
+   * .shd file syntax to be used during parsing
+   */
+  enum BellhopShdSyntax {
+    BELLHOP_CREATOR_SHD_FILE_SYNTAX_0 = 0,
+    BELLHOP_CREATOR_SHD_FILE_SYNTAX_1,
+    BELLHOP_CREATOR_SHD_FILE_INVALID ///< invalid syntax, must always be the last element
+  };
+
   /**
   * \brief Implempentation of ACToolboxWoss for Bellhop raytracing program
   *
@@ -269,6 +279,13 @@ namespace woss {
     BellhopWoss& setBellhopArrSyntax( BellhopArrSyntax syntax ) { bellhop_arr_syntax = syntax; return *this; }
     
     /**
+    * Sets the bellhop shd file syntax
+    * @param syntax syntax to be used
+    * @return reference to <b>*this</b>
+    */
+    BellhopWoss& setBellhopShdSyntax( BellhopShdSyntax syntax ) { bellhop_shd_syntax = syntax; return *this; }
+    
+    /**
     * Sets the beam option string . See Bellhop documentation for more info
     * @param options beam options ( G, C, R , B)
     * @return reference to <b>*this</b>
@@ -440,7 +457,13 @@ namespace woss {
     * @return arr file syntax
     */
     BellhopArrSyntax getBellhopArrSyntax() const { return bellhop_arr_syntax; }
-    
+
+   /**
+    * Gets the .shd file sintax
+    * @return shd file syntax
+    */
+    BellhopShdSyntax getBellhopShdSyntax() const { return bellhop_shd_syntax; }
+
     /**
     * Gets the beam option string
     * @returns "R" , "B", "C" or "G" 
@@ -578,6 +601,11 @@ namespace woss {
      * .arr file syntax to be used during file parsing
      */
     BellhopArrSyntax bellhop_arr_syntax;
+
+    /**
+     * .shd file syntax to be used during file parsing
+     */
+    BellhopShdSyntax bellhop_shd_syntax;
     
     /**
     * Current working path
@@ -672,7 +700,7 @@ namespace woss {
     
     
     /**
-    * transformed SSP depth steps
+    * transformed SSP depth steps. Set <= 0 in order to disable the feature.
     **/ 
     int transform_ssp_depth_steps;
 
@@ -941,7 +969,7 @@ namespace woss {
     
     f_out << "\'" << ::std::setw(30) << "! RAY OPTIONS" << ::std::endl 
           << total_rays << ::std::setw(30) << "! NUMBER OF RAYS" << ::std::endl
-          << min_angle << ::std::setw(4) << max_angle << ::std::setw(4) << "/" << ::std::setw(30) << "! START, END ANGLES" << ::std::endl;   
+          << min_angle << "  " << max_angle << "  " << "/" << ::std::setw(30) << "! START, END ANGLES" << ::std::endl;   
   }
 
 

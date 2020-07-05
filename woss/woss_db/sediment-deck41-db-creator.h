@@ -44,6 +44,7 @@
 #ifdef WOSS_NETCDF_SUPPORT
 
 #include "woss-db-creator.h"
+#include "sediment-deck41-coord-db.h"
 
 
 namespace woss {
@@ -79,45 +80,50 @@ namespace woss {
 
 
     void setDeck41CoordPathName( const ::std::string& name ) { db_coord_name = name; }
-    
+
     void setDeck41MarsdenPathName( const ::std::string& name ) { db_marsden_name = name; }
 
     void setDeck41MarsdenOnePathName( const ::std::string& name ) { db_marsden_one_name = name; }
 
+#if defined (WOSS_NETCDF4_SUPPORT)
+    void setDeck41DbType( DECK41DbType db_type ) { deck41_db_type = db_type; }
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
-    ::std::string getDeck41CoordPathName() { return db_coord_name; }
-    
-    ::std::string getDeck41MarsdenPathName() { return db_marsden_name; }
+    ::std::string getDeck41CoordPathName() const { return db_coord_name; }
 
-    ::std::string getDeck41MarsdenOnePathName() { return db_marsden_one_name; }
-    
-    
+    ::std::string getDeck41MarsdenPathName() const { return db_marsden_name; }
+
+    ::std::string getDeck41MarsdenOnePathName() const { return db_marsden_one_name; }
+
+    DECK41DbType getDeck41DbType() const { return deck41_db_type; }
+
+
     protected:
-    
-      
+
     ::std::string db_coord_name;
-    
+
     ::std::string db_marsden_name;
-    
+
     ::std::string db_marsden_one_name;
-    
-    
+
+    /**
+     * DECK41 database type
+     */
+    DECK41DbType deck41_db_type;
+
     /**
     * Initializes the pointed object
     * @param woss_db pointer to a recently created SedimDeck41Db
     * @return <i>true</i> if the method succeed, <i>false</i> otherwise
     **/   
     virtual bool initializeDb( WossDb* woss_db );
-    
-    
+
     /**
     * Initializes the pointed object
     * @param woss_db pointer to a recently created SedimDeck41Db
     * @return <i>true</i> if the method succeed, <i>false</i> otherwise
     **/ 
     bool initializeSedimDb( SedimDeck41Db* const woss_db );
-    
-
   };
 
   

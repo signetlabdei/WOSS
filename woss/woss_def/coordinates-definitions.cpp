@@ -49,6 +49,13 @@ using namespace woss;
 
 double Coord::earth_radius = 6371000.0;
 
+const double Coord::COORD_MIN_LATITUDE = -90.0;
+
+const double Coord::COORD_MAX_LATITUDE = 90.0;
+
+const double Coord::COORD_MIN_LONGITUDE = -180.0;
+
+const double Coord::COORD_MAX_LONGITUDE = 180.0;
 
 Coord::Coord( double lat, double lon ) 
 : latitude(lat),
@@ -81,27 +88,45 @@ void Coord::updateMarsdenCoord() {
   marsden_one_degree =(int)( (floor(std::abs(lat)) - floor(std::abs(lat)/10.0)*10.0)*10.0 + (floor(std::abs(lon)) - floor(std::abs(lon)/10.0)*10.0));
 
   if (( lat >= 0.0) && (lat < 80.0) ) {
-    if (lon > 0.0) lon -=360.0;
-    lon = std::abs(lon); 
+    if (lon > 0.0) 
+      lon -= 360.0;
+    lon = std::abs(lon);
     int quoz_lat = (int)floor(lat / 10.0);
     int quoz_long = (int)ceil(lon / 10.0);
+    // marsden square's longitude should be in range (N, N+10]
+    double rem_lon = fmod(lon, 10.0);
+    if (rem_lon == 0)
+      quoz_long += 1;
+
     marsden_square = quoz_lat * 36 + quoz_long;
   }
   else if (lat >= 80.0) {
-    if (lon > 0.0) lon -=360.0;
+    if (lon > 0.0) 
+      lon -= 360.0;
     lon = std::abs(lon); 
     int quoz_long = (int)ceil(lon / 10.0);
+    // marsden square's longitude should be in range (N, N+10]
+    double rem_lon = fmod(lon, 10.0);
+    if (rem_lon == 0)
+      quoz_long += 1;
     marsden_square = 900 + quoz_long;
   }
   else {
-    if (lon > 0.0) lon -=360.0;
+    if (lon > 0.0) 
+      lon -= 360.0;
     lon = std::abs(lon); 
     lat = std::abs(lat);
     int quoz_lat = (int)floor(lat / 10.0);
     int quoz_long = (int)floor(lon / 10.0);
+
+    // marsden square of S latitude should be in range (N, N+10]
+    double rem_lat = fmod(lat, 10.0);
+    if (rem_lat == 0)
+      quoz_lat -= 1;
+
     marsden_square = 300 + quoz_lat * 36 + quoz_long;
   }
-} 
+}
 
 
 double Coord::getInitialBearing( const Coord& destination ) const {
@@ -114,7 +139,21 @@ double Coord::getInitialBearing( const Coord& destination ) const {
   double y = sin(dLon) * cos(lat2);
   double x = cos(lat1)* sin(lat2) - sin(lat1)* cos(lat2) * cos(dLon);
 
-  return( atan2(y, x) );
+  double bearing = atan2(y, x);
+  // normalize to 0 -> 360
+  bearing += 2.0 * M_PI;
+  bearing = fmod(bearing, 2.0 * M_PI);
+
+  return bearing;
+}
+
+double Coord::getFinalBearing( const Coord& destination ) const {
+  double init_bear = destination.getInitialBearing(*this);
+
+  double fin_bear = init_bear + M_PI;
+  fin_bear = fmod(fin_bear, 2.0 * M_PI);
+
+  return fin_bear;
 }
 
 
@@ -148,9 +187,11 @@ const Coord Coord::getCoordFromBearing( const Coord& destination, double bearing
 
   double ret_lat = lat2 * 180.0 / M_PI;
   double ret_long = lon2 * 180.0 / M_PI;
+
+  ret_long = fmod((ret_long + 540.0), 360.0) - 180.0;
+
   if (ret_lat > 90.0) ret_lat -= 180.0;
-  if (ret_long > 180.0) ret_long -= 360.0;
-     
+
   return( Coord(ret_lat, ret_long) );
 }
 
@@ -282,6 +323,7 @@ Coord& woss::operator-=( Coord& left, const Coord& right ) {
   return left;
 }
 
+const double CoordZ::COORDZ_MIN_DEPTH = 0.0;
 
 CoordZ::CoordZ(double lat, double lon, double d) 
   : Coord(lat,lon),
