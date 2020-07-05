@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.10.0
+ * @version 1.11.0
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -34,14 +34,15 @@
  * deep sound channels, convergence zones, shadow zones, and so on, see [3]), the Bathymetric Profile (BP) 
  * and the type of Bottom Sediments (BS, required to model acoustic power losses due to bottom reflections). 
  * In this respect, WOSS offers a technology independent database API and a number of classes to manipulate SSP, 
- * BP and BS data. For the SSP, it employs a custom implementation of the World Ocean Database [6], 
- * a collection of SSPs measured during a number of experiments around the world; the measurements are divided
+ * BP and BS data. For the SSP, it employs a custom implementation of the World Ocean Database [7-11], 
+ * a collection of SSPs calculated with the TEOS-10 [6] exact formula based on the depth, temperature and salinity data
+ * measured during a number of experiments around the world; the measurements are divided
  * by location and day or season of the year when the measurement was performed (recall that sound propagation 
  * is affected by water temperature, which in turn undergoes seasonal changes, especially in the superficial layer).
- * The bathymetry data have been taken from the General Bathymetric Chart of the Oceans [7], a public database 
+ * The bathymetry data have been taken from the General Bathymetric Chart of the Oceans [12], a public database 
  * offering samples of the depth of the sea bottom with an angular spacing of 30 seconds of arc. 
  * Finally, the type of bottom sediments is provided by a geo-acoustic analysis of the 
- * National Geophysical Data Center's Deck41 data-base [8].
+ * National Geophysical Data Center's Deck41 data-base [13].
  *
  * Thanks to this automation the user only has to specify the location in the world and the time where 
  * the simulation should take place. This is done by setting the simulated date and the wanted latitude 
@@ -149,18 +150,21 @@
  * <ul>
  *    <li> interface implementation for the Bellhop ray tracing program [4], [woss::BellhopWoss, 
  *         woss::BellhopCreator];
- *    <li> interface implementation and custom NetCDF db of monthly averaged SSPs taken 
- *         from the World Ocean Atlas database of 2009 [6] and 2013 [7], [woss::SspWoa2005Db, woss::SspWoa2005DbCreator];
+ *    <li> interface implementation and custom NetCDF db of monthly averaged SSPs, 
+ *         calculated with the TEOS-10 exact formula [6] based on the temperature, salinity and depth data taken 
+ *         from the World Ocean Atlas database of 2001 [7], 2005 [8], 2009 [9], 2013 [10] and 2018 [11] 
+ *         [woss::SspWoa2005Db, woss::SspWoa2005DbCreator];
  *    <li> interface implementation for the GEBCO NetCDF bathymetry databases 
- *         (all versions: 1D, 2D, 2008, 2014, 2019) [8], [woss::BathyGebcoDb, woss::BathyGebcoDbCreator];
+ *         (all versions: 1D, 2D, 2008, 2014, 2019) [12], [woss::BathyGebcoDb, woss::BathyGebcoDbCreator];
  *    <li> interface implementation and custom NetCDF data analysis taken from the DECK41 database, 
- *         for bottom sediments composition [9], [woss::SedimDeck41Db, woss::SedimDeck41DbCreator, woss::SedimDeck41CoordDb,
+ *         for bottom sediments composition [13], [woss::SedimDeck41Db, woss::SedimDeck41DbCreator, woss::SedimDeck41CoordDb,
  *         woss::SedimDeck41MarsdenDb, woss::SedimDeck41MarsdenOneDb];
  *    <li> A <b>multi-threaded</b> version that allows the parallel execution of multiple channel simulators
  *         [woss::WossManagerResDbMT];
  *    <li> a database of real acoustic transducers made from publicly avalaible datasheets;
  *    <li> an implementation of the Bretschneider sea surface wave spectrum for altimetry simulations;
  *    <li> support for time evolution, to account for channel variability.
+ *    <li> 
  * </ul>
  * @see \ref database for further info on custom database, \ref transducer_page for further info on transducers, \ref altimetry for further info on altimetry models, \ref time_evo for further info on time evolution modeling.
  *
@@ -174,12 +178,15 @@
  *    <li> F. Jensen, W. Kuperman, M. Porter, and H. Schmidt, <i>Computational Ocean Acoustics</i>. Springer-Verlag, 2000.
  *    <li> Bellhop code, http://oalib.hlsresearch.com/Rays/index.html .
  *    <li> P. C. Etter, <i>Underwater acoustic modeling and simulation</i>. Spon Press, Taylor & Francis group, 2003.
- *    <li> World ocean atlas 2009, http://www.nodc.noaa.gov/OC5/WOA09/pr_woa09.html .
- *    <li> World ocean atlas 2013, https://www.nodc.noaa.gov/OC5/woa13/ .
+ *    <li> TEOS-10 source code http://www.TEOS-10.org .
+ *    <li> World Ocean Atlas 2001, https://www.nodc.noaa.gov/OC5/WOA01/pr_woa01.html .
+ *    <li> World Ocean Atlas 2005, https://www.nodc.noaa.gov/OC5/WOA05/pr_woa05.html .
+ *    <li> World Ocean Atlas 2009, https://www.nodc.noaa.gov/OC5/WOA09/pr_woa09.html .
+ *    <li> World Ocean Atlas 2013, https://www.nodc.noaa.gov/OC5/woa13/ .
+ *    <li> World Ocean Atlas 2018, https://www.nodc.noaa.gov/OC5/woa18/ .
  *    <li> General bathymetric chart of the oceans, http://www.gebco.net .
  *    <li> National geophysical data center, seafloor surficial sediment descriptions,
  *         http://www.ngdc.noaa.gov/mgg/geology/deck41.html .
- *    <li> TEOS-10 source code http://www.TEOS-10.org .
  * </ol> 
 **/
 
@@ -194,9 +201,10 @@
  * @see woss::BathyGebcoDb, woss::BathyGebcoDbCreator
  *
  *
- * \section ssp_db World Ocean Atlas 2009 SSP Database
+ * \section ssp_db World Ocean Atlas 2005 and 2009 SSP Databases
  * 
- * These databases contain monthly, seasonal and annual average of sound speed profiles. 
+ * These databases contain monthly, seasonal and annual average of sound speed profiles, calculated with the TEOS-10
+ * exact formula, and based on the depth, temperature and salinity provided by the World Ocean Atlas.
  * The available resolution is 1° x 1°. Data are provided at <i>standard depths</i> [m] : <p>
  * <b>0, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 600, 700, 800,
  * 900, 1000, 1100, 1200, 1300, 1400, 1500, 1750, 2000, 2500, 3000,
@@ -222,9 +230,10 @@
  * @see woss::SSP, woss::SspWoa2005Db, woss::SspWoa2005DbCreator
  *
  *
- * \section ssp_db_2013 World Ocean Atlas 2013 SSP Database
+ * \section ssp_db_2013 World Ocean Atlas 2001, 2013 and 2018 SSP Databases
  * 
- * These databases contain monthly, seasonal and annual average of sound speed profiles. 
+ * These databases contain monthly, seasonal and annual average of sound speed profiles, calculated with the TEOS-10
+ * exact formula, and based on the depth, temperature and salinity provided by the World Ocean Atlas.
  * The available resolution is 0.25° x 0.25°. Data are provided at <i>standard depths</i> [m] : <p>
  * <b>0, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 600, 700, 800,
  * 900, 1000, 1100, 1200, 1300, 1400, 1500, 1750, 2000, 2500, 3000,
@@ -306,15 +315,15 @@
  * This database covers all marsden squares. Lithology data of a marsden square are 
  * a representative set of all original data for that particular square.
  * <ul>
- *    <li> <i>mardsen_square</i>: 937 values
+ *    <li> <i>marsden_square</i>: 937 values
  * </ul>
  * This NetCDF file has the following variables description:
  * <ul>
- *    <li> <i>byte seafloor_main_type(mardsen_square)</i> ; \n
+ *    <li> <i>byte seafloor_main_type(marsden_square)</i> ; \n
  *         seafloor_main_type:units = "DECK 41 type" ; \n
  *         seafloor_main_type:valid_min = 0 ; \n
  *         seafloor_main_type:valid_max = 9 ; \n
- *    <li> <i>byte seafloor_secondary_type(mardsen_square)</i> ; \n
+ *    <li> <i>byte seafloor_secondary_type(marsden_square)</i> ; \n
  *         seafloor_secondary_type:units = "DECK 41 type" ; \n
  *         seafloor_secondary_type:valid_min = 0 ; \n
  *         seafloor_secondary_type:valid_max = 9 ; 
@@ -331,16 +340,16 @@
  * Lithology data of a marsden coordinates square are a representative set of all original data 
  * for that particular set of marsden coordinates.
  * <ul>
- *    <li> <i>mardsen_square</i>: 937 values
- *    <li> <i>mardsen_one_degree</i>: 100 values
+ *    <li> <i>marsden_square</i>: 937 values
+ *    <li> <i>marsden_one_degree</i>: 100 values
  * </ul>
  * This NetCDF file has the following variables description:
  * <ul>
- *    <li> <i>byte seafloor_main_type(mardsen_square, mardsen_one_degree)</i> ; \n
+ *    <li> <i>byte seafloor_main_type(marsden_square, marsden_one_degree)</i> ; \n
  *         seafloor_main_type:units = "DECK 41 type" ; \n
  *         seafloor_main_type:valid_min = 0 ; \n
  *         seafloor_main_type:valid_max = 9 ; \n
- *    <li> <i>byte seafloor_secondary_type(mardsen_square, mardsen_one_degree)</i> ; \n
+ *    <li> <i>byte seafloor_secondary_type(marsden_square, marsden_one_degree)</i> ; \n
  *         seafloor_secondary_type:units = "DECK 41 type" ; \n
  *         seafloor_secondary_type:valid_min = 0 ; \n
  *         seafloor_secondary_type:valid_max = 9 ; 
@@ -1197,6 +1206,11 @@
 *  <li> <b>v.1.10.0</b> <ul>
 *                            <li> Added support for SSP NetCDF4 databases generated from WOA2013 dataset.
 *                            <li> Fix for Bellhop quad SSP scenario
+*                      </ul>
+*  <li> <b>v.1.11.0</b> <ul>
+*                            <li> Added support for SSP NetCDF4 databases generated from WOA2018 and WOA2001 dataset.
+*                            <li> Fix for woss::BellhopWoss ray angles env file write operation.
+*                            <li> Added support for Bellhop latest shade file reader syntax.
 *                      </ul>
 * </ul>
 **/

@@ -26,7 +26,7 @@
 # whose support is gratefully acknowledged.
 
 
-AC_INIT([WOSS], [1.10.0], [woss@guerra-tlc.com])
+AC_INIT([WOSS], [1.11.0], [woss@guerra-tlc.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_MSG_NOTICE([WOSS AC_PACKAGE_VERSION])

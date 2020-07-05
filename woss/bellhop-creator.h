@@ -776,12 +776,25 @@ namespace woss {
       bellhop_arr_syntax = syntax; return *this; }
 
     /**
-    * Gets the path of bellhop program
+    * Gets the .arr file syntax
     * @return bellhop_arr_syntax
     */
     BellhopArrSyntax getBellhopArrSyntax() { return bellhop_arr_syntax; }
 
-    
+    /**
+    * Sets the .shd file syntax to be used during file parsing
+    * @param syntax .arr file syntax
+    * @return reference to <b>*this</b>
+    */
+    BellhopCreator& setBellhopShdSyntax( BellhopShdSyntax syntax ) { 
+      bellhop_shd_syntax = syntax; return *this; }
+
+    /**
+    * Gets the .shd file syntax
+    * @return bellhop_shd_syntax
+    */
+    BellhopShdSyntax getBellhopShdSyntax() { return bellhop_shd_syntax; }
+
     /**
     * Sets the beam option string for given transmitter, receiver woss::CoordZ. 
     * See Bellhop documentation for more info
@@ -1442,7 +1455,12 @@ namespace woss {
      * Bellhop .arr file syntax to be used during parsing, factory value = invalid
      */
     BellhopArrSyntax bellhop_arr_syntax;
-    
+
+    /**
+     * Bellhop .shd file syntax to be used during parsing, factory value = invalid
+     */
+    BellhopShdSyntax bellhop_shd_syntax;
+
     /**
     * Bellhop run mode ( A, a, C, I, S )
     **/

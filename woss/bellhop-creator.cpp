@@ -52,6 +52,7 @@ BellhopCreator::BellhopCreator()
   use_thorpe_att(true),
   bellhop_path(),  
   bellhop_arr_syntax(BELLHOP_CREATOR_ARR_FILE_INVALID),
+  bellhop_shd_syntax(BELLHOP_CREATOR_SHD_FILE_INVALID),
   ccbellhop_mode(),
   ccbeam_options(),
   ccbathymetry_type(),
@@ -152,6 +153,7 @@ bool BellhopCreator::initializeBhWoss( BellhopWoss* const woss_ptr ) const {
            .setTransformSSPDepthSteps(ccnormalized_ssp_depth_steps.get( tx, rx ))
            .setBellhopPath(bellhop_path)
            .setBellhopArrSyntax(bellhop_arr_syntax)
+           .setBellhopShdSyntax(bellhop_shd_syntax)
            .setBathymetryType(ccbathymetry_type.get( tx, rx ))
            .setBathymetryMethod(ccbathymetry_method.get( tx, rx))
            .setAltimetryType(ccaltimetry_type.get( tx, rx ))
