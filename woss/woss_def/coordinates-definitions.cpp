@@ -282,7 +282,7 @@ const Coord Coord::getCoordFromUtmWgs84( double easting, double northing, double
   
 //     ::std::cout << "Coord::getCoordFromUtmWgs84() latitude = " << latitude 
 //                 << "; longitude = " << longitude << ::std::endl;
-              
+
   return Coord(latitude, longitude);
 }
 
@@ -386,17 +386,17 @@ const CoordZ CoordZ::getCoordZAlongGreatCircle( const CoordZ& start, const Coord
   double start_depth = start.getDepth();
   double end_depth = end.getDepth();
   double total_distance = start.getGreatCircleDistance( end, start_depth );
-  
+
   if ( total_distance == 0.0 && start_depth != end_depth ) {
     total_distance = ::std::abs(end_depth - start_depth);  
     assert( distance < total_distance );
-    
+
     return( CoordZ( static_cast<Coord>(start), distance ) );
   }
- 
+
   double delta_depth = end_depth - start_depth;
   double curr_depth = start_depth + distance / total_distance * delta_depth;
-                
+
   return( CoordZ( Coord::getCoordAlongGreatCircle( start, end, distance , start_depth ) , curr_depth ) );
 }
 
@@ -405,41 +405,41 @@ const CoordZ CoordZ::getCoordZAlongCartLine( const CoordZ& start, const CoordZ& 
   double Xsorg_ = start.getCartX();
   double Ysorg_ = start.getCartY();
   double Zsorg_ = start.getCartZ();
-  
+
 //  double Xdest_ = end.getCartX();
 //  double Ydest_ = end.getCartY();
 //  double Zdest_ = end.getCartZ();
-   
+
   double azimut = start.getCartRelAzimuth( end );
   double polar = start.getCartRelZenith( end );
 
   double x_fin = Xsorg_ + distance * cos(azimut) * sin(polar);
   double y_fin = Ysorg_ + distance * sin(azimut) * sin(polar);
   double z_fin = Zsorg_ + distance * cos(polar);
-  
-  ::std::cout << ::std::endl;
-//   ::std::cout << "x_fin = " << x_fin << "; Xdest_ = " << Xdest_ << "; diff = " << (x_fin - Xdest_) << ::std::endl;
-//   ::std::cout << "y_fin = " << y_fin << "; Ydest_ = " << Ydest_ << "; diff = " << (y_fin - Ydest_) << ::std::endl;
-//   ::std::cout << "z_fin = " << z_fin << "; Zdest_ = " << Zdest_ << "; diff = " << (z_fin - Zdest_) << ::std::endl;
-  
-  ::std::cout << ::std::endl;
-//   ::std::cout << "x_fin = " << x_fin << "; Xsorg_ = " << Xsorg_ << "; diff = " << (x_fin - Xsorg_) << ::std::endl;
-//   ::std::cout << "y_fin = " << y_fin << "; Ysorg_ = " << Ysorg_ << "; diff = " << (y_fin - Ysorg_) << ::std::endl;
-//   ::std::cout << "z_fin = " << z_fin << "; Zsorg_ = " << Zsorg_ << "; diff = " << (z_fin - Zsorg_) << ::std::endl;
-  
-  ::std::cout << ::std::endl;
-//   ::std::cout << "Xdest_ = " << Xdest_ << "; Xsorg_ = " << Xsorg_ << "; diff = " << (Xdest_ - Xsorg_) << ::std::endl;
-//   ::std::cout << "Ydest_ = " << Ydest_ << "; Ysorg_ = " << Ysorg_ << "; diff = " << (Ydest_ - Ysorg_) << ::std::endl;
-//   ::std::cout << "Zdest_ = " << Zdest_ << "; Zsorg_ = " << Zsorg_ << "; diff = " << (Zdest_ - Zsorg_) << ::std::endl;
-  
+
+//  ::std::cout << ::std::endl;
+//  ::std::cout << "x_fin = " << x_fin << "; Xdest_ = " << Xdest_ << "; diff = " << (x_fin - Xdest_) << ::std::endl;
+//  ::std::cout << "y_fin = " << y_fin << "; Ydest_ = " << Ydest_ << "; diff = " << (y_fin - Ydest_) << ::std::endl;
+//  ::std::cout << "z_fin = " << z_fin << "; Zdest_ = " << Zdest_ << "; diff = " << (z_fin - Zdest_) << ::std::endl;
+
+//  ::std::cout << ::std::endl;
+//  ::std::cout << "x_fin = " << x_fin << "; Xsorg_ = " << Xsorg_ << "; diff = " << (x_fin - Xsorg_) << ::std::endl;
+//  ::std::cout << "y_fin = " << y_fin << "; Ysorg_ = " << Ysorg_ << "; diff = " << (y_fin - Ysorg_) << ::std::endl;
+//  ::std::cout << "z_fin = " << z_fin << "; Zsorg_ = " << Zsorg_ << "; diff = " << (z_fin - Zsorg_) << ::std::endl;
+
+//  ::std::cout << ::std::endl;
+//  ::std::cout << "Xdest_ = " << Xdest_ << "; Xsorg_ = " << Xsorg_ << "; diff = " << (Xdest_ - Xsorg_) << ::std::endl;
+//  ::std::cout << "Ydest_ = " << Ydest_ << "; Ysorg_ = " << Ysorg_ << "; diff = " << (Ydest_ - Ysorg_) << ::std::endl;
+//  ::std::cout << "Zdest_ = " << Zdest_ << "; Zsorg_ = " << Zsorg_ << "; diff = " << (Zdest_ - Zsorg_) << ::std::endl;
+
   double lat = 90.0 - 180.0 / M_PI * acos( z_fin / sqrt( pow(x_fin,2.0) + pow(y_fin,2.0) + pow(z_fin,2.0) ) );
   double lon = 180.0 / M_PI * atan2( y_fin, x_fin );
   double depth = sqrt( pow(x_fin,2.0) + pow(y_fin,2.0) + pow(z_fin,2.0) ) - earth_radius;
-  
+
 //   ::std::cout << "lat = " << lat << ::std::endl;
 //   ::std::cout << "long = " << lon << ::std::endl;
 //   ::std::cout << "depth = " << depth << ::std::endl;
-     
+
   return CoordZ( lat, lon, ::std::abs(depth) );
 }
    
@@ -482,15 +482,72 @@ CoordZ& woss::operator-=( CoordZ& left, const CoordZ& right ) {
 
 
 const CoordZ CoordZ::getCoordZFromCartesianCoords( double x, double y, double z ) {
-  double lat = 90.0 - 180.0 / M_PI * acos( z / sqrt( pow(x,2.0) + pow(y,2.0) + pow(z,2.0) ) );
-  double lon = 180.0 / M_PI * atan2( y, x );
-  double depth = sqrt( pow(x,2.0) + pow(y,2.0) + pow(z,2.0) ) - earth_radius;
-  
-//   ::std::cout << "lat = " << lat << ::std::endl;
-//   ::std::cout << "long = " << lon << ::std::endl;
-//   ::std::cout << "depth = " << depth << ::std::endl;
-     
-  return CoordZ( lat, lon, ::std::abs(depth) );
+  double wgs84_polarRadius = 6356752.314245;     // WGS84 ellipsoide
+  double equatorRadius = 6378137.0;
+  double e2Param = ( pow(equatorRadius,2.0) - pow(wgs84_polarRadius,2.0) ) / pow(equatorRadius,2.0);
+
+  double latitude = COORD_NOT_SET_VALUE;
+  double longitude = COORD_NOT_SET_VALUE;
+  double altitude = COORD_NOT_SET_VALUE;
+
+  // distance from the position point (P) to earth center point (origin O)
+  double op = std::sqrt ( x*x + y*y + z*z );
+
+  if ( op > 0 ) {
+    // longitude calculation
+    double lon2 = std::atan (y / x);
+
+    // scale longitude between -PI and PI (-180 and 180 in degrees)
+    if ( x != 0 || y != 0 ) {
+      longitude = std::atan(y/x) * 180/M_PI;
+
+      if ( x < 0 ) {
+        if ( y > 0) {
+          longitude = 180 + longitude;
+          lon2 = lon2 - M_PI;
+        }
+        else {
+          longitude = -180 + longitude;
+          lon2 = M_PI + lon2;
+        }
+      }
+    }
+
+    // Geocentric latitude
+    double latG = std::atan (z / (std::sqrt ( x*x + y*y )));
+
+    // Geocentric latitude (of point Q, Q is intersection point of segment OP and reference ellipsoid)
+    double latQ = std::atan (z / ( (1 - e2Param ) * (std::sqrt ( x*x + y*y ))) );
+
+    // calculate radius of the curvature
+    double rCurvature = ( equatorRadius / std::sqrt (1 - e2Param * std::sin (latQ) * std::sin (latQ)) );
+
+    // x, y, z of point Q
+    double xQ = rCurvature * std::cos (latQ) * std::cos (lon2);
+    double yQ = rCurvature * std::cos (latQ) * std::sin (lon2);
+    double zQ = rCurvature * (1 - e2Param) * std::sin (latQ);
+
+    // distance OQ
+    double oq = std::sqrt ( xQ*xQ + yQ*yQ + zQ*zQ );
+
+    // distance PQ is OP - OQ
+    double pq = op - oq;
+
+    // length of the normal segment from point P of line (PO) to point T.
+    // T is intersection point of linen the PO normal and ellipsoid normal from point Q.
+    double tp = pq * std::sin (latG - latQ);
+
+    double lat_radians = latQ + tp / op * std::cos (latQ - latG);
+    latitude = lat_radians*180/M_PI;
+
+    altitude = pq * std::cos (latQ - latG);
+
+    //std::cout << "lat new = " << latitude << std::endl;
+    //std::cout << "lon new = " << longitude << std::endl;
+    //std::cout << "alt new = " << altitude << std::endl;
+  }
+
+  return CoordZ( latitude, longitude, ::std::abs(altitude) );
 }
 
 
@@ -540,7 +597,6 @@ const UtmWgs84 UtmWgs84::getUtmWgs84FromCoord(const Coord& coords) {
 
   double cosLambda = cos(lambda);
   double sinLambda = sin(lambda);
-  //double tanLambda = tan(lambda);
 
   double tau = tan(phi);
   double sigma = sinh(e*atanh(e*tau / sqrt(1+pow(tau,2)) ));
@@ -548,9 +604,8 @@ const UtmWgs84 UtmWgs84::getUtmWgs84FromCoord(const Coord& coords) {
   double tau_prime = tau*sqrt(1+ pow(sigma,2)) - sigma*sqrt(1 +pow(tau,2));
 
   double epsilon_prime = atan2(tau_prime, cosLambda);
-  double eta_prime = asinh(sinLambda/ sqrt( pow(tau_prime,2) 
-			+ pow(cosLambda,2)));
-    
+  double eta_prime = asinh(sinLambda/ sqrt( pow(tau_prime,2) + pow(cosLambda,2)));
+
   double A = a/(1+n) * (1 + 1.0/4*n2 + 1.0/64*n4 + 1.0/256*n6);
   double alpha[] = {0,
         1.0/2*n - 2.0/3*n2 + 5.0/16*n3 + 41.0/180*n4 -127.0/288*n5 + 7891.0/37800*n6,
@@ -560,6 +615,7 @@ const UtmWgs84 UtmWgs84::getUtmWgs84FromCoord(const Coord& coords) {
         34729.0/80640*n5 - 3418889.0/1995840*n6,
         212378941.0/319334400*n6};
   double epsilon = epsilon_prime;
+
   for(int j = 1; j<=6; j++) {
     epsilon += alpha[j]*sin(2*j*epsilon_prime)*cosh(2*j*eta_prime);
   }
@@ -571,38 +627,11 @@ const UtmWgs84 UtmWgs84::getUtmWgs84FromCoord(const Coord& coords) {
 
   double x = k0*A*eta;
   double y = k0*A*epsilon;
-#if 0
-  double p_prime = 1;
-  for(int j = 1; j<=6; j++) {
-      p_prime += 2*j*alpha[j]*cos(2*j*epsilon_prime)*cosh(2*j*eta_prime);
-  }
 
-  double q_prime = 0;
-  for(int j = 1; j<=6; j++) {
-    q_prime += 2*j*alpha[j]*sin(2*j*epsilon_prime)*sinh(2*j*eta_prime);
-  }
-
-  double Y_prime = atan(tau_prime / sqrt(1+pow(tau_prime,2))*tanLambda);
-  double Y_s = atan2(q_prime,p_prime);
-  double Y = Y_prime+Y_s;
-
-  double sinPhi = sin(phi);
-  double k_prime = sqrt(1 - pow(e,2)*pow(sinPhi,2))*sqrt(1+pow(tau,2))
-                 / sqrt(pow(tau_prime,2) + pow(cosLambda,2));
-  double k_s = A/a*sqrt(pow(p_prime,2)+pow(q_prime,2));
-
-  double k = k0*k_prime*k_s;
-    
-  double convergence = Y*180/M_PI;
-  double scale = k;
-#endif 
   x = x + falseEasting;
 
   if(y<0)
       y = y + falseNorthing; 
-
-  //std::cout.precision(10);
-  //std::cout << "UTM: zone=" << zone << " x=" << x << " y=" << y << " convergence=" << convergence<< " scale=" << scale << std::endl;
 
   return UtmWgs84(zone,x,y);
 }

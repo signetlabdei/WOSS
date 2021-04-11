@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.12.0
+ * @version 1.12.1
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -1275,7 +1275,7 @@
 *                      </ul>
 *  <li> <b>v.1.10.0</b> <ul>
 *                            <li> Added support for SSP NetCDF4 databases generated from WOA2013 dataset.
-*                            <li> Fix for Bellhop quad SSP scenario
+*                            <li> Fix for Bellhop quad SSP scenario.
 *                      </ul>
 *  <li> <b>v.1.11.0</b> <ul>
 *                            <li> Added support for SSP NetCDF4 databases generated from WOA2018 and WOA2001 dataset.
@@ -1286,7 +1286,12 @@
 *                            <li> Added support for DECK41V2 databases in NetCDF4 format with revised data format.
 *                            <li> Added support for GEBCO 2020 database.
 *                            <li> Added support for autotools tests, installation procedure has been updated.
-*                            <li> Fix for woss::BellhopWoss SSP max depth
+*                            <li> Fix for woss::BellhopWoss SSP max depth.
+*                      </ul>
+*  <li> <b>v.1.12.1</b> <ul>
+*                            <li> Fixed issue with autotools distribution.
+*                            <li> Added SSP truncate option to both woss::SSP and woss::BellhopWoss (thanks to Randall Plate).
+*                            <li> Improved woss::CoordZ::getCoordZFromCartesianCoords() function (thanks to Randall Plate).
 *                      </ul>
 * </ul>
 **/

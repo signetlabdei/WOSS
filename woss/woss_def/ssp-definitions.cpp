@@ -710,6 +710,44 @@ SSP* SSP::transform( const Coord& coordinates, double new_min_depth, double new_
   }
 }
 
+SSP* SSP::truncate(const double max_depth) const
+{
+  SSP* new_SSP = clone();
+
+  DConstIter it_lb = new_SSP->lower_bound( max_depth );
+
+  if (it_lb != new_SSP->end()) {
+    //If lower bound is below max depth, create new point at max depth
+    if(it_lb->first > PDouble(max_depth)) {
+      it_lb--;
+
+      if (debug) {
+        std::cout << "SSP::truncate() cur point: " << it_lb->first << " " << it_lb->second << std::endl;
+        std::cout << "SSP::truncate() prev point: " << std::prev(it_lb)->first << " " << std::prev(it_lb)->second << std::endl;
+      }
+
+      double extrap_speed = PDouble(it_lb->second) - ( (it_lb->first - PDouble(max_depth)) * PDouble(it_lb->second - std::prev(it_lb)->second) / (it_lb->first - std::prev(it_lb)->first) );
+
+      if (debug) {
+        std::cout << "SSP::truncate() extrapolated speed: " << extrap_speed << std::endl;
+      }
+
+      new_SSP->insertValue(max_depth, extrap_speed);
+      it_lb++;
+    }
+    it_lb++;
+  
+    //Truncate - remove all values deeper than max_depth depth
+    new_SSP->ssp_map.erase(it_lb, new_SSP->end());
+  }
+  else
+  {
+    // SSP should be not valid
+    delete new_SSP;
+    new_SSP = new SSP();
+  }
+  return ( new_SSP );
+}
 
 SSP* SSP::fullRandomize( double perc_incr_value ) const {
   assert( perc_incr_value > 0.0 && perc_incr_value <= 1.0 );
