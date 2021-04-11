@@ -585,6 +585,14 @@ namespace woss {
     virtual SSP* transform( const Coord& coordinates, double new_min_depth = -HUGE_VAL, double new_max_depth = HUGE_VAL, int total_depth_steps = SSP_CUSTOM_DEPTH_STEPS ) const;
 
     /**
+    * It returns a new SSP object, truncated at the input depth. 
+    * If the current ssp can't be truncated it returns a not valid SSP.
+    * @param max_depth truncation depth [m]
+    * @return a <i>new</i> SSP object
+    **/
+    virtual SSP* truncate( double max_depth ) const;
+
+    /**
     * Performs a random perturbation of temperature, salinity, pressure with given ratio
     * Sound speed values are then calculated from this new data
     * @param ratio_incr_value perturbation ratio

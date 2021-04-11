@@ -261,10 +261,14 @@ void BellhopWoss::normalizeDbSSP() {
 
   if ( is_normalized_matrix ) {
     for ( ::std::set<int>::iterator it = ssp_unique_indexes.begin(); it != ssp_unique_indexes.end(); it++) {
-      normalized_ssp_map[range_vector[*it]] = ssp_vector[*it]->clone();
+      normalized_ssp_map[range_vector[*it]] = ssp_vector[*it]->truncate(ceil(max_bathy_depth));
     }
     min_normalized_ssp_depth = *( min_ssp_depth_set.begin() );
     max_normalized_ssp_depth = *( max_ssp_depth_set.rbegin() );
+    if (max_bathy_depth <= *( max_ssp_depth_set.rbegin()))
+      max_normalized_ssp_depth = ceil(max_bathy_depth);
+    else
+      max_normalized_ssp_depth = *( max_ssp_depth_set.rbegin());
 
     curr_norm_ssp_depth_steps = normalized_ssp_map.begin()->second->size(); 
     return;

@@ -1,7 +1,7 @@
 WOSS changelog:
 
-please note: WOSS is in its development stage, API changes will be limited at minimum, 
-             but this cannot be guaranteed. 
+please note: WOSS is in its development stage, API changes will be limited at minimum,
+             but this cannot be guaranteed.
 
 
 v1.0.0 - release version
@@ -52,13 +52,13 @@ v1.2.0 - woss::RandomGenerator : bug fixed.
        - doxygen basic samples page removed, all the comments are inline within the tcl files.
 
 v1.3.0 - WossChannelModule : channel_eq_time_, channel_symbol_time_ and channel_eq_threshold_db_ introduced, channel_time_resolution_ removed;
-															- the channel now coherently sums all taps at channel_symbol_resolution_ 
-                              - from channel_eq_snr_threshold_db_ the attenuation threshold is calculated
-                              - the first tap that has txloss <= channel_eq_att_threshold_db is found
-															- then all taps after the above tap + channel_equalization_time_ are incoherently summed
-                                   if channel_equalization_time_ == 0 no eq is done
-                                   if channel_equalization_time_ < 0 then all taps are incoherently summed 
-															- all taps after channel_equalization_time_ are left untouched
+       - the channel now coherently sums all taps at channel_symbol_resolution_ 
+       - from channel_eq_snr_threshold_db_ the attenuation threshold is calculated
+       - the first tap that has txloss <= channel_eq_att_threshold_db is found
+       - then all taps after the above tap + channel_equalization_time_ are incoherently summed
+         if channel_equalization_time_ == 0 no eq is done
+         if channel_equalization_time_ < 0 then all taps are incoherently summed 
+       - all taps after channel_equalization_time_ are left untouched
        - Altimetry concept introduced.
        - Altimetry time evolution introduced.
        - Woss, WossManager, WossCreator: time evolution concept introduced.
@@ -75,7 +75,7 @@ v1.3.4 - minor bug fixes
 
 v1.3.5 - minor bug fixes
        - UwmStd lib has been moved to NS-Miracle for a better compatibility with DESERT framework.
-       
+
 v1.3.6 - warnings removal and minor bug fixes
 
 v1.3.7 - warnings system revised. 
@@ -87,9 +87,9 @@ v1.3.8 - minor bug fixes
 
 v1.3.9 - minor bug fixes
        - syntax now compliant with C++11 standard
-       
+
 v1.4.0 - minor bug fixes
-         
+
 v1.5.0 - memory leak fixed (thanks to Raúl Sáez Cañete)
        - new bathymetry write mode introduced (thanks to Randall Plate)
        - new attenuation complex tap calculation introduced:
@@ -102,7 +102,7 @@ v1.5.1 - gcc-6 warning removal
 
 v1.6.0 - bug fix in volumetrical attenuation computations
        - new APIs introduced
-       
+
 v1.6.1 - license changed
 
 v1.6.2 - bug fix in box depth and box range for ns2 tcl hooks
@@ -134,3 +134,7 @@ v1.12.0 - Added support for DECK41V2 databases in NetCDF4 format with revised da
         - Added support for GEBCO 2020 database.
         - Added support for autotools tests, installation procedure has been updated.
         - Fix for woss::BellhopWoss SSP max depth
+
+v1.12.1 - Fixed issue with autotools distribution.
+        - Added SSP truncate option to both woss::SSP and woss::BellhopWoss (thanks to Randall Plate).
+        - Improved woss::CoordZ::getCoordZFromCartesianCoords() function (thanks to Randall Plate).
