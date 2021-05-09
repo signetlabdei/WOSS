@@ -123,7 +123,7 @@ void WossCoordDefTest::doRun() {
       }
 
       if (false == curr_coord.isValid()) {
-        throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_INVALID_PARAM); 
+        throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
       }
 
       for (vector<double>::iterator it3 = vector_bearing.begin(); it3 != vector_bearing.end(); ++it3) {
@@ -147,7 +147,7 @@ void WossCoordDefTest::doRun() {
           }
 
           if (false == new_coord.isValid()) {
-            throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_INVALID_PARAM); 
+            throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
           }
 
           double test_bearing = curr_coord.getInitialBearing( new_coord );
@@ -160,7 +160,7 @@ void WossCoordDefTest::doRun() {
           }
 
           if (test_bearing_pd != curr_bearing_pd) {
-            throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+            throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
           }
 
           double test_distance = curr_coord.getGreatCircleDistance( new_coord );
@@ -173,7 +173,7 @@ void WossCoordDefTest::doRun() {
           }
 
           if (test_distance_pd != curr_distance_pd) {
-            throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+            throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
           }
         }
       }
