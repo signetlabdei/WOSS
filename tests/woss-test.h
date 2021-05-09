@@ -123,7 +123,7 @@ namespace woss {
     /**
       * destructor
       **/
-    virtual ~WossException() { }
+    virtual ~WossException() throw () { }
 
     /**
       * assignement operator

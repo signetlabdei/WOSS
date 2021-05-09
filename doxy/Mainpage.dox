@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.12.1
+ * @version 1.12.2
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -1292,6 +1292,9 @@
 *                            <li> Fixed issue with autotools distribution.
 *                            <li> Added SSP truncate option to both woss::SSP and woss::BellhopWoss (thanks to Randall Plate).
 *                            <li> Improved woss::CoordZ::getCoordZFromCartesianCoords() function (thanks to Randall Plate).
+*                      </ul>
+*  <li> <b>v.1.12.2</b> <ul>
+*                            <li> Fixed issue with SSP::truncate c+11 syntax
 *                      </ul>
 * </ul>
 **/

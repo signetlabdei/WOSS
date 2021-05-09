@@ -138,3 +138,5 @@ v1.12.0 - Added support for DECK41V2 databases in NetCDF4 format with revised da
 v1.12.1 - Fixed issue with autotools distribution.
         - Added SSP truncate option to both woss::SSP and woss::BellhopWoss (thanks to Randall Plate).
         - Improved woss::CoordZ::getCoordZFromCartesianCoords() function (thanks to Randall Plate).
+
+v1.12.2 - Fixed issue with SSP::truncate c++11 syntax
