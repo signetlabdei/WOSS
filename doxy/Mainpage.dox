@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.12.2
+ * @version 1.12.3
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -1295,6 +1295,9 @@
 *                      </ul>
 *  <li> <b>v.1.12.2</b> <ul>
 *                            <li> Fixed issue with SSP::truncate c+11 syntax
+*                      </ul>
+*  <li> <b>v.1.12.3</b> <ul>
+*                            <li> New geographical to cartesian conversion model, based on spherical, GRS80 and WGS84 models
 *                      </ul>
 * </ul>
 **/

@@ -46,6 +46,13 @@ using namespace woss;
 
 class WossCoordDefTest : public WossTest {
 
+  public:
+  
+  WossCoordDefTest();
+  
+  virtual ~WossCoordDefTest() {}
+
+  
   private:
 
   virtual void doConfig();
@@ -54,35 +61,154 @@ class WossCoordDefTest : public WossTest {
 
   virtual void doRun(); 
 
-};
+
+  void doCoordCartTests(const CoordZ& curr_coord);
+
+  void doBearingTests(const CoordZ& curr_coord, const CoordZ& new_coord, double curr_distance, double curr_bear);
 
 
-void WossCoordDefTest::doConfig() {
-  debug = false;
-}
-
-void WossCoordDefTest::doInit() {
-}
-
-void WossCoordDefTest::doRun() {
-  double start_lat = -89.0;
-  double end_lat = 89.0;
-  double step_lat = 30.0;
-  double start_lon = -180.0;
-  double end_lon = 180.0;
-  double step_lon = 30.0;
-  double start_bearing = 0.0;
-  double end_bearing = 360.0;
-  double step_bearing = 20.0;
-  double start_distance = 1000.0;
-  double end_distance = 101000.0;
-  double step_distance = 10000.0;
-  double precision = 1e-5;
+  double start_lat;
+  double end_lat;
+  double step_lat;
+  double start_lon;
+  double end_lon;
+  double step_lon;
+  double start_bearing;
+  double end_bearing;
+  double step_bearing;
+  double start_distance; // meters
+  double end_distance; // meters
+  double step_distance; // meters
+  double precision;
+  double cartesian_precision; // meters
+  double start_depth; // meters
+  double end_depth; // meters
+  double step_depth; // meters
 
   std::vector<double> vector_lat;
   std::vector<double> vector_lon;
   std::vector<double> vector_dist;
   std::vector<double> vector_bearing;
+  std::vector<double> vector_depth;
+};
+
+WossCoordDefTest::WossCoordDefTest()
+: WossTest(),
+  start_lat(-89.0),
+  end_lat(89.0),
+  step_lat(30.0),
+  start_lon(-180.0),
+  end_lon(180.0),
+  step_lon(30.0),
+  start_bearing(0.0),
+  end_bearing(360.0),
+  step_bearing(20.0),
+  start_distance(1000.0),
+  end_distance(101000.0),
+  step_distance(10000.0),
+  precision(1e-5),
+  cartesian_precision(0.5),
+  start_depth(1.0),
+  end_depth(10000.0),
+  step_depth(100.0),
+  vector_lat(),
+  vector_lon(),
+  vector_dist(),
+  vector_bearing(),
+  vector_depth()
+{
+  //debug = true;
+}
+
+void WossCoordDefTest::doConfig() {
+}
+
+void WossCoordDefTest::doInit() {
+}
+
+void WossCoordDefTest::doCoordCartTests(const CoordZ& test_coord) {
+  CoordZ::CoordZSpheroidType type;
+
+  for (int i = 0; i < 3; ++i) {
+    if (i == 0) {
+      type = CoordZ::CoordZSpheroidType::COORDZ_SPHERE;
+    }
+    else if (i == 1) {
+      type = CoordZ::CoordZSpheroidType::COORDZ_GRS80;
+    }
+    else {
+      type = CoordZ::CoordZSpheroidType::COORDZ_WGS84;
+    }
+
+    CoordZ::CartCoords test_cart = test_coord.getCartCoords(type);
+
+    if (debug) {
+      cout << __LINE__ << ": " << "test_cart = " << test_cart << endl;
+    }
+
+    CoordZ test_cart_coord = CoordZ::getCoordZFromCartesianCoords(test_cart);
+
+    if (debug) {
+      cout << __LINE__ << ": " << "test_cart_coord: " << test_cart_coord << endl;
+    }
+
+    if (false == test_cart_coord.isValid()) {
+      throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
+    }
+
+    double error_distance = test_cart_coord.getCartDistance(test_coord, type);
+
+    if (debug) {
+      cout << __LINE__ << ": " << "test error_distance: " << error_distance << endl;
+    }
+
+    if (error_distance > cartesian_precision) {
+      throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+    }
+  }
+}
+
+void WossCoordDefTest::doBearingTests(const CoordZ& curr_coord, const CoordZ& new_coord, double curr_distance, double curr_bear) {
+  double test_bearing = curr_coord.getInitialBearing( new_coord );
+  PDouble test_bearing_pd = PDouble(test_bearing, precision);
+  PDouble curr_bearing_pd = PDouble(curr_bear, precision);
+
+  if (debug) {
+    cout << __LINE__ << ": " << "curr_bear: " << curr_bear << "," << curr_bearing_pd << "," << curr_bearing_pd * PDouble(180.0 / M_PI) 
+        << "; test_bearing: " << test_bearing << "," <<  test_bearing_pd << "," << test_bearing_pd * PDouble(180.0 / M_PI) << endl;
+  }
+
+  if (test_bearing_pd != curr_bearing_pd) {
+    throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+  }
+
+  double test_distance = curr_coord.getGreatCircleDistance( new_coord );
+  PDouble test_distance_pd = PDouble(test_distance, precision);
+  PDouble curr_distance_pd = PDouble(curr_distance, precision);
+
+  if (debug) {
+    cout << __LINE__ << ": " << "curr_distance: " << curr_distance << "," << curr_distance_pd
+        << "; test_distance: " << test_distance << "," << test_distance_pd << endl;
+  }
+
+  if (test_distance_pd != curr_distance_pd) {
+    throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+  }
+  
+  double cart_distance = curr_coord.getCartDistance( new_coord );
+  PDouble cart_distance_pd = PDouble(curr_distance, precision);
+
+  if (debug) {
+    cout << __LINE__ << ": " << "curr_distance: " << curr_distance << "," << curr_distance_pd
+        << "; cart_distance: " << cart_distance << "," << cart_distance_pd << endl;
+  }
+
+  if (curr_distance_pd != cart_distance_pd) {
+    throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+  }
+}
+
+void WossCoordDefTest::doRun() {
 
   for (double i = start_lon; i <= end_lon; i += step_lon) {
     vector_lon.push_back(i);
@@ -100,6 +226,10 @@ void WossCoordDefTest::doRun() {
     vector_dist.push_back(i);
   }
 
+  for (double i = start_depth; i <= end_depth; i += step_depth) {
+    vector_depth.push_back(i);
+  }
+
   for (vector<double>::iterator it = vector_lon.begin(); it != vector_lon.end(); ++it) {
     double curr_lon = *it;
 
@@ -114,66 +244,54 @@ void WossCoordDefTest::doRun() {
         cout << __LINE__ << ": " << "curr_lat: " << curr_lat << endl;
       }
 
-      Coord curr_coord(curr_lat, curr_lon);
-
-      if (debug) {
-        cout << __LINE__ << ": " << "curr_coord: " << curr_coord << endl;
-        cout << __LINE__ << ": " << "marsden coords: " << curr_coord.getMarsdenSquare() 
-                         << "," << curr_coord.getMarsdenOneDegreeSquare() << endl;
-      }
-
-      if (false == curr_coord.isValid()) {
-        throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
-      }
-
-      for (vector<double>::iterator it3 = vector_bearing.begin(); it3 != vector_bearing.end(); ++it3) {
-        double curr_bear = *it3;
+      for (vector<double>::iterator it = vector_depth.begin(); it != vector_depth.end(); ++it) {
+        double curr_depth = *it;
 
         if (debug) {
-          cout << __LINE__ << ": " << "curr_bear: " << curr_bear << ", " << curr_bear * 180.0 / M_PI << endl;
+          cout << __LINE__ << ": " << "curr_depth: " << curr_depth << endl;
+        }
+        CoordZ curr_coord(curr_lat, curr_lon, curr_depth);
+
+        if (debug) {
+          cout << __LINE__ << ": " << "curr_coord: " << curr_coord << endl;
         }
 
-        for (vector<double>::iterator it4 = vector_dist.begin(); it4 != vector_dist.end(); ++it4) {
-          double curr_distance = *it4;
+        if (false == curr_coord.isValid()) {
+          throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
+        }
+
+        // Do geographical coordinates to Cartesian Coordinates tests
+        doCoordCartTests(curr_coord);
+
+        for (vector<double>::iterator it3 = vector_bearing.begin(); it3 != vector_bearing.end(); ++it3) {
+          double curr_bear = *it3;
 
           if (debug) {
-            cout << __LINE__ << ": " << "curr_distance: " << curr_distance << endl;
+            cout << __LINE__ << ": " << "curr_bear: " << curr_bear << ", " << curr_bear * 180.0 / M_PI << endl;
           }
 
-          Coord new_coord = Coord::getCoordFromBearing(curr_coord, curr_bear, curr_distance);
+          for (vector<double>::iterator it4 = vector_dist.begin(); it4 != vector_dist.end(); ++it4) {
+            double curr_distance = *it4;
 
-          if (debug) {
-            cout << __LINE__ << ": " << "curr_coord: " << curr_coord << "; new_coord: " << new_coord << endl;
-          }
+            if (debug) {
+              cout << __LINE__ << ": " << "curr_distance: " << curr_distance << endl;
+            }
 
-          if (false == new_coord.isValid()) {
-            throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
-          }
+            CoordZ new_coord = CoordZ( Coord::getCoordFromBearing(curr_coord, curr_bear, curr_distance), curr_depth);
 
-          double test_bearing = curr_coord.getInitialBearing( new_coord );
-          PDouble test_bearing_pd = PDouble(test_bearing, precision);
-          PDouble curr_bearing_pd = PDouble(curr_bear, precision);
+            if (debug) {
+              cout << __LINE__ << ": " << "curr_coord: " << curr_coord << "; new_coord: " << new_coord << endl;
+            }
 
-          if (debug) {
-            cout << __LINE__ << ": " << "curr_bear: " << curr_bear << "," << curr_bearing_pd << "," << curr_bearing_pd * PDouble(180.0 / M_PI) 
-                 << "; test_bearing: " << test_bearing << "," <<  test_bearing_pd << "," << test_bearing_pd * PDouble(180.0 / M_PI) << endl;
-          }
+            if (false == new_coord.isValid()) {
+              throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
+            }
 
-          if (test_bearing_pd != curr_bearing_pd) {
-            throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
-          }
+            // Do geographical coordinates to Cartesian Coordinates tests
+            doCoordCartTests(new_coord);
 
-          double test_distance = curr_coord.getGreatCircleDistance( new_coord );
-          PDouble test_distance_pd = PDouble(test_distance, precision);
-          PDouble curr_distance_pd = PDouble(curr_distance, precision);
-
-          if (debug) {
-            cout << __LINE__ << ": " << "curr_distance: " << curr_distance << "," << curr_distance_pd
-                 << "; test_distance: " << test_distance << "," << test_distance_pd << endl;
-          }
-
-          if (test_distance_pd != curr_distance_pd) {
-            throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+            // Do bearing tests
+            doBearingTests(curr_coord, new_coord, curr_distance, curr_bear);
           }
         }
       }

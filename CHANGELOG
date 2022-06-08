@@ -140,3 +140,5 @@ v1.12.1 - Fixed issue with autotools distribution.
         - Improved woss::CoordZ::getCoordZFromCartesianCoords() function (thanks to Randall Plate).
 
 v1.12.2 - Fixed issue with SSP::truncate c++11 syntax
+
+v1.12.3 - New geographical to cartesian conversion model, based on spherical, GRS80 and WGS84 models
