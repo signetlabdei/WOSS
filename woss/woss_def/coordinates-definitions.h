@@ -116,6 +116,23 @@ namespace woss {
 
     static const double COORD_MAX_LONGITUDE; ///< Maximum valid Longitude
 
+    static const double EARTH_RADIUS; ///< Mean earth radius in meters
+
+    /// Earth's semi-major axis in meters as defined by both GRS80 and WGS84
+    static const double EARTH_SEMIMAJOR_AXIS;
+
+    /// Earth's semi-major axis in meters as defined by GRS80
+    static const double EARTH_GRS80_POLAR_RADIUS;
+
+    /// Earth's polar radius in meters as defined by WGS84
+    static const double EARTH_WGS84_POLAR_RADIUS; 
+
+    /// Earth's first eccentricity as defined by GRS80
+    static const double EARTH_GRS80_ECCENTRICITY;
+
+    /// Earth's first eccentricity as defined by WGS84
+    static const double EARTH_WGS84_ECCENTRICITY;
+
     /**
     * Coord constructor.
     * @param lat <b>decimal degree</b> latitude value. Default value makes the instance <i>not valid</i>
@@ -131,19 +148,6 @@ namespace woss {
 
     virtual ~Coord() { }
 
-    /**
-    * Sets the mean earth radius
-    * @param value earth radius in meters
-    **/
-    static void setEarthRadius( double value ) { earth_radius = value; }
-  
-    /**
-    * Gets the mean earth radius
-    * @returns mean earth radius in meters
-    **/
-    static double getEarthRadius() { return earth_radius; }
-    
-    
     /**
     * Sets latitude and updates marsden coordinates
     * @param lat latitude value
@@ -354,13 +358,6 @@ namespace woss {
 
     protected:
 
-   
-    /**
-    * Mean earth radius in meters
-    **/
-    static double earth_radius;
-    
-    
     /**
     * Latitude value
     **/
@@ -411,6 +408,86 @@ namespace woss {
     static const double COORDZ_MIN_DEPTH; ///< Minimum valid depth
 
     /**
+    * \brief Spheroid model to use
+    * 
+    * Spheroid model to use: perfect sphere (COORDZ_SPHERE), 
+    * Geodetic Reference System 1980 (COORDZ_GRS80), 
+    * or World Geodetic System 1984 (COORDZ_WGS84)
+    */
+    enum CoordZSpheroidType
+    {
+      COORDZ_SPHERE = 0,
+      COORDZ_GRS80,
+      COORDZ_WGS84
+    };
+
+    /**
+    * \brief Class that represents cartesian coordinates
+    * 
+    * Class that represents cartesian coordinates
+    */
+    class CartCoords {
+      public:
+
+      /**
+      * CartCoords default constructor.
+      **/
+      CartCoords();
+
+      /**
+      * Coord constructor.
+      * @param in_x number of <b>meters</b> along the X axis
+      * @param in_y number of <b>meters</b> along the X axis
+      * @param in_z number of <b>meters</b> along the X axis
+      * @param in_type Spheroid model that has been used
+      **/
+      CartCoords(double in_x, double in_y, double in_z, CoordZSpheroidType in_type);
+
+      /**
+      * Returns the number of meters along the X axis
+      * @return x axis value [m]
+      **/ 
+      double getX() const { return x; }
+
+      /**
+      * Returns the number of meters along the Y axis
+      * @return y axis value [m]
+      **/ 
+      double getY() const { return y; }
+
+      /**
+      * Returns the number of meters along the z axis
+      * @return Z axis value [m]
+      **/ 
+      double getZ() const { return z; }
+
+      /**
+      * Returns the CoordZSpheroidType used for computation
+      * @return CoordZSpheroidType spheroid model
+      **/ 
+      CoordZSpheroidType getType() const { return type; }
+
+      /**
+      * << operator
+      * @param os left operand ostream reference
+      * @param instance right operand const CartCoords reference
+      * @return <i>os</i> reference after the operation
+      **/ 
+      friend ::std::ostream& operator<<( ::std::ostream& os, const CartCoords& instance );
+
+      protected:
+
+      double x; /// X-asis value in meters
+      
+      double y; /// Y-asis value in meters
+      
+      double z; /// Z-asis value in meters
+      
+      CoordZSpheroidType type; /// Spheroid used during computation
+      
+    };
+
+    /**
     * CoordZ constructor.
     * @param lat <b>decimal degree</b> latitude value. Default value makes the instance <i>not valid</i>
     * @param lon <b>decimal degree</b> longitude value. Default value makes the instance <i>not valid</i>
@@ -447,25 +524,33 @@ namespace woss {
     **/
     double getDepth() const { return depth; }
 
-
     /**
-    * Gets cartesian x coordinate, assuming earth as a sphere of ray = 6371000.0 meters
+    * Gets cartesian x coordinate
+    * @param type Earh Model type
     * @return x in <i>meters</i>
     **/
-    double getCartX() const;
+    CartCoords getCartCoords(CoordZSpheroidType type = COORDZ_SPHERE) const;
+
+    /**
+    * Gets cartesian x coordinate
+    * @param type Earh Model type
+    * @return x in <i>meters</i>
+    **/
+    double getCartX(CoordZSpheroidType type = COORDZ_SPHERE) const;
     
     /**
-    * Gets cartesian y coordinate, assuming earth as a sphere of ray = 6371000.0 meters
+    * Gets cartesian y coordinate
+    * @param type Earh Model type
     * @return y in <i>meters</i>
     **/
-    double getCartY() const;
+    double getCartY(CoordZSpheroidType type = COORDZ_SPHERE) const;
     
     /**
-    * Gets cartesian z coordinate, assuming earth as a sphere of ray = 6371000.0 meters
+    * Gets cartesian z coordinate
+    * @param type Earh Model type
     * @return z in <i>meters</i>
     **/
-    double getCartZ() const;
-    
+    double getCartZ(CoordZSpheroidType type = COORDZ_SPHERE) const;
     
     /**
     * Gets spherical rho coordinate, assuming earth as a sphere of ray = 6371000.0 meters
@@ -483,7 +568,7 @@ namespace woss {
     * Gets spherical phi coordinate, assuming earth as a sphere of ray = 6371000.0 meters
     * @return z in <i>meters</i>
     **/
-    double getSphericalPhi() const;    
+    double getSphericalPhi() const;
     
     
     /**
@@ -491,23 +576,23 @@ namespace woss {
     * @param coords a const reference to a valid CoordZ object
     * @return distance in <i>meters</i>
     **/
-    double getCartDistance( const CoordZ& coords ) const;
+    double getCartDistance( const CoordZ& coords, CoordZSpheroidType type = COORDZ_SPHERE ) const;
     
     /**
-    * Gets relative zenith from cartesian coordinates approximations
+    * Gets relative zenith from cartesian coordinates approximations, assuming earth as a sphere of ray = 6371000.0 meters
     * @return zenith in <i>radians</i>
     **/
     double getCartRelZenith( const CoordZ& coords ) const;
     
     /**
-    * Gets relative azimuth from cartesian coordinates approximations
+    * Gets relative azimuth from cartesian coordinates approximations, assuming earth as a sphere of ray = 6371000.0 meters
     * @return azimuth in <i>radians</i>
     **/
     double getCartRelAzimuth( const CoordZ& coords ) const;
    
    
     /**
-    * Gets The CoordZ at given distance along the line in cartesian coordinates 
+    * Gets The CoordZ at given distance along the line in cartesian coordinates, assuming earth as a sphere of ray = 6371000.0 meters
     * that ties <i>start</i> and <i>end</i> CoordZ
     * @param start a const reference to a valid CoordZ object
     * @param end a const reference to a valid CoordZ object
@@ -532,9 +617,17 @@ namespace woss {
     * @param x x axis
     * @param y y axis
     * @param z z axis
+    * @param type Earth model type
     * @return a valid CoordZ object
     **/
-    static const CoordZ getCoordZFromCartesianCoords( double x, double y, double z);
+    static const CoordZ getCoordZFromCartesianCoords( double x, double y, double z, CoordZSpheroidType type = COORDZ_SPHERE);
+
+    /**
+    * Gets the CoordZ converted from given cartesian coordinates 
+    * @param cart_coords const reference to a valid CoordZ::CartCoords object
+    * @return a valid CoordZ object
+    **/
+    static const CoordZ getCoordZFromCartesianCoords( const CartCoords& cart_coords );
 		
     /**
     * Gets the CoordZ converted from given spherical coordinates 
@@ -660,7 +753,6 @@ namespace woss {
     * Depth value
     **/   
     double depth;
-
   };
 
    class UtmWgs84 {
@@ -742,8 +834,7 @@ namespace woss {
       if ( x.getGreatCircleDistance(y) <= CompUser::getSpaceSampling() ) return false;
       return operator<(x,y);
     }
-      
-  
+
   };
   
   
@@ -756,8 +847,7 @@ namespace woss {
   */
   template < class CompUser >
   class CoordComparator< CompUser, CoordZ > {
-  
-    
+
     public:
         
     
@@ -777,8 +867,7 @@ namespace woss {
       if ( x.getCartDistance(y) <= CompUser::getSpaceSampling() ) return false;
       return operator<(x,y);
     }
-      
-  
+
   };
   
   //non-inline operator declarations
@@ -794,22 +883,6 @@ namespace woss {
     
   ///////////////////////////////
   // inline functions
-
-  inline double CoordZ::getSphericalRho() const {
-    return earth_radius - depth;
-  }
-  
-
-  inline double CoordZ::getSphericalTheta() const {
-    return 90.0 - latitude;
-  }
-  
-
-  inline double CoordZ::getSphericalPhi() const {
-    return longitude;
-  }
-
-
   inline const Coord operator+( const Coord& left , const Coord& right )  {
     if( !( left.isValid() && right.isValid() ) ) return Coord();
     return( Coord( (left.latitude + right.latitude), (left.longitude + right.longitude) ) );
@@ -865,7 +938,13 @@ namespace woss {
     return os;
   }
 
-    
+
+  inline ::std::ostream& operator<<( ::std::ostream& os, const CoordZ::CartCoords& instance ) {
+    os << "X = " << instance.x << "; Y = " << instance.y << "; Z = " << instance.z << "; type = " << instance.type;
+    return os;
+  }
+
+  
   inline bool operator==( const CoordZ& left, const CoordZ& right ) { 
     if ( &left == &right ) return true; 
     return( left.latitude == right.latitude && left.longitude == right.longitude && left.depth == right.depth );
@@ -904,7 +983,7 @@ namespace woss {
     return( left < right );
   }
 
-
+  
   inline ::std::ostream& operator<<( ::std::ostream& os, const CoordZ& instance ) {
     os << "Latitude = " << instance.latitude << "; Longitude = " << instance.longitude << "; Depth = " << instance.depth
        << "; Marsden square = " << instance.marsden_square
@@ -925,15 +1004,15 @@ namespace woss {
   }
 
   inline int UtmWgs84::getZone() const {
-    return zone; 
+    return zone;
   }
 
   inline double UtmWgs84::getEasting() const { 
-    return easting; 
+    return easting;
   }
 
   inline double UtmWgs84::getNorthing() const { 
-    return northing; 
+    return northing;
   }
   
   inline bool UtmWgs84::isValid() const { 

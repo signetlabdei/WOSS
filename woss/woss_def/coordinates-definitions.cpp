@@ -47,8 +47,6 @@
 using namespace woss;
 
 
-double Coord::earth_radius = 6371000.0;
-
 const double Coord::COORD_MIN_LATITUDE = -90.0;
 
 const double Coord::COORD_MAX_LATITUDE = 90.0;
@@ -56,6 +54,19 @@ const double Coord::COORD_MAX_LATITUDE = 90.0;
 const double Coord::COORD_MIN_LONGITUDE = -180.0;
 
 const double Coord::COORD_MAX_LONGITUDE = 180.0;
+
+const double Coord::EARTH_RADIUS = 6371000.0;
+
+const double Coord::EARTH_SEMIMAJOR_AXIS = 6378137.0;
+
+const double Coord::EARTH_GRS80_POLAR_RADIUS = 6356752.3141;
+
+const double Coord::EARTH_WGS84_POLAR_RADIUS = 6356752.314245;
+
+const double Coord::EARTH_GRS80_ECCENTRICITY = 0.0818191910428158;
+
+const double Coord::EARTH_WGS84_ECCENTRICITY = 0.0818191908426215;
+
 
 Coord::Coord( double lat, double lon ) 
 : latitude(lat),
@@ -171,7 +182,7 @@ double Coord::getGreatCircleDistance( const Coord& destination, double depth ) c
 
   double c = 2.0 * atan2(sqrt(a), sqrt(1.0-a));
 
-  return((earth_radius - depth) * c);
+  return((EARTH_RADIUS - depth) * c);
 }
 
 
@@ -180,10 +191,10 @@ const Coord Coord::getCoordFromBearing( const Coord& destination, double bearing
  
   double lat1 = destination.latitude * M_PI / 180.0; 
   double lon1 = destination.longitude * M_PI / 180.0;
-  double lat2 = asin( sin(lat1) * cos(distance/(earth_radius-depth)) 
-              + cos(lat1) * sin(distance/(earth_radius-depth)) * cos(bearing) );
-  double lon2 = lon1 + atan2(sin(bearing) * sin(distance/(earth_radius-depth)) * cos(lat1), 
-                             cos(distance/(earth_radius-depth)) - sin(lat1) * sin(lat2));
+  double lat2 = asin( sin(lat1) * cos(distance/(EARTH_RADIUS-depth)) 
+              + cos(lat1) * sin(distance/(EARTH_RADIUS-depth)) * cos(bearing) );
+  double lon2 = lon1 + atan2(sin(bearing) * sin(distance/(EARTH_RADIUS-depth)) * cos(lat1), 
+                             cos(distance/(EARTH_RADIUS-depth)) - sin(lat1) * sin(lat2));
 
   double ret_lat = lat2 * 180.0 / M_PI;
   double ret_long = lon2 * 180.0 / M_PI;
@@ -230,9 +241,9 @@ const Coord Coord::getCoordFromUtmWgs84( double easting, double northing, double
   }
   
   // Equatorial radius
-  double sa = 6378137.000000 ; 
+  double sa = EARTH_SEMIMAJOR_AXIS;
   // Polar radius
-  double sb = 6356752.314245 ;
+  double sb = EARTH_WGS84_POLAR_RADIUS;
   
   double e2 = ::std::pow( ( ::std::pow(sa, 2.0) - ::std::pow(sb, 2.0) ), 0.5 ) / sb;
   double e2square = ::std::pow( e2, 2.0);
@@ -323,7 +334,9 @@ Coord& woss::operator-=( Coord& left, const Coord& right ) {
   return left;
 }
 
+
 const double CoordZ::COORDZ_MIN_DEPTH = 0.0;
+
 
 CoordZ::CoordZ(double lat, double lon, double d) 
   : Coord(lat,lon),
@@ -348,37 +361,113 @@ CoordZ::CoordZ(const CoordZ& coordz)
 
 }
 
-
-double CoordZ::getCartX() const {
-  return (earth_radius - depth) * sin( (90.0 - latitude) * M_PI / 180.0 ) * cos( longitude * M_PI / 180.0 );
+CoordZ::CartCoords::CartCoords()
+: x(0.0),
+  y(0.0),
+  z(0.0),
+  type(COORDZ_SPHERE)
+{
 }
 
 
-double CoordZ::getCartY() const {
-  return (earth_radius - depth) * sin( (90.0 - latitude) * M_PI / 180.0 ) * sin( longitude * M_PI / 180.0 );
+CoordZ::CartCoords::CartCoords(double in_x, double in_y, double in_z, CoordZSpheroidType in_type)
+: x(in_x),
+  y(in_y),
+  z(in_z),
+  type(in_type)
+{
 }
 
 
-double CoordZ::getCartZ() const {
-  return (earth_radius - depth) * cos( (90.0 - latitude) * M_PI / 180.0 );
+CoordZ::CartCoords CoordZ::getCartCoords(CoordZSpheroidType type) const {
+  double latitudeRadians = M_PI / 180.0 * latitude;
+  double longitudeRadians = M_PI / 180.0 * longitude;
+  double a; // semi-major axis of earth
+  double e; // first eccentricity of earth
+  double altitude = -1.0 * depth;
+  
+  if (type == COORDZ_SPHERE) {
+    a = EARTH_RADIUS;
+    e = 0.0;
+  }
+  else if (type == COORDZ_GRS80) {
+    a = EARTH_SEMIMAJOR_AXIS;
+    e = EARTH_GRS80_ECCENTRICITY;
+  }
+  else { // if type == WGS84
+    a = EARTH_SEMIMAJOR_AXIS;
+    e = EARTH_WGS84_ECCENTRICITY;
+  }
+
+  // radius of curvature
+  double Rn = a / (sqrt(1.0 - pow(e, 2.0) * pow(sin(latitudeRadians), 2.0)));
+  double x = (Rn + altitude) * cos(latitudeRadians) * cos(longitudeRadians);
+  double y = (Rn + altitude) * cos(latitudeRadians) * sin(longitudeRadians);
+  double z = ((1 - pow (e, 2.0)) * Rn + altitude) * sin(latitudeRadians);
+
+  return CoordZ::CartCoords(x, y, z, type);
 }
-    
-    
-double CoordZ::getCartDistance( const CoordZ& coords ) const {   
-  return sqrt( pow( (coords.getCartX() - getCartX()) ,2.0) + pow( (coords.getCartY() - getCartY()) ,2.0) 
-             + pow( (coords.getCartZ() - getCartZ()) ,2.0) );
+
+
+double CoordZ::getCartX( CoordZSpheroidType type ) const {
+  return getCartCoords(type).getX();
+}
+
+
+double CoordZ::getCartY( CoordZSpheroidType type ) const {
+  return getCartCoords(type).getY();
+}
+
+
+double CoordZ::getCartZ( CoordZSpheroidType type ) const {
+  return getCartCoords(type).getZ();
+}
+
+
+double CoordZ::getSphericalRho() const {
+  return EARTH_RADIUS - depth;
+}
+
+
+double CoordZ::getSphericalTheta() const {
+  return 90.0 - latitude;
+}
+
+
+double CoordZ::getSphericalPhi() const {
+  return longitude;
+}
+
+
+double CoordZ::getCartDistance( const CoordZ& coords, CoordZSpheroidType type ) const {   
+  assert( coords.isValid() );
+
+  CartCoords my_cart_coords = getCartCoords(type);
+  CartCoords input_cart_coords = coords.getCartCoords(type);
+
+  return sqrt(   pow((my_cart_coords.getX() - input_cart_coords.getX()), 2.0)
+               + pow((my_cart_coords.getY() - input_cart_coords.getY()), 2.0)
+               + pow((my_cart_coords.getZ() - input_cart_coords.getZ()), 2.0));
 }
 
 
 double CoordZ::getCartRelAzimuth( const CoordZ& coords ) const {
-  assert( coords.isValid() );   
-  return( atan2( (coords.getCartY() - getCartY()) , (coords.getCartX() - getCartX()) )  );
+  assert( coords.isValid() );
+
+  CartCoords my_cart_coords = getCartCoords(COORDZ_SPHERE);
+  CartCoords input_cart_coords = coords.getCartCoords(COORDZ_SPHERE);
+
+  return(atan2((input_cart_coords.getY() - my_cart_coords.getY()), (input_cart_coords.getX() - my_cart_coords.getX())));
 }
 
 
 double CoordZ::getCartRelZenith( const CoordZ& coords ) const {
   assert( coords.isValid() );
-  return acos( (coords.getCartZ() - getCartZ()) / getCartDistance(coords) );
+
+  CartCoords my_cart_coords = getCartCoords(COORDZ_SPHERE);
+  CartCoords input_cart_coords = coords.getCartCoords(COORDZ_SPHERE);
+
+  return acos((input_cart_coords.getZ() - my_cart_coords.getZ()) / getCartDistance(coords));
 }
 
 
@@ -402,13 +491,15 @@ const CoordZ CoordZ::getCoordZAlongGreatCircle( const CoordZ& start, const Coord
 
 
 const CoordZ CoordZ::getCoordZAlongCartLine( const CoordZ& start, const CoordZ& end, double distance ) { 
-  double Xsorg_ = start.getCartX();
-  double Ysorg_ = start.getCartY();
-  double Zsorg_ = start.getCartZ();
+  CoordZ::CartCoords sorg_cart_coords = start.getCartCoords(COORDZ_SPHERE);
+  double Xsorg_ = sorg_cart_coords.getX();
+  double Ysorg_ = sorg_cart_coords.getY();
+  double Zsorg_ = sorg_cart_coords.getZ();
 
-//  double Xdest_ = end.getCartX();
-//  double Ydest_ = end.getCartY();
-//  double Zdest_ = end.getCartZ();
+// CartCoords end_cart_coords = end.getCartCoords(COORDZ_SPHERE);
+//  double Xdest_ = end_cart_coords.getX();
+//  double Ydest_ = end_cart_coords.getY();
+//  double Zdest_ = end_cart_coords.getZ();
 
   double azimut = start.getCartRelAzimuth( end );
   double polar = start.getCartRelZenith( end );
@@ -434,7 +525,7 @@ const CoordZ CoordZ::getCoordZAlongCartLine( const CoordZ& start, const CoordZ& 
 
   double lat = 90.0 - 180.0 / M_PI * acos( z_fin / sqrt( pow(x_fin,2.0) + pow(y_fin,2.0) + pow(z_fin,2.0) ) );
   double lon = 180.0 / M_PI * atan2( y_fin, x_fin );
-  double depth = sqrt( pow(x_fin,2.0) + pow(y_fin,2.0) + pow(z_fin,2.0) ) - earth_radius;
+  double depth = sqrt( pow(x_fin,2.0) + pow(y_fin,2.0) + pow(z_fin,2.0) ) - EARTH_RADIUS;
 
 //   ::std::cout << "lat = " << lat << ::std::endl;
 //   ::std::cout << "long = " << lon << ::std::endl;
@@ -442,8 +533,8 @@ const CoordZ CoordZ::getCoordZAlongCartLine( const CoordZ& start, const CoordZ& 
 
   return CoordZ( lat, lon, ::std::abs(depth) );
 }
-   
-    
+
+
 CoordZ& CoordZ::operator=( const CoordZ& coordz ) {
   if (this == &coordz) return *this;
   latitude = coordz.latitude;
@@ -481,70 +572,88 @@ CoordZ& woss::operator-=( CoordZ& left, const CoordZ& right ) {
 }
 
 
-const CoordZ CoordZ::getCoordZFromCartesianCoords( double x, double y, double z ) {
-  double wgs84_polarRadius = 6356752.314245;     // WGS84 ellipsoide
-  double equatorRadius = 6378137.0;
-  double e2Param = ( pow(equatorRadius,2.0) - pow(wgs84_polarRadius,2.0) ) / pow(equatorRadius,2.0);
+const CoordZ CoordZ::getCoordZFromCartesianCoords( const CartCoords& cart_coords ) {
+  return CoordZ::getCoordZFromCartesianCoords( cart_coords.getX(), cart_coords.getY(), cart_coords.getZ(), cart_coords.getType() );
+}
+
+
+const CoordZ CoordZ::getCoordZFromCartesianCoords( double x, double y, double z, CoordZSpheroidType type ) {
+  double polarRadius, equatorRadius, e2Param;
+
+  if (type == COORDZ_SPHERE) {
+    equatorRadius = EARTH_RADIUS;
+    e2Param = 0.0;
+  }
+  else if (type == COORDZ_GRS80) {
+    polarRadius = EARTH_GRS80_POLAR_RADIUS;// GRS80 ellipsoide
+    equatorRadius = EARTH_SEMIMAJOR_AXIS; 
+    e2Param = ( pow(equatorRadius, 2.0) - pow(polarRadius, 2.0) ) / pow(equatorRadius, 2.0);
+  }
+  else { // if type == COORDZ_WGS84
+    polarRadius = EARTH_WGS84_POLAR_RADIUS;// WGS84 ellipsoide
+    equatorRadius = EARTH_SEMIMAJOR_AXIS; 
+    e2Param = ( pow(equatorRadius, 2.0) - pow(polarRadius, 2.0) ) / pow(equatorRadius, 2.0);
+  }
 
   double latitude = COORD_NOT_SET_VALUE;
   double longitude = COORD_NOT_SET_VALUE;
   double altitude = COORD_NOT_SET_VALUE;
 
   // distance from the position point (P) to earth center point (origin O)
-  double op = std::sqrt ( x*x + y*y + z*z );
+  double op = std::sqrt( x*x + y*y + z*z );
 
-  if ( op > 0 ) {
+  if ( op > 0.0 ) {
     // longitude calculation
-    double lon2 = std::atan (y / x);
+    double lon2 = std::atan(y / x);
 
-    // scale longitude between -PI and PI (-180 and 180 in degrees)
-    if ( x != 0 || y != 0 ) {
-      longitude = std::atan(y/x) * 180/M_PI;
+    // scale longitude between -PI and PI (-180.0 and 180.0 in degrees)
+    if ( x != 0.0 || y != 0.0 ) {
+      longitude = std::atan(y/x) * 180.0/M_PI;
 
-      if ( x < 0 ) {
-        if ( y > 0) {
-          longitude = 180 + longitude;
+      if ( x < 0.0 ) {
+        if ( y > 0.0) {
+          longitude = 180.0 + longitude;
           lon2 = lon2 - M_PI;
         }
         else {
-          longitude = -180 + longitude;
+          longitude = -180.0 + longitude;
           lon2 = M_PI + lon2;
         }
       }
     }
 
     // Geocentric latitude
-    double latG = std::atan (z / (std::sqrt ( x*x + y*y )));
+    double latG = std::atan(z / (std::sqrt( x*x + y*y )));
 
     // Geocentric latitude (of point Q, Q is intersection point of segment OP and reference ellipsoid)
-    double latQ = std::atan (z / ( (1 - e2Param ) * (std::sqrt ( x*x + y*y ))) );
+    double latQ = std::atan(z / ( (1.0 - e2Param ) * (std::sqrt( x*x + y*y ))) );
 
     // calculate radius of the curvature
-    double rCurvature = ( equatorRadius / std::sqrt (1 - e2Param * std::sin (latQ) * std::sin (latQ)) );
+    double rCurvature = ( equatorRadius / std::sqrt(1.0 - e2Param * std::sin(latQ) * std::sin(latQ)) );
 
     // x, y, z of point Q
-    double xQ = rCurvature * std::cos (latQ) * std::cos (lon2);
-    double yQ = rCurvature * std::cos (latQ) * std::sin (lon2);
-    double zQ = rCurvature * (1 - e2Param) * std::sin (latQ);
+    double xQ = rCurvature * std::cos(latQ) * std::cos(lon2);
+    double yQ = rCurvature * std::cos(latQ) * std::sin(lon2);
+    double zQ = rCurvature * (1.0 - e2Param) * std::sin(latQ);
 
     // distance OQ
-    double oq = std::sqrt ( xQ*xQ + yQ*yQ + zQ*zQ );
+    double oq = std::sqrt( xQ*xQ + yQ*yQ + zQ*zQ );
 
     // distance PQ is OP - OQ
     double pq = op - oq;
 
     // length of the normal segment from point P of line (PO) to point T.
     // T is intersection point of linen the PO normal and ellipsoid normal from point Q.
-    double tp = pq * std::sin (latG - latQ);
+    double tp = pq * std::sin(latG - latQ);
 
-    double lat_radians = latQ + tp / op * std::cos (latQ - latG);
-    latitude = lat_radians*180/M_PI;
+    double lat_radians = latQ + tp / op * std::cos(latQ - latG);
+    latitude = lat_radians*180.0/M_PI;
 
-    altitude = pq * std::cos (latQ - latG);
+    altitude = pq * std::cos(latQ - latG);
 
-    //std::cout << "lat new = " << latitude << std::endl;
-    //std::cout << "lon new = " << longitude << std::endl;
-    //std::cout << "alt new = " << altitude << std::endl;
+//    std::cout << "lat new = " << latitude << std::endl;
+//    std::cout << "lon new = " << longitude << std::endl;
+//    std::cout << "alt new = " << altitude << std::endl;
   }
 
   return CoordZ( latitude, longitude, ::std::abs(altitude) );
@@ -553,9 +662,9 @@ const CoordZ CoordZ::getCoordZFromCartesianCoords( double x, double y, double z 
 
 const CoordZ CoordZ::getCoordZFromSphericalCoords( double rho, double theta, double phi ) {
   // we want to be underwater!
-  assert(rho <= earth_radius);
+  assert(rho <= EARTH_RADIUS);
 	
-  return CoordZ( (90.0 - theta), phi, ::std::abs(earth_radius - rho) );
+  return CoordZ( (90.0 - theta), phi, ::std::abs(EARTH_RADIUS - rho) );
 }
 
 
@@ -572,57 +681,57 @@ const UtmWgs84 UtmWgs84::getUtmWgs84FromCoord(const Coord& coords) {
   double longitude = coords.getLongitude();
   //std::cout << "lat " << latitude << " long " << longitude << std::endl;
 
-  double falseEasting = 500000;
-  double falseNorthing = 10000000;
+  double falseEasting = 500000.0;
+  double falseNorthing = 10000000.0;
 
-  int zone = floor((longitude + 180)/6) + 1;
+  int zone = floor((longitude + 180.0)/6.0) + 1;
   //std::cout << "UTM zone " << zone << std::endl;
-  double lambda0 = ((zone-1)*6 - 180 + 3)*M_PI / 180;//central meridian
+  double lambda0 = ((zone-1)*6.0 - 180.0 + 3.0)*M_PI / 180.0;//central meridian
 
-  double phi = latitude*M_PI/180;
-  double lambda = longitude*M_PI/180 - lambda0;
+  double phi = latitude*M_PI/180.0;
+  double lambda = longitude*M_PI/180.0 - lambda0;
  
-  double a = 6378137;
+  double a = Coord::EARTH_SEMIMAJOR_AXIS;
   double f = 1/298.2572215381486;
 
   double k0 = 0.9996;
 
-  double e = sqrt(f*(2-f));
-  double n = f/(2-f);
-  double n2 = pow(n,2);
-  double n3 = pow(n,3);
-  double n4 = pow(n,4);
-  double n5 = pow(n,5);
-  double n6 = pow(n,6);
+  double e = sqrt(f*(2.0-f));
+  double n = f/(2.0-f);
+  double n2 = pow(n,2.0);
+  double n3 = pow(n,3.0);
+  double n4 = pow(n,4.0);
+  double n5 = pow(n,5.0);
+  double n6 = pow(n,6.0);
 
   double cosLambda = cos(lambda);
   double sinLambda = sin(lambda);
 
   double tau = tan(phi);
-  double sigma = sinh(e*atanh(e*tau / sqrt(1+pow(tau,2)) ));
+  double sigma = sinh(e*atanh(e*tau / sqrt(1.0+pow(tau,2.0)) ));
 
-  double tau_prime = tau*sqrt(1+ pow(sigma,2)) - sigma*sqrt(1 +pow(tau,2));
+  double tau_prime = tau*sqrt(1.0 + pow(sigma,2.0)) - sigma*sqrt(1.0 +pow(tau,2.0));
 
   double epsilon_prime = atan2(tau_prime, cosLambda);
-  double eta_prime = asinh(sinLambda/ sqrt( pow(tau_prime,2) + pow(cosLambda,2)));
+  double eta_prime = asinh(sinLambda/ sqrt( pow(tau_prime,2.0) + pow(cosLambda,2.0)));
 
-  double A = a/(1+n) * (1 + 1.0/4*n2 + 1.0/64*n4 + 1.0/256*n6);
-  double alpha[] = {0,
-        1.0/2*n - 2.0/3*n2 + 5.0/16*n3 + 41.0/180*n4 -127.0/288*n5 + 7891.0/37800*n6,
-        13.0/48*n2 - 3.0/5*n3 + 557.0/1440*n4 + 281.0/630*n5 - 1983433.0/1935360*n6,
-        61.0/240*n3 - 103.0/140*n4 + 15061.0/26880*n5 + 167603.0/181440*n6,
-        49561.0/161280*n4 - 179.0/168*n5 + 6601661.0/7257600*n6,
-        34729.0/80640*n5 - 3418889.0/1995840*n6,
-        212378941.0/319334400*n6};
+  double A = a/(1.0+n) * (1.0 + 1.0/4.0*n2 + 1.0/64.0*n4 + 1.0/256.0*n6);
+  double alpha[] = {0.0,
+        1.0/2.0*n - 2.0/3.0*n2 + 5.0/16.0*n3 + 41.0/180.0*n4 -127.0/288.0*n5 + 7891.0/37800.0*n6,
+        13.0/48.0*n2 - 3.0/5.0*n3 + 557.0/1440.0*n4 + 281.0/630.0*n5 - 1983433.0/1935360.0*n6,
+        61.0/240.0*n3 - 103.0/140.0*n4 + 15061.0/26880.0*n5 + 167603.0/181440.0*n6,
+        49561.0/161280.0*n4 - 179.0/168*n5 + 6601661.0/7257600.0*n6,
+        34729.0/80640.0*n5 - 3418889.0/1995840.0*n6,
+        212378941.0/319334400.0*n6};
   double epsilon = epsilon_prime;
 
   for(int j = 1; j<=6; j++) {
-    epsilon += alpha[j]*sin(2*j*epsilon_prime)*cosh(2*j*eta_prime);
+    epsilon += alpha[j]*sin(2.0*j*epsilon_prime)*cosh(2.0*j*eta_prime);
   }
 
   double eta = eta_prime;
   for(int j = 1; j<=6; j++) {
-    eta += alpha[j]*cos(2*j*epsilon_prime)*sinh(2*j*eta_prime);
+    eta += alpha[j]*cos(2.0*j*epsilon_prime)*sinh(2.0*j*eta_prime);
   }
 
   double x = k0*A*eta;
@@ -630,7 +739,7 @@ const UtmWgs84 UtmWgs84::getUtmWgs84FromCoord(const Coord& coords) {
 
   x = x + falseEasting;
 
-  if(y<0)
+  if(y<0.0)
       y = y + falseNorthing; 
 
   return UtmWgs84(zone,x,y);
