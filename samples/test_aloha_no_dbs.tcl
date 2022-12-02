@@ -108,12 +108,12 @@ set ssp_creator         [new "WOSS/Definitions/SSP"]
 set sediment_creator    [new "WOSS/Definitions/Sediment"]
 set pressure_creator    [new "WOSS/Definitions/Pressure"]
 set time_arr_creator    [new "WOSS/Definitions/TimeArr"]
-set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
-# set altimetry_creator   [new "WOSS/Definitions/Altimetry/Flat"]
+#set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+set altimetry_creator   [new "WOSS/Definitions/Altimetry/Flat"]
 set time_reference      [new "WOSS/Definitions/TimeReference/NS2"]
 set transducer_creator  [new "WOSS/Definitions/Transducer"]
-# set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
-set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
+set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
+#set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
 $rand_generator initialize
 
 #### we plug the chosen prototypes into the woss::DefinitionHandler
@@ -145,26 +145,27 @@ set db_res_arr [new "WOSS/Creator/Database/Binary/Results/TimeArr"]
 $db_res_arr setDbPathName "${opt(db_res_path)}/test_aloha_no_dbs_res_arr.dat"
 
 
-WOSS/Database/Manager set debug 0
-
 WOSS/Definitions/Altimetry/Flat set evolution_time_quantum   -1
 WOSS/Definitions/Altimetry/Flat set range                    -1
 WOSS/Definitions/Altimetry/Flat set total_range_steps        -1
 WOSS/Definitions/Altimetry/Flat set depth                    0.0
 set cust_altimetry   [new "WOSS/Definitions/Altimetry/Flat"]
 
-# WOSS/Definitions/Altimetry/Bretschneider set evolution_time_quantum   -1
-# WOSS/Definitions/Altimetry/Bretschneider set range                    -1
-# WOSS/Definitions/Altimetry/Bretschneider set total_range_steps        3000
-# WOSS/Definitions/Altimetry/Bretschneider set characteristic_height    1.5
-# WOSS/Definitions/Altimetry/Bretschneider set average_period           3.0
-# set cust_altimetry   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+#WOSS/Definitions/Altimetry/Bretschneider set evolution_time_quantum   -1
+#WOSS/Definitions/Altimetry/Bretschneider set range                    -1
+#WOSS/Definitions/Altimetry/Bretschneider set total_range_steps        -1
+#WOSS/Definitions/Altimetry/Bretschneider set characteristic_height    1.5
+#WOSS/Definitions/Altimetry/Bretschneider set average_period           3.0
+#set cust_altimetry   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+
+$cust_altimetry setDebug 0
 
 #### We create the mandatory woss::WossDbManager and we set a custom sediment and SSP for ALL
 #### the channel computations involved.
 #### we also create a custom bathymetry: it is a line that starts at ($opt(start_lat), $opt(start_long)), it is valid
 #### for all bearings, and has four range/depth points. WossDbManager will provide bathymetry for (lat, long) points
 #### selecting the closest point from its custom bathymetry. 
+WOSS/Database/Manager set debug 0
 set db_manager [new "WOSS/Database/Manager"]
 $db_manager setCustomSediment   "Test Sedim" 1560 200 1.5 0.9 0.8 1.0
 $db_manager setCustomAltimetry  $cust_altimetry
@@ -212,16 +213,16 @@ $woss_creator setSimulationTimes    0 0 1 12 2009 0 0 1 1 12 2009 0 0 1
 ### choose between single-threaded or multithreaded WossManager
 ### by uncomment/comment the followings lines
 
-WOSS/Manager/Simple set debug                       0
-WOSS/Manager/Simple set is_time_evolution_active  -1.0
-WOSS/Manager/Simple set space_sampling              0.0
-set woss_manager [new "WOSS/Manager/Simple"]
+#WOSS/Manager/Simple set debug                       0
+#WOSS/Manager/Simple set is_time_evolution_active  -1.0
+#WOSS/Manager/Simple set space_sampling              0.0
+#set woss_manager [new "WOSS/Manager/Simple"]
 
-#WOSS/Manager/Simple/MultiThread set debug                     0.0
-#WOSS/Manager/Simple/MultiThread set is_time_evolution_active  -1.0
-#WOSS/Manager/Simple/MultiThread set space_sampling            0.0
-#WOSS/Manager/Simple/MultiThread set concurrent_threads        0
-#set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
+WOSS/Manager/Simple/MultiThread set debug                     0.0
+WOSS/Manager/Simple/MultiThread set is_time_evolution_active  -1.0
+WOSS/Manager/Simple/MultiThread set space_sampling            0.0
+WOSS/Manager/Simple/MultiThread set concurrent_threads        0
+set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
 
 
 #### we create the mandatory woss::TransducerHandler
@@ -232,7 +233,8 @@ set transducer_handler [new "WOSS/Definitions/TransducerHandler"]
 #### we connect everything to the woss::WossController and we initialize it
 WOSS/Controller set debug 0
 set woss_controller [new "WOSS/Controller"]
-$woss_controller setTimeArrResultsDbCreator  $db_res_arr
+#uncomment if you wish to store results to a db on filesystem
+#$woss_controller setTimeArrResultsDbCreator  $db_res_arr
 $woss_controller setWossDbManager            $db_manager
 $woss_controller setWossManager              $woss_manager
 $woss_controller setWossCreator              $woss_creator

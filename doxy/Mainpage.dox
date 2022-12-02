@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.12.3
+ * @version 1.12.4
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -156,7 +156,7 @@
  *         from the World Ocean Atlas database of 2001 [7], 2005 [8], 2009 [9], 2013 [10] and 2018 [11] 
  *         [woss::SspWoa2005Db, woss::SspWoa2005DbCreator];
  *    <li> interface implementation for the GEBCO NetCDF bathymetry databases 
- *         (all versions: 1D, 2D, 2008, 2014, 2019, 2020) [12], [woss::BathyGebcoDb, woss::BathyGebcoDbCreator];
+ *         (all versions: 1D, 2D, 2008, 2014, 2019, 2020, 2021, 2022) [12], [woss::BathyGebcoDb, woss::BathyGebcoDbCreator];
  *    <li> interface implementation and custom NetCDF data analysis taken from the DECK41 database, 
  *         for bottom sediments composition [13], [woss::SedimDeck41Db, woss::SedimDeck41DbCreator, woss::SedimDeck41CoordDb,
  *         woss::SedimDeck41MarsdenDb, woss::SedimDeck41MarsdenOneDb];
@@ -1061,7 +1061,7 @@
  *    <li> If you wish to add NS-Miracle support, download the <b>latest</b> version of NS-Miracle from the official git repository as instructed <a href="http://telecom.dei.unipd.it/pages/read/58/">here</a>: \n
  *         Read documentation provided in the above link for installation instructions.
  *    <li> If you wish to use WOSS with world data, download and extract the provided databases. 
- *         Download the <a href="https://www.bodc.ac.uk/data/open_download/gebco/gebco_2020/zip/">GEBCO 2020 2D Fifteen seconds zip archive</a> 
+ *         Download the <a href="https://www.bodc.ac.uk/data/open_download/gebco/gebco_2022/zip/">GEBCO 2022 2D Fifteen seconds zip archive</a> 
  *         or any of the <a href="https://www.gebco.net/data_and_products/historical_data_sets">previous data sets</a> 
  *         and put them in the same directory.
  * </ul>
@@ -1298,6 +1298,14 @@
 *                      </ul>
 *  <li> <b>v.1.12.3</b> <ul>
 *                            <li> New geographical to cartesian conversion model, based on spherical, GRS80 and WGS84 models
+*                      </ul>
+*  <li> <b>v.1.12.4</b> <ul>
+*                            <li> Added support for GEBCO 2022
+*                            <li> Fixed TCL samples
+*                            <li> Refactor of function member's static variables in order to guarantee re-entrancy
+*                            <li> Fixed bug with WossDbManager
+*                            <li> Added TCL debug capabilities to Altimetry classes
+*                            <li> Refactored usage of streams' precision throughout the whole framework
 *                      </ul>
 * </ul>
 **/

@@ -38,7 +38,6 @@
 
 
 #include <cstdlib>
-#include <definitions.h>
 #include <altimetry-definitions.h>
 #include "bellhop-woss.h"
 
@@ -118,6 +117,7 @@ BellhopWoss::BellhopWoss()
   using_press_mode(false),
   using_time_arrival_mode(false),
   normalized_ssp_map(),
+  randomized_ssp_map(),
   box_depth(BELLHOP_NOT_SET),
   box_range(BELLHOP_NOT_SET),
   f_out()
@@ -168,6 +168,7 @@ BellhopWoss::BellhopWoss(const CoordZ& tx, const CoordZ& rx, const Time& start_t
   using_press_mode(false),
   using_time_arrival_mode(false),
   normalized_ssp_map(),
+  randomized_ssp_map(),
   box_depth(BELLHOP_NOT_SET),
   box_range(BELLHOP_NOT_SET),
   f_out()
@@ -182,7 +183,10 @@ BellhopWoss::~BellhopWoss() {
     delete it->second;
     it->second = NULL;
   }
-
+  for ( NSMIter it = randomized_ssp_map.begin(); it != randomized_ssp_map.end(); it++ ) {
+    delete it->second;
+    it->second = NULL;
+  }
 }
 
 
@@ -283,7 +287,6 @@ void BellhopWoss::normalizeDbSSP() {
 
 void BellhopWoss::writeNormalizedSSP( int curr_run ) {
   bool using_ssp_file;
-  static NormSSPMap randomized_ssp_map;
 
   if (normalized_ssp_map.size() > 1) 
     using_ssp_file = true;
@@ -342,8 +345,10 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
     }
      
     ::std::ofstream ssp_out ( ssp_file.c_str() );
-    ssp_out.precision(18);
-   
+    assert ( ssp_out.is_open() );
+
+    ssp_out.precision(WOSS_DECIMAL_PRECISION);
+
     /*
      * Bellhop does NOT extrapolate SSP
      * Therefore we need to add two additional SSPs
@@ -550,7 +555,10 @@ void BellhopWoss::writeBathymetryFile() {
   ::std::ofstream baty_out (bathymetry_file.c_str());
   assert ( baty_out.is_open() );
 
+  baty_out.precision(WOSS_DECIMAL_PRECISION);
+
   ::std::stringstream temp_buffer;
+  temp_buffer.precision(WOSS_DECIMAL_PRECISION);
 
   double prev_depth = BELLHOP_NOT_SET;
 
@@ -574,7 +582,8 @@ void BellhopWoss::writeBathymetryFile() {
         total_same_values--;
         has_last_value_to_write = false;
         
-        temp_buffer << ::std::setw(18) << (range_vector[i-1]/1000.0) << ::std::setw(18) 
+        temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i-1]/1000.0) 
+                    << ::std::setw(WOSS_STREAM_TAB_SPACE) 
                     << ::std::min( prev_depth, max_normalized_ssp_depth ) << ::std::endl;
       
         if (debug) 
@@ -583,7 +592,7 @@ void BellhopWoss::writeBathymetryFile() {
       }
       prev_depth = curr_depth;
 
-      temp_buffer << ::std::setw(18) << (range_vector[i]/1000.0) << ::std::setw(18) 
+      temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) << ::std::setw(WOSS_STREAM_TAB_SPACE) 
                   << ::std::min( curr_depth, max_normalized_ssp_depth ) << ::std::endl;
 
       if (debug) 
@@ -606,19 +615,21 @@ void BellhopWoss::writeBathymetryFile() {
       if (curr_depth != prev_depth && i > 0) {
         written_values++;
 
-        temp_buffer << ::std::setw(18) << (range_vector[i]/1000.0) << ::std::setw(18) 
-                    << ::std::min( (prev_depth+curr_depth)/2, max_normalized_ssp_depth ) << ::std::endl;
+        temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) 
+                    << ::std::setw(WOSS_STREAM_TAB_SPACE) 
+                    << ::std::min( (prev_depth+curr_depth)/2.0, max_normalized_ssp_depth ) << ::std::endl;
 
         if (debug) 
           ::std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() value change: i = " << i 
                       << "; range = " << range_vector[i]
-                      << "; depth = " << ::std::min( (prev_depth+curr_depth)/2, max_normalized_ssp_depth ) << ::std::endl;
+                      << "; depth = " << ::std::min( (prev_depth+curr_depth)/2.0, max_normalized_ssp_depth ) << ::std::endl;
 
       }
       else if (i == 0 || i == ((int) coordz_vector.size())-1) { //On first and last point, use the actual value
         written_values++;
 
-        temp_buffer << ::std::setw(18) << (range_vector[i]/1000.0) << ::std::setw(18)
+        temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) 
+                    << ::std::setw(WOSS_STREAM_TAB_SPACE)
                     << ::std::min( curr_depth, max_normalized_ssp_depth ) << ::std::endl;
 
         if (debug) 
@@ -644,6 +655,7 @@ void BellhopWoss::writeBathymetryFile() {
 void BellhopWoss::writeBeamPatternFile() {
   ::std::ofstream beam_out ( beam_pattern_file.c_str() );
   assert ( beam_out.is_open() );
+  beam_out.precision(WOSS_DECIMAL_PRECISION);
   transducer->writeVertBeamPattern( beam_out, tx_coordz, rx_coordz, bp_initial_bearing, bp_vertical_rotation, bp_horizontal_rotation, bp_mult_costant, bp_add_costant );
   beam_out.close();
 }
@@ -652,10 +664,10 @@ void BellhopWoss::writeBeamPatternFile() {
 void BellhopWoss::writeAltimetryFile( int curr_run ) { 
   ::std::ofstream aty_out (altimetry_file.c_str());
   assert ( aty_out.is_open() );
-  aty_out.precision(18);
+  aty_out.precision(WOSS_DECIMAL_PRECISION);
   
   ::std::stringstream temp_buffer;
-  temp_buffer.precision(18);
+  temp_buffer.precision(WOSS_DECIMAL_PRECISION);
   
   double prev_depth = BELLHOP_NOT_SET;
   int total_same_values = 0;
@@ -692,19 +704,19 @@ void BellhopWoss::writeAltimetryFile( int curr_run ) {
       total_same_values--;
       has_last_value_to_write = false;
       
-      temp_buffer << ::std::setw(25) << (range_vector[range_counter-1]/1000.0) << ::std::setw(25) 
-                  << prev_depth << ::std::endl;
-    
+      temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[range_counter-1]/1000.0) 
+                  << ::std::setw(WOSS_STREAM_TAB_SPACE) << prev_depth << ::std::endl;
+
       if (debug) ::std::cout << "BellhopWoss(" << woss_id << ")::writeAltimetryFile() range = " 
                              << range_vector[range_counter-1]
                              << "; depth = " << prev_depth << ::std::endl;
     }                   
     prev_depth = curr_depth;
 
-    temp_buffer << ::std::setw(25) << (range_vector[range_counter]/1000.0) << ::std::setw(25) 
-                << curr_depth << ::std::endl;
+    temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[range_counter]/1000.0) 
+                << ::std::setw(WOSS_STREAM_TAB_SPACE) << curr_depth << ::std::endl;
 
-//     ::std::cout.precision(18);
+//     ::std::cout.precision(WOSS_DECIMAL_PRECISION);
     if (debug) ::std::cout << "BellhopWoss(" << woss_id << ")::writeAltimetryFile() range = " 
                            << range_vector[range_counter]
                            << "; depth = " << curr_depth << ::std::endl;
@@ -855,7 +867,7 @@ void BellhopWoss::writeCfgFiles( double curr_frequency, int curr_run ) {
   
   f_out.open(bellhop_env_file.c_str());
   assert( f_out.is_open() );
-  f_out.precision(18);
+  f_out.precision(WOSS_DECIMAL_PRECISION);
   
   writeBathymetryFile();
   

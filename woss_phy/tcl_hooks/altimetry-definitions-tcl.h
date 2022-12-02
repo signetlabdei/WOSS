@@ -60,6 +60,24 @@ namespace woss {
      
     AltimetryTcl();
     
+    /**
+    * TCL command interpreter. It implements the following OTcl methods:
+    * <ul>
+    *  <li><b>setDebug &lt;<i>debug value</i>&gt;</b>: 
+    *      <b>optional</b> command that configures the Altimetry debug flag
+    * </ul>
+    * 
+    * Moreover it inherits all the OTcl method of TclObject
+    * 
+    * 
+    * @param argc number of arguments in <i>argv</i>
+    * @param argv array of strings which are the comand parameters (Note that argv[0] is the name of the object)
+    * 
+    * @return TCL_OK or TCL_ERROR whether the command has been dispatched succesfully or no
+    * 
+    **/
+    virtual int command( int argc, const char*const* argv );
+    
   };
 
 	
@@ -73,8 +91,25 @@ namespace woss {
   public:
     
     AltimBretschneiderTcl();
-    
-  };  
+
+    /**
+    * TCL command interpreter. It implements the following OTcl methods:
+    * <ul>
+    *  <li><b>setDebug &lt;<i>debug value</i>&gt;</b>: 
+    *      <b>optional</b> command that configures the Altimetry debug flag
+    * </ul>
+    * 
+    * Moreover it inherits all the OTcl method of TclObject
+    * 
+    * 
+    * @param argc number of arguments in <i>argv</i>
+    * @param argv array of strings which are the comand parameters (Note that argv[0] is the name of the object)
+    * 
+    * @return TCL_OK or TCL_ERROR whether the command has been dispatched succesfully or no
+    * 
+    **/
+    virtual int command( int argc, const char*const* argv );
+  };
 
 
 }

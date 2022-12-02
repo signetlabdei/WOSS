@@ -91,7 +91,7 @@ namespace woss {
     * @param end_rx_range end receiver range [m]
     * @return a valid Pressure value; a not valid Pressure if arr_file hasn't been read yet
     **/  
-    virtual Pressure* readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) const;
+    virtual Pressure* readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range );
 
     /**
     * Gets a Pressure value for given range, depths. Returned Pressure is the coherent sum of the computed 
@@ -144,6 +144,18 @@ namespace woss {
     */
     ArrData arr_file;
 
+    double last_tx_depth;
+
+    double last_start_rx_depth;
+
+    double last_start_rx_range;
+
+    double last_end_rx_depth;
+
+    double last_end_rx_range;
+
+    ::std::complex<double> last_ret_value;
+
 
     /**
     * Gets the TimeArr value from ArrData TimeArr array associated to given parameters
@@ -165,7 +177,7 @@ namespace woss {
     * @param end_rx_range end receiver range [m]
     * @return a valid Pressure value; a not valid Pressure if arr_file hasn't been read yet
     **/  
-    ::std::complex<double> readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) const;
+    ::std::complex<double> readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range );
 
 
     /**

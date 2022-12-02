@@ -193,14 +193,14 @@ Sediment* WossDbManager::getSediment( const CoordZ& tx_coord, const CoordZ& rx_c
 Sediment* WossDbManager::getSediment( const CoordZ& tx_coord, const CoordZVector& rx_coordz_vector ) const { 
   Sediment* ptr = NULL;
   
-  static ::std::map< ::std::string, ::std::vector<Sediment*> > sedim_map;
+  ::std::map< ::std::string, ::std::vector<Sediment*> > sedim_map;
   
   if ( ccsediment_map.empty() ) goto db_sediment;
 
   for ( int i = 0; i < (int) rx_coordz_vector.size(); i++ ) {
     ptr = getSediment( tx_coord, rx_coordz_vector[i] );
     if ( ptr != NULL ) { 
-      sedim_map[ptr->getType()].push_back(ptr); 
+      sedim_map[ptr->getType()].push_back(ptr);
     }
   }
   
@@ -227,11 +227,11 @@ Sediment* WossDbManager::getSediment( const CoordZ& tx_coord, const CoordZVector
         delete (it->second)[i];
         it->second[i] = NULL;
       }
-      sedim_map.clear();
-      
+
       if (debug) ::std::cout << "WossDbManager::getSediment() after delete it->second.size() = " << it->second.size() << ::std::endl;
-      
     }
+    sedim_map.clear();
+
     return ptr;
   } 
   else goto db_sediment;

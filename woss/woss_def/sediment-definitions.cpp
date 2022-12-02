@@ -48,10 +48,7 @@ using namespace woss;
 
 bool Sediment::debug = false;
 
-::std::stringstream Sediment::sstream;
-  
-    
-Sediment::Sediment() 
+Sediment::Sediment()
 : type(),
   depth(SEDIMENT_NOT_SET_VALUE),
   vel_c(SEDIMENT_NOT_SET_VALUE),
@@ -64,8 +61,7 @@ Sediment::Sediment()
 }
 
 Sediment::Sediment( const ::std::string& name, double velc, double vels, double dens, double attc, double atts, double bottom ) 
-: 
-  type(name),
+: type(name),
   depth(bottom),
   vel_c(velc),
   vel_s(vels),
@@ -102,37 +98,47 @@ Sediment& Sediment::operator=( const Sediment& copy ) {
 
 
 const ::std::string Sediment::getStringValues() const {
-  Sediment::sstream.str("");
-  Sediment::sstream << vel_c << " " << vel_s << " " << density << " " << att_c << " " << att_s;
-  return Sediment::sstream.str(); 
+  ::std::stringstream sstream;
+
+  sstream.str("");
+  sstream << vel_c << " " << vel_s << " " << density << " " << att_c << " " << att_s;
+  return sstream.str(); 
 }
 
 
 const Sediment woss::operator/( const double left, const Sediment& right ) {
-  Sediment::sstream.str("");
-  Sediment::sstream << "( " << right.type << " / " << left << " )";
-  return( Sediment( Sediment::sstream.str(), left / right.vel_c, left / right.vel_s, left / right.density, left / right.att_c, left / right.att_s ) );
+  ::std::stringstream sstream;
+
+  sstream.str("");
+  sstream << "( " << right.type << " / " << left << " )";
+  return( Sediment( sstream.str(), left / right.vel_c, left / right.vel_s, left / right.density, left / right.att_c, left / right.att_s ) );
 }
 
 
 const Sediment woss::operator*( const double left, const Sediment& right ) {
-  Sediment::sstream.str("");
-  Sediment::sstream << "( " << right.type << " * " << left << " )";
-  return( Sediment( Sediment::sstream.str(), left * right.vel_c, left * right.vel_s, left * right.density, left * right.att_c, left * right.att_s ) );
+  ::std::stringstream sstream;
+
+  sstream.str("");
+  sstream << "( " << right.type << " * " << left << " )";
+  return( Sediment( sstream.str(), left * right.vel_c, left * right.vel_s, left * right.density, left * right.att_c, left * right.att_s ) );
 }
 
 
 const Sediment woss::operator/( const Sediment& left, const double right ) {
-  Sediment::sstream.str("");
-  Sediment::sstream << "( " << left.type << " / " << right << " )";
-  return( Sediment( Sediment::sstream.str(), right / left.vel_c, right / left.vel_s, right / left.density, right / left.att_c, right / left.att_s ) );
+  ::std::stringstream sstream;
+
+  sstream.str("");
+  sstream << "( " << left.type << " / " << right << " )";
+  return( Sediment( sstream.str(), right / left.vel_c, right / left.vel_s, right / left.density, right / left.att_c, right / left.att_s ) );
 }
 
 
 const Sediment woss::operator*( const Sediment& left, const double right ) {
-  Sediment::sstream.str("");  
-  Sediment::sstream << "( " << left.type << " * " << right << " )";
-  return( Sediment( Sediment::sstream.str(), right * left.vel_c, right * left.vel_s, right * left.density, right * left.att_c, right * left.att_s ) );
+  ::std::stringstream sstream;
+
+  sstream.str("");  
+  sstream << "( " << left.type << " * " << right << " )";
+  return( Sediment( sstream.str(), right * left.vel_c, right * left.vel_s, right * left.density, right * left.att_c, right * left.att_s ) );
 }
 
 
@@ -186,10 +192,12 @@ Sediment& woss::operator*=( Sediment& left, const Sediment& right ) {
 
 
 Sediment& woss::operator+=( Sediment& left, double right ) {
-  Sediment::sstream.str("");  
-  Sediment::sstream << left.type << " + " << right;
+  ::std::stringstream sstream;
+
+  sstream.str("");  
+  sstream << left.type << " + " << right;
   
-  left.type = Sediment::sstream.str();
+  left.type = sstream.str();
   left.vel_c += right;
   left.vel_s += right;
   left.density += right;
@@ -200,10 +208,12 @@ Sediment& woss::operator+=( Sediment& left, double right ) {
 
 
 Sediment& woss::operator-=( Sediment& left, double right ) {
-  Sediment::sstream.str("");  
-  Sediment::sstream << left.type << " - " << right;
+  ::std::stringstream sstream;
+
+  sstream.str("");  
+  sstream << left.type << " - " << right;
   
-  left.type = Sediment::sstream.str();
+  left.type = sstream.str();
   left.vel_c -= right;
   left.vel_s -= right;
   left.density -= right;
@@ -214,10 +224,12 @@ Sediment& woss::operator-=( Sediment& left, double right ) {
 
 
 Sediment& woss::operator/=( Sediment& left, double right ) {
-  Sediment::sstream.str("");  
-  Sediment::sstream << left.type << " / " << right;
+  ::std::stringstream sstream;
+
+  sstream.str("");
+  sstream << left.type << " / " << right;
   
-  left.type = Sediment::sstream.str();
+  left.type = sstream.str();
   left.vel_c /= right;
   left.vel_s /= right;
   left.density /= right;
@@ -228,10 +240,12 @@ Sediment& woss::operator/=( Sediment& left, double right ) {
 
 
 Sediment& woss::operator*=( Sediment& left, double right ) {
-  Sediment::sstream.str("");  
-  Sediment::sstream << left.type << " * " << right;
+  ::std::stringstream sstream;
+
+  sstream.str("");  
+  sstream << left.type << " * " << right;
   
-  left.type = Sediment::sstream.str();
+  left.type = sstream.str();
   left.vel_c *= right;
   left.vel_s *= right;
   left.density *= right;

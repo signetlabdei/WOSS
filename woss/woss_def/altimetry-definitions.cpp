@@ -53,7 +53,7 @@
 using namespace woss;
 
 
-bool Altimetry::debug = false; //false;
+bool Altimetry::debug = false;
 
 
 Altimetry::Altimetry()
@@ -123,7 +123,7 @@ Altimetry::Altimetry( double altimetry, double range )
 bool Altimetry::isValid() const { 
 //   ::std::cout << "Altimetry::isValid() " << ::std::endl;
   
-  if ( altimetry_map.size() < 1 ) return false; 
+  if ( altimetry_map.size() < 1 ) return false;
   return true;
 }
 
@@ -167,20 +167,20 @@ AltCIt Altimetry::at( const int position ) const {
 
 Altimetry* Altimetry::crop( double range_start, double range_end ) {
   if ( !isValid() ) return( new Altimetry(Altimetry::createNotValid()) );
-								  
+
   AltimetryMap temp_map;
-	
-// 	int i = 0;
+
+  int i = 0;
   for ( AltIt it = altimetry_map.begin(); it != altimetry_map.end(); it++) {
     if ( it->first >= PDouble(range_start, range_precision) 
       && it->first < PDouble(range_end, range_precision) ) {
-	
-// 	std::cout << "Altimetry::crop() index " << i << "; range_start " << range_start << "; range_end " << range_end 
-// 	          << "; time value " << it->first << "; att " << it->second << std::endl;
-
+      if (debug) {
+        std::cout << "Altimetry::crop() index " << i << "; range_start " << range_start << "; range_end " << range_end 
+                  << "; time value " << it->first << "; att " << it->second << std::endl;
+      }
       temp_map[it->first] = it->second;
     }
-// 		++i;
+    ++i;
   }
   return( create(temp_map) );	
 }
@@ -191,20 +191,21 @@ Altimetry* Altimetry::randomize( double perc_incr_value ) const {
 
   assert( perc_incr_value > 0.0 && perc_incr_value <= 1.0 );
 
-  static AltimetryMap new_altimetry;
-  
-  new_altimetry.clear();
-   
+  AltimetryMap* new_altimetry = new AltimetryMap();
+
+  new_altimetry->clear();
+
   double sign = 1.0;
-  
+
   for( AltCIt it = altimetry_map.begin(); it != altimetry_map.end(); it++ ) {
     if ( SDefHandler::instance()->getRand() >= 0.5 ) sign = 1.0;
     else sign = -1.0;
-    new_altimetry[it->first] = it->second + sign * ( SDefHandler::instance()->getRand() ) * ( it->second * perc_incr_value);
+    (*new_altimetry)[it->first] = it->second + sign * ( SDefHandler::instance()->getRand() ) * ( it->second * perc_incr_value);
   }
-  
-  Altimetry* ret_val = new Altimetry( new_altimetry );
+
+  Altimetry* ret_val = new Altimetry( *new_altimetry );
   ret_val->updateMinMaxAltimetryValues();
+  delete new_altimetry;
   return( ret_val );
 }
 
@@ -213,7 +214,7 @@ Altimetry* Altimetry::timeEvolve( const Time& time_value ) {
   if ( debug ) ::std::cout << "Altimetry::timeEvolve() time_value = " 
                            << time_value << "; evolution_time_quantum = " << evolution_time_quantum << ::std::endl;
   
-  if ( evolution_time_quantum < 0.0 || !time_value.isValid() ) return clone();  
+  if ( evolution_time_quantum < 0.0 || !time_value.isValid() ) return clone();
   Time t_value = time_value;
   
 //   if ( t_value > end_time ) t_value = end_time;
@@ -229,15 +230,13 @@ Altimetry* Altimetry::timeEvolve( const Time& time_value ) {
     || ( time_difference == -1.0 ) ) {
     last_evolution_time = t_value; 
     return randomize( ALTIMETRY_DEFAULT_RANDOMIZATION );
-  }  
+  }
   return clone();
 }
 
 
 bool Altimetry::initialize()
 {
-//   ::std::cout << "Altimetry::initialize() " << ::std::endl;
-  
   if ( isValid() == false ) return false;
   range_precision = ::std::ceil(range/total_range_steps);
 
@@ -421,10 +420,8 @@ AltimBretschneider& AltimBretschneider::operator=( const AltimBretschneider& cop
 
 
 bool AltimBretschneider::initialize() {
-//   ::std::cout << "AltimBretschneider::initialize()" << ::std::endl;
-  
   if (!AltimBretschneider::isValid()) return false;
-  
+
   range_precision = range / (double)total_range_steps;
   createWaveSpectrum();
   return true;
@@ -432,12 +429,13 @@ bool AltimBretschneider::initialize() {
     
     
 bool AltimBretschneider::isValid() const {
-  
-//   ::std::cout << "AltimBretschneider::isValid() char_height = " << char_height << "; avg period = " << average_period
-//               << "; total range step = " << total_range_steps << "; return = " 
-//               << (char_height != ALTIMETRY_CHAR_HEIGHT_INVALID && average_period != ALTIMETRY_AVG_PERIOD_INVALID) << ::std::endl;
-  
-//   return true;
+
+  if (debug) {
+    ::std::cout << "AltimBretschneider::isValid() char_height = " << char_height << "; avg period = " << average_period
+                << "; total range step = " << total_range_steps << "; return = " 
+                << (char_height != ALTIMETRY_CHAR_HEIGHT_INVALID && average_period != ALTIMETRY_AVG_PERIOD_INVALID) 
+                << ::std::endl;
+  }
   return ( char_height != ALTIMETRY_CHAR_HEIGHT_INVALID && average_period != ALTIMETRY_AVG_PERIOD_INVALID );
 }
   
@@ -447,57 +445,54 @@ AltimBretschneider* AltimBretschneider::timeEvolve( const Time& time_value ) {
                            << time_value << "; evolution_time_quantum = " << evolution_time_quantum << ::std::endl;
 
   AltimBretschneider* ret_val = clone();  
-  
+
   if ( evolution_time_quantum < 0.0 || !time_value.isValid() ) return ret_val;  
   Time t_value = time_value;
-  
+
 //   if ( t_value > end_time ) t_value = end_time;
 //   else if ( t_value < start_time ) t_value = start_time;
   double time_difference;
   if ( last_evolution_time.isValid() ) time_difference = ::std::abs(last_evolution_time - t_value);
   else time_difference = -1.0;
-  
+
   if ( debug ) ::std::cout << "AltimBretschneider::timeEvolve() t_value = " 
                            << t_value << "; time_difference = " << time_difference << ::std::endl;
-  
+
   if ( ( evolution_time_quantum == 0.0 ) || ( time_difference >= evolution_time_quantum ) 
     || ( time_difference == -1.0 ) ) {
     last_evolution_time = t_value; 
      ret_val->createWaveSpectrum();
   }  
-  return ret_val;  
+  return ret_val;
 }
 
 
 AltimBretschneider* AltimBretschneider::randomize( double ratio_incr_value ) const {
   AltimBretschneider* ret_val = clone();
   ret_val->createWaveSpectrum();
-//   ::std::cout << "AltimBretschneider::randomize() this " << this << "; new " << ret_val << ::std::endl;  
-  
+  if (debug)
+    ::std::cout << "AltimBretschneider::randomize() this " << this << "; new " << ret_val << ::std::endl;  
+
   return ret_val; 
 }
 
 
 AltimBretschneider& AltimBretschneider::createWaveSpectrum() {
-  
-  //::std::cout << "Start of createWaveSpectrum()" << ::std::endl;
   altimetry_map.clear();
-  
+
   if ( depth == 0 ) {
     ::std::cout << "AltimBretschneider::createWaveSpectrum() depth == 0, invalid depth value!"
                 << ::std::endl;
     exit(1);
   }
-  
+
   double delta_omega = 2.0 * M_PI * 0.0125; 
   double dep = ::std::abs(depth);  
   double c = std::sqrt(G * dep);
-  
+
   double A_bret = 172.75 * std::pow(char_height, 2.0) / std::pow(average_period, 4.0); 
   double B_bret = 691.0 / std::pow(average_period, 4.0);
 
-//   double range_step = ::std::ceil(range / total_range_steps);
-  
   int peak_ratio = SDefHandler::instance()->getRandInt();
   while ( (peak_ratio == 0) || ((peak_ratio % 100) == 0) ) {
     peak_ratio = SDefHandler::instance()->getRandInt();
@@ -507,7 +502,7 @@ AltimBretschneider& AltimBretschneider::createWaveSpectrum() {
   
   for ( double cur_range = 0.0 - peak_offset; cur_range <= (range - peak_offset); cur_range += range_precision ) {
     double cur_t = cur_range / c;
-    
+
     double sum = 0;
     for ( double cur_omega = delta_omega; cur_omega <= 2.0 * M_PI + 0.01; cur_omega += delta_omega ) {
       double spec = A_bret / std::pow(cur_omega, 5.0) * std::exp((-1.0 * B_bret) / std::pow(cur_omega, 4.0));
@@ -527,7 +522,7 @@ AltimBretschneider& AltimBretschneider::createWaveSpectrum() {
       double phi = std::atan2( b, a );
       sum += A * std::cos(cur_t * cur_omega * phi);
     }
-    
+
     if (debug) ::std::cout << "AltimBretschneider::createWaveSpectrum() range " << (cur_range+peak_offset) 
                            << "; altimetry "<< (-sum) << "; range precision " << range_precision 
                            << "; peak_ratio " << peak_ratio << "; peak_offset " << peak_offset << ::std::endl; 
@@ -538,9 +533,7 @@ AltimBretschneider& AltimBretschneider::createWaveSpectrum() {
   if (debug) ::std::cout << "; map size " << altimetry_map.size()  
                          << "; total range steps " << total_range_steps 
                          << "; equal " << (total_range_steps == (int)altimetry_map.size() ) << ::std::endl;
-  
+
   return *this;
-//   if (debug) assert( (total_range_steps+1) == altimetry_map.size() );
-//   exit(1);
 }
 

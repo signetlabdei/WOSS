@@ -94,8 +94,8 @@ set opt(tracefile) [open $opt(tracefilename) w]
 set opt(cltracefilename) "/dev/null"
 set opt(cltracefile) [open $opt(cltracefilename) w]
 
-#set opt(db_path)        "insert_db_path_here"
-set opt(db_path)        "/home/fedwar/ns/ocean_database/dbs/"
+set opt(db_path)        "insert_db_path_here"
+#set opt(db_path)        "/home/fedwar/ns/ocean_database/dbs/"
 
 set opt(db_res_path)    "./"
 
@@ -105,7 +105,7 @@ if { $opt(db_path) == "insert_db_path_here" } {
 }
 
 WOSS/Definitions/RandomGenerator/NS2 set rep_number_ $opt(rep_num)
-#WOSS/Definitions/RandomGenerator/C   set seed_       $opt(rep_num)
+WOSS/Definitions/RandomGenerator/C   set seed_       $opt(rep_num)
 
 set ssp_creator         [new "WOSS/Definitions/SSP"]
 set sediment_creator    [new "WOSS/Definitions/Sediment"]
@@ -113,7 +113,8 @@ set pressure_creator    [new "WOSS/Definitions/Pressure"]
 set time_arr_creator    [new "WOSS/Definitions/TimeArr"]
 set time_reference      [new "WOSS/Definitions/TimeReference/NS2"]
 set transducer_creator  [new "WOSS/Definitions/Transducer"]
-set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+set altimetry_creator   [new "WOSS/Definitions/Altimetry/Flat"]
+#set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
 set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
 #set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
 $rand_generator initialize
@@ -150,8 +151,8 @@ WOSS/Creator/Database/NetCDF/Sediment/DECK41 set woss_db_debug 0
 set db_sedim [new "WOSS/Creator/Database/NetCDF/Sediment/DECK41"]
 $db_sedim setDeck41DbTypeV2
 $db_sedim setUpDeck41CoordinatesDb  "${opt(db_path)}/seafloor_sediment/DECK41_V2_coordinates.nc"
-$db_sedim setUpDeck41MarsdenDb      "${opt(db_path)}/seafloor_sediment/DECK41_V2_mardsen_square.nc"
-$db_sedim setUpDeck41MarsdenOneDb   "${opt(db_path)}/seafloor_sediment/DECK41_V2_mardsen_one_degree.nc"
+$db_sedim setUpDeck41MarsdenDb      "${opt(db_path)}/seafloor_sediment/DECK41_V2_marsden_square.nc"
+$db_sedim setUpDeck41MarsdenOneDb   "${opt(db_path)}/seafloor_sediment/DECK41_V2_marsden_one_degree.nc"
 
 
 WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set debug          0
@@ -176,28 +177,30 @@ set db_bathy [new "WOSS/Creator/Database/Textual/Bathymetry/UMT_CSV"]
 $db_bathy setDbPathName "${opt(db_path)}/bathymetry/hamburg_port.csv"
 
 
-WOSS/Database/Manager set debug 0
-
 WOSS/Definitions/Altimetry/Flat set evolution_time_quantum   -1
 WOSS/Definitions/Altimetry/Flat set range                    -1
 WOSS/Definitions/Altimetry/Flat set total_range_steps        -1
 WOSS/Definitions/Altimetry/Flat set depth                    0.0
 set cust_altimetry   [new "WOSS/Definitions/Altimetry/Flat"]
 
-# WOSS/Definitions/Altimetry/Bretschneider set evolution_time_quantum   -1
-# WOSS/Definitions/Altimetry/Bretschneider set range                    -1
-# WOSS/Definitions/Altimetry/Bretschneider set total_range_steps        3000
-# WOSS/Definitions/Altimetry/Bretschneider set characteristic_height    1.5
-# WOSS/Definitions/Altimetry/Bretschneider set average_period           3.0
-# set cust_altimetry   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+#WOSS/Definitions/Altimetry/Bretschneider set evolution_time_quantum   -1
+#WOSS/Definitions/Altimetry/Bretschneider set range                    -1
+#WOSS/Definitions/Altimetry/Bretschneider set total_range_steps        -1
+#WOSS/Definitions/Altimetry/Bretschneider set characteristic_height    1.5
+#WOSS/Definitions/Altimetry/Bretschneider set average_period           3.0
+#set cust_altimetry   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+
+$cust_altimetry setDebug 0
 
 
 #first ssp, time key is 1st january 2011, 9:01 am
 set time_evo_ssp_1 [new "WOSS/Definitions/Time"]
 $time_evo_ssp_1 setTime 1 1 2011 9 0 1
+
+WOSS/Database/Manager set debug 0
 set db_manager [new "WOSS/Database/Manager"]
 $db_manager setCustomSSP        $time_evo_ssp_1 "./ssp-custom-hamb-port.txt"
-# $db_manager setCustomAltimetry  $cust_altimetry
+$db_manager setCustomAltimetry  $cust_altimetry
 
 WOSS/Creator/Bellhop set debug                        0.0
 WOSS/Creator/Bellhop set woss_debug                   0.0
@@ -226,7 +229,7 @@ WOSS/Creator/Bellhop set box_range                    15000
 
 
 set woss_creator [new "WOSS/Creator/Bellhop"]
-$woss_creator setWorkDirPath        "./bellhop_out_hamburg_port/"
+$woss_creator setWorkDirPath        "/dev/shm/woss/bellhop_out_hamburg_port/"
 $woss_creator setBellhopPath        ""
 $woss_creator setBellhopMode        0 0 "A"
 $woss_creator setBeamOptions        0 0 "B"
@@ -262,7 +265,7 @@ set woss_controller [new "WOSS/Controller"]
 $woss_controller setBathymetryDbCreator      $db_bathy
 $woss_controller setSedimentDbCreator        $db_sedim
 #$woss_controller setSSPDbCreator             $db_ssp
-$woss_controller setTimeArrResultsDbCreator  $db_res_arr
+#$woss_controller setTimeArrResultsDbCreator  $db_res_arr
 $woss_controller setWossDbManager            $db_manager
 $woss_controller setWossManager              $woss_manager
 $woss_controller setWossCreator              $woss_creator

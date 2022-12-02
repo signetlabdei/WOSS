@@ -582,7 +582,7 @@ SSP* SSP::transform( const Coord& coordinates, double new_min_depth, double new_
   if ( new_max_depth == HUGE_VAL ) new_max_depth = ssp_map.rbegin()->first;
   if ( total_depth_steps <= 0 ) total_depth_steps = ssp_map.size();
   
-//   ::std::cout.precision(18);
+//   ::std::cout.precision(WOSS_DECIMAL_PRECISION);
   
 //   ::std::cout << "SSP::transform() coord is valid " << coordinates.isValid() 
 //               << "; new min depth " << new_min_depth << "; new max depth " << new_max_depth 
@@ -816,12 +816,12 @@ SSP* SSP::randomize( double perc_incr_value ) const {
 
   assert( perc_incr_value > 0.0 && perc_incr_value <= 1.0 );
 
-  static DepthMap new_ssp;
-  
+  DepthMap new_ssp;
+
   new_ssp.clear();
-   
+
   double sign = 1.0;
-  
+
   for( DConstIter it = ssp_map.begin(); it != ssp_map.end(); it++ ) {
     if ( SDefHandler::instance()->getRand() >= 0.5 ) sign = 1.0;
     else sign = -1.0;

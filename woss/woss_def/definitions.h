@@ -53,6 +53,9 @@ namespace woss {
   **/
   static const int WOSS_DECIMAL_PRECISION = 17;
 
+  static const int WOSS_STREAM_TAB_SPACE = 25;
+
+
 
   /**
   * Pause the execution of the program. Restart it by pressing any key.

@@ -171,7 +171,7 @@ Woss& Woss::insertFrequencies( double freq_start, double freq_end, double freq_s
 bool Woss::rmWorkDir() {
   assert(work_dir_path.size() > 0);
 
-  static ::std::stringstream str_out;
+  ::std::stringstream str_out;
   str_out << "rm -fr " << work_dir_path << "woss" << woss_id << "/";
   ::std::string command = str_out.str();
   str_out.str("");
@@ -189,7 +189,7 @@ bool Woss::mkWorkDir( double curr_frequency, int curr_run ) {
 
   assert(work_dir_path.size() > 0);
 
-  static ::std::stringstream str_out;
+  ::std::stringstream str_out;
   str_out << "mkdir -p " << work_dir_path << "woss" << woss_id 
           << "/freq" << curr_frequency << "/time" << (time_t)current_time 
           << "/run" << curr_run;
@@ -207,7 +207,7 @@ bool Woss::mkWorkDir( double curr_frequency, int curr_run ) {
 
 
 bool Woss::rmWorkDir( double curr_frequency, int curr_run ) {
-  static ::std::stringstream str_out;
+  ::std::stringstream str_out;
   int ret_value = -1;
   
   str_out << "rm -fr " << work_dir_path << "woss" << woss_id 

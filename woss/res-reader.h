@@ -91,7 +91,7 @@ namespace woss {
     * @param end_rx_range end receiver range [m]
     * @return a valid Pressure value 
     **/
-    virtual Pressure* readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) const = 0;
+    virtual Pressure* readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) = 0;
 
     /**
     * Gets a Pressure value for given range, depths

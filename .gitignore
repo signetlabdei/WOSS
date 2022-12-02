@@ -35,6 +35,8 @@
 ***/*.trs
 ***/.clang-format
 ***/*.dirstamp
+***/doc/
 woss_phy/woss-phy-embeddedtcl.cc
 woss/WossWOADbCreator
+woss/WossDeck41DbCreator
 tests/*bin

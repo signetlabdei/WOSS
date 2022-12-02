@@ -103,8 +103,14 @@ ShdResReader::ShdResReader()
    shd_header_collected(false),
    shd_file_collected(false),
    file_reader(),
-   shd_file()
-{ 
+   shd_file(),
+   last_tx_depth(SHD_RES_NOT_SET),
+   last_start_rx_depth(SHD_RES_NOT_SET),
+   last_start_rx_range(SHD_RES_NOT_SET),
+   last_end_rx_depth(SHD_RES_NOT_SET),
+   last_end_rx_range(SHD_RES_NOT_SET),
+   last_ret_value(Pressure::createNotValid())
+{
 
 }
 
@@ -114,8 +120,14 @@ ShdResReader::ShdResReader( const Woss* const woss )
    shd_header_collected(false),
    shd_file_collected(false),
    file_reader(),
-   shd_file()
-{ 
+   shd_file(),
+   last_tx_depth(SHD_RES_NOT_SET),
+   last_start_rx_depth(SHD_RES_NOT_SET),
+   last_start_rx_range(SHD_RES_NOT_SET),
+   last_end_rx_depth(SHD_RES_NOT_SET),
+   last_end_rx_range(SHD_RES_NOT_SET),
+   last_ret_value(Pressure::createNotValid())
+{
 
 }
 
@@ -292,7 +304,7 @@ bool ShdResReader::getShdFile()
 }
 
 
-Pressure* ShdResReader::readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) const {
+Pressure* ShdResReader::readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
   if (!shd_file_collected) return SDefHandler::instance()->getPressure()->create( Pressure::createNotValid() );
   return( SDefHandler::instance()->getPressure()->create( readMapAvgPressure( tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range ) ) ); 
 }
@@ -310,15 +322,7 @@ TimeArr* ShdResReader::readTimeArr( double tx_depth, double rx_depth, double rx_
 } 
 
 
-::std::complex<double> ShdResReader::readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range, double theta ) const {
-
-  static double last_tx_depth = SHD_RES_NOT_SET;
-  static double last_start_rx_depth = SHD_RES_NOT_SET;
-  static double last_start_rx_range = SHD_RES_NOT_SET;
-  static double last_end_rx_depth = SHD_RES_NOT_SET;
-  static double last_end_rx_range = SHD_RES_NOT_SET;
-  static ::std::complex<double> last_ret_value = Pressure::createNotValid();
-
+::std::complex<double> ShdResReader::readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range, double theta ) {
   if ( ( last_tx_depth == tx_depth ) && ( last_start_rx_depth == start_rx_depth ) && ( last_start_rx_range == start_rx_range ) 
    &&  ( last_end_rx_depth == end_rx_depth ) && ( last_end_rx_range == end_rx_range ) )
      return last_ret_value;

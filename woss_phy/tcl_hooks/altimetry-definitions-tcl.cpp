@@ -74,17 +74,50 @@ AltimetryTcl::AltimetryTcl()
 //   if ( evolution_time_quantum < 0 ) evolution_time_quantum = HUGE_VAL;
 }
 
+int AltimetryTcl::command( int argc, const char*const* argv ) {
+  Tcl& tcl = Tcl::instance();
+
+  if ( argc == 3) {
+    if(strcasecmp(argv[1], "setDebug") == 0) {
+      int tmp_int = atoi(argv[2]);
+      bool tmp_debug = tmp_int > 0 ? true : false;
+      woss::Altimetry::setDebug(tmp_debug);
+
+      if (debug) ::std::cout << "AltimetryTcl::command() setDebug called = " << tmp_debug << ::std::endl;
+
+      return TCL_OK;
+    }
+  }
+  return TclObject::command(argc, argv);
+}
 
 AltimBretschneiderTcl::AltimBretschneiderTcl()
 : AltimBretschneider()
 {
-  bind("evolution_time_quantum", &evolution_time_quantum); 
+  bind("evolution_time_quantum", &evolution_time_quantum);
   bind("range", &range);
-  bind("total_range_steps", &total_range_steps);  
+  bind("total_range_steps", &total_range_steps);
   bind("depth", &depth);
   bind("characteristic_height",&char_height);
   bind("average_period",&average_period);
   
-//   if ( evolution_time_quantum < 0 ) evolution_time_quantum = HUGE_VAL;  
+//   if ( evolution_time_quantum < 0 ) evolution_time_quantum = HUGE_VAL;
+}
+
+int AltimBretschneiderTcl::command( int argc, const char*const* argv ) {
+  Tcl& tcl = Tcl::instance();
+
+  if ( argc == 3) {
+    if(strcasecmp(argv[1], "setDebug") == 0) {
+      int tmp_int = atoi(argv[2]);
+      bool tmp_debug = tmp_int > 0 ? true : false;
+      woss::Altimetry::setDebug(tmp_debug);
+
+      if (debug) ::std::cout << "AltimBretschneiderTcl::command() setDebug called = " << tmp_debug << ::std::endl;
+
+      return TCL_OK;
+    }
+  }
+  return TclObject::command(argc, argv);
 }
 #endif // WOSS_NS_MIRACLE_SUPPORT
