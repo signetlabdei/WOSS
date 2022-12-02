@@ -456,13 +456,6 @@ namespace woss {
 
     protected:
 
-      
-    /**
-    * Stringstream object 
-    **/
-    static ::std::stringstream sstream;
-    
-    
     /**
     * Sediment type name
     **/

@@ -248,6 +248,12 @@ namespace woss {
     **/
     static void setDebug( bool flag ) { debug = flag; }
 
+   /**
+    * Gets debug flag for all instances
+    * @return flag debug
+    **/
+    static bool getDebug( bool flag ) { return debug; }
+
     /**
     * Sets the evolution time quantum
     * @param quantum time quantum [s]

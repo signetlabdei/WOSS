@@ -41,6 +41,7 @@
 
 
 #include <iomanip>
+#include <definitions.h>
 #include <sediment-definitions.h>
 #include <transducer-definitions.h>
 #include "ac-toolbox-arr-asc-reader.h"
@@ -735,6 +736,10 @@ namespace woss {
     **/ 
     NormSSPMap normalized_ssp_map;
 
+    /**
+    * SSP matrix normalized and randomized for Bellhop requirements (same depths and same depth-steps for all SSP involved)
+    **/
+    NormSSPMap randomized_ssp_map;
 
     /**
     * Bellhop box depth [m]
@@ -934,7 +939,7 @@ namespace woss {
 
 
   inline void BellhopWoss::writeHeader( double curr_frequency, int curr_run ) {
-    f_out.precision(18);
+    f_out.precision(WOSS_DECIMAL_PRECISION);
     f_out << "\'BELLHOP - woss id = " << woss_id << "; run = " << curr_run << "\'" << ::std::endl
           << curr_frequency << ::std::setw(30) << "! FREQUENCY [HZ]" << ::std::endl
           << 1 << ::std::setw(30) << "! NMEDIA" << ::std::endl;   

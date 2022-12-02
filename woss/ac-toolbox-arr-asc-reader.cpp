@@ -109,7 +109,13 @@ ArrAscResReader::ArrAscResReader()
   arr_asc_file_collected(false),
   file_reader(),
   skip_header(0),
-  arr_file()
+  arr_file(),
+  last_tx_depth(ARR_ASC_RES_NOT_SET),
+  last_start_rx_depth(ARR_ASC_RES_NOT_SET),
+  last_start_rx_range(ARR_ASC_RES_NOT_SET),
+  last_end_rx_depth(ARR_ASC_RES_NOT_SET),
+  last_end_rx_range(ARR_ASC_RES_NOT_SET),
+  last_ret_value(Pressure::createNotValid())
 {
 
 }
@@ -121,7 +127,13 @@ ArrAscResReader::ArrAscResReader( const Woss* const woss )
   arr_asc_file_collected(false),
   file_reader(),
   skip_header(0),
-  arr_file()
+  arr_file(),
+  last_tx_depth(ARR_ASC_RES_NOT_SET),
+  last_start_rx_depth(ARR_ASC_RES_NOT_SET),
+  last_start_rx_range(ARR_ASC_RES_NOT_SET),
+  last_end_rx_depth(ARR_ASC_RES_NOT_SET),
+  last_end_rx_range(ARR_ASC_RES_NOT_SET),
+  last_ret_value(Pressure::createNotValid())
 {
 
 }
@@ -398,7 +410,7 @@ Pressure* ArrAscResReader::readPressure( double tx_depth, double rx_depth, doubl
 }
 
 
-Pressure* ArrAscResReader::readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) const {
+Pressure* ArrAscResReader::readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
   if ( !arr_asc_file_collected ) return SDefHandler::instance()->getPressure()->create( Pressure::createNotValid() );
   return( SDefHandler::instance()->getPressure()->create( readMapAvgPressure( tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range ) ) );
 }
@@ -410,15 +422,7 @@ TimeArr* ArrAscResReader::readTimeArr( double source_depth, double rx_depth, dou
 }
 
 
-::std::complex<double> ArrAscResReader::readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) const {
-
-  static double last_tx_depth = ARR_ASC_RES_NOT_SET;
-  static double last_start_rx_depth = ARR_ASC_RES_NOT_SET;
-  static double last_start_rx_range = ARR_ASC_RES_NOT_SET;
-  static double last_end_rx_depth = ARR_ASC_RES_NOT_SET;
-  static double last_end_rx_range = ARR_ASC_RES_NOT_SET;
-  static ::std::complex<double> last_ret_value = Pressure::createNotValid();
-
+::std::complex<double> ArrAscResReader::readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
   if ( ( last_tx_depth == tx_depth ) && ( last_start_rx_depth == start_rx_depth ) && ( last_start_rx_range == start_rx_range )
    &&  ( last_end_rx_depth == end_rx_depth ) && ( last_end_rx_range == end_rx_range ) )
      return last_ret_value;

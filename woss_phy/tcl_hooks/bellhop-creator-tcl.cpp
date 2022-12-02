@@ -75,7 +75,7 @@ BellhopCreatorTcl::BellhopCreatorTcl()
   bind( "normalized_ssp_depth_steps", &ccnormalized_ssp_depth_steps.accessAllLocations() );
   bind( "box_depth", &ccbox_depth.accessAllLocations() );
   bind( "box_range", &ccbox_range.accessAllLocations() );
-  bind( "woss_debug", &woss_debug_);  
+  bind( "woss_debug", &woss_debug_);
   bind( "debug", &debug_);  
   bind( "woss_clean_workdir", &woss_clean_workdir_);  
   bind( "frequency_step", &ccfrequency_step.accessAllLocations());

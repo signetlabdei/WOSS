@@ -113,7 +113,7 @@ if { $opt(db_path_gebco) == "insert_db_path_gebco_here" } {
 }
 
 WOSS/Definitions/RandomGenerator/NS2 set rep_number_ $opt(rep_num)
-#WOSS/Definitions/RandomGenerator/C   set seed_       $opt(rep_num)
+WOSS/Definitions/RandomGenerator/C   set seed_       $opt(rep_num)
 
 set ssp_creator         [new "WOSS/Definitions/SSP"]
 set sediment_creator    [new "WOSS/Definitions/Sediment"]
@@ -121,7 +121,8 @@ set pressure_creator    [new "WOSS/Definitions/Pressure"]
 set time_arr_creator    [new "WOSS/Definitions/TimeArr"]
 set time_reference      [new "WOSS/Definitions/TimeReference/NS2"]
 set transducer_creator  [new "WOSS/Definitions/Transducer"]
-set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+set altimetry_creator   [new "WOSS/Definitions/Altimetry/Flat"]
+#set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
 set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
 #set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
 $rand_generator initialize
@@ -183,7 +184,9 @@ set db_bathy [new "WOSS/Creator/Database/NetCDF/Bathymetry/GEBCO"]
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GRIDONE_2D.nc" 
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2014_2D.nc"
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2019.nc" 
-$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2020.nc" 
+#$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2020.nc" 
+#$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2021.nc" 
+$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2022.nc" 
 
 
 #$db_bathy useOneMinutePrecision
@@ -192,23 +195,25 @@ $db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2020.nc"
 #$db_bathy use2DThirtySecondsPrecision
 $db_bathy use2DFifteenSecondsPrecision
 
-WOSS/Database/Manager set debug 0
-
 WOSS/Definitions/Altimetry/Flat set evolution_time_quantum   -1
 WOSS/Definitions/Altimetry/Flat set range                    -1
 WOSS/Definitions/Altimetry/Flat set total_range_steps        -1
 WOSS/Definitions/Altimetry/Flat set depth                    0.0
 set cust_altimetry   [new "WOSS/Definitions/Altimetry/Flat"]
 
-# WOSS/Definitions/Altimetry/Bretschneider set evolution_time_quantum   -1
-# WOSS/Definitions/Altimetry/Bretschneider set range                    -1
-# WOSS/Definitions/Altimetry/Bretschneider set total_range_steps        3000
-# WOSS/Definitions/Altimetry/Bretschneider set characteristic_height    1.5
-# WOSS/Definitions/Altimetry/Bretschneider set average_period           3.0
-# set cust_altimetry   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+#WOSS/Definitions/Altimetry/Bretschneider set evolution_time_quantum   -1
+#WOSS/Definitions/Altimetry/Bretschneider set range                    -1
+#WOSS/Definitions/Altimetry/Bretschneider set total_range_steps        -1
+#WOSS/Definitions/Altimetry/Bretschneider set characteristic_height    1.5
+#WOSS/Definitions/Altimetry/Bretschneider set average_period           3.0
+#set cust_altimetry   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+
+$cust_altimetry setDebug 0
+
+WOSS/Database/Manager set debug 0
 
 set db_manager [new "WOSS/Database/Manager"]
-# $db_manager setCustomAltimetry  $cust_altimetry
+$db_manager setCustomAltimetry  $cust_altimetry
 
 WOSS/Creator/Bellhop set debug                        0.0
 WOSS/Creator/Bellhop set woss_debug                   0.0
@@ -245,17 +250,17 @@ $woss_creator setAltimetryType      0 0 "L"
 $woss_creator setSimulationTimes    0 0 1 1 2010 0 0 1 2 1 2010 0 0 1
 
 
-WOSS/Manager/Simple set debug                     0
-WOSS/Manager/Simple set is_time_evolution_active -1.0
-WOSS/Manager/Simple set space_sampling            0.0
-set woss_manager [new "WOSS/Manager/Simple"]
+#WOSS/Manager/Simple set debug                     0
+#WOSS/Manager/Simple set is_time_evolution_active -1.0
+#WOSS/Manager/Simple set space_sampling            0.0
+#set woss_manager [new "WOSS/Manager/Simple"]
 
 
-#WOSS/Manager/Simple/MultiThread set debug                     0
-#WOSS/Manager/Simple/MultiThread set is_time_evolution_active -1.0
-#WOSS/Manager/Simple/MultiThread set concurrent_threads        0
-#WOSS/Manager/Simple/MultiThread set space_sampling            0.0
-#set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
+WOSS/Manager/Simple/MultiThread set debug                     0
+WOSS/Manager/Simple/MultiThread set is_time_evolution_active -1.0
+WOSS/Manager/Simple/MultiThread set concurrent_threads        0
+WOSS/Manager/Simple/MultiThread set space_sampling            0.0
+set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
 
 
 WOSS/Utilities set debug 0
@@ -271,7 +276,7 @@ set woss_controller [new "WOSS/Controller"]
 $woss_controller setBathymetryDbCreator      $db_bathy
 $woss_controller setSedimentDbCreator        $db_sedim
 $woss_controller setSSPDbCreator             $db_ssp
-$woss_controller setTimeArrResultsDbCreator  $db_res_arr
+#$woss_controller setTimeArrResultsDbCreator  $db_res_arr
 $woss_controller setWossDbManager            $db_manager
 $woss_controller setWossManager              $woss_manager
 $woss_controller setWossCreator              $woss_creator

@@ -113,9 +113,8 @@ set opt(tx_margin_db)       10.0
 set opt(node_bathy_offset) -2.0
 set opt(auv_depth)         10.0
 
-
-# set opt(db_path)     "insert_db_path_here"
-set opt(db_path)     "/home/fedwar/ns/ocean_database/"
+set opt(db_path)     "insert_db_path_here"
+#set opt(db_path)     "/home/fedwar/ns/ocean_database/dbs/"
 set opt(db_res_path)  "."
 
 if { $opt(db_path) == "insert_db_path_here" } {
@@ -180,9 +179,10 @@ set pressure_creator    [new "WOSS/Definitions/Pressure"]
 set time_arr_creator    [new "WOSS/Definitions/TimeArr"]
 set time_reference      [new "WOSS/Definitions/TimeReference/NS2"]
 set transducer_creator  [new "WOSS/Definitions/Transducer"]
-set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
-# set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
-set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
+set altimetry_creator   [new "WOSS/Definitions/Altimetry/Flat"]
+#set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
+#set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
 $rand_generator initialize
 
 set def_handler [new "WOSS/Definitions/Handler"]
@@ -217,9 +217,26 @@ WOSS/Creator/Database/NetCDF/Sediment/DECK41 set debug         0
 WOSS/Creator/Database/NetCDF/Sediment/DECK41 set woss_db_debug 0
 
 
+WOSS/Definitions/Altimetry/Flat set evolution_time_quantum   -1
+WOSS/Definitions/Altimetry/Flat set range                    -1
+WOSS/Definitions/Altimetry/Flat set total_range_steps        -1
+WOSS/Definitions/Altimetry/Flat set depth                    0.0
+set cust_altimetry   [new "WOSS/Definitions/Altimetry/Flat"]
+
+#WOSS/Definitions/Altimetry/Bretschneider set evolution_time_quantum   -1
+#WOSS/Definitions/Altimetry/Bretschneider set range                    -1
+#WOSS/Definitions/Altimetry/Bretschneider set total_range_steps        -1
+#WOSS/Definitions/Altimetry/Bretschneider set characteristic_height    1.5
+#WOSS/Definitions/Altimetry/Bretschneider set average_period           3.0
+#set cust_altimetry   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+
+$cust_altimetry setDebug 0
+
+
 WOSS/Database/Manager set debug 0
 set db_manager [new WOSS/Database/Manager]
 $db_manager setCustomSediment   "Test Sedim" 1560 200 1.5 0.9 0.8 1.0
+$db_manager setCustomAltimetry  $cust_altimetry
 $db_manager setCustomSSP        0 "./ssp-test.txt"
 
 
@@ -257,14 +274,14 @@ $woss_creator setAltimetryType     0 0 "L"
 $woss_creator setSimulationTimes   0 0 1 1 2010 0 0 1 2 1 2010 0 0 1
 
 
-WOSS/Manager/Simple set debug 0
-WOSS/Manager/Simple set space_sampling 2.0
-set woss_manager [new "WOSS/Manager/Simple"]
+#WOSS/Manager/Simple set debug 0
+#WOSS/Manager/Simple set space_sampling 2.0
+#set woss_manager [new "WOSS/Manager/Simple"]
 
-#WOSS/Manager/Simple/MultiThread set debug               0
-#WOSS/Manager/Simple/MultiThread set space_sampling      2.0
-#WOSS/Manager/Simple/MultiThread set concurrent_threads  0.0
-#set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
+WOSS/Manager/Simple/MultiThread set debug               0
+WOSS/Manager/Simple/MultiThread set space_sampling      2.0
+WOSS/Manager/Simple/MultiThread set concurrent_threads  0.0
+set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
 
 
 WOSS/Definitions/TransducerHandler set debug 0
@@ -276,7 +293,7 @@ $transducer_handler importAscii "ITC-3001" "$opt(db_path)/transducers/ITC/ITC-IT
 
 WOSS/Controller set debug 0
 set woss_controller [new WOSS/Controller]
-$woss_controller setTimeArrResultsDbCreator  $db_res_arr
+#$woss_controller setTimeArrResultsDbCreator  $db_res_arr
 $woss_controller setWossDbManager            $db_manager
 $woss_controller setWossManager              $woss_manager
 $woss_controller setWossCreator              $woss_creator

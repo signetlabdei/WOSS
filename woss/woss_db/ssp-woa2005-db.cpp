@@ -264,7 +264,7 @@ void SspWoa2005Db::getSSPValue( const SSPIndexes& indexes, double* ssp_values ) 
 
 
 SSP* SspWoa2005Db::getValue( const Coord& coordinates, const Time& time, long double ssp_depth_precision ) const {
-  static double curr_ssp[SSP_STD_NDEPTH];
+  double curr_ssp[SSP_STD_NDEPTH];
 
   DepthMap ssp_map;
   

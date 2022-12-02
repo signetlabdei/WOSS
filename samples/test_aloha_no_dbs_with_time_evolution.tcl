@@ -112,8 +112,8 @@ set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
 # set altimetry_creator   [new "WOSS/Definitions/Altimetry/Flat"]
 set time_reference      [new "WOSS/Definitions/TimeReference/NS2"]
 set transducer_creator  [new "WOSS/Definitions/Transducer"]
-# set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
-set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
+set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
+#set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
 $rand_generator initialize
 
 #### we plug the chosen prototypes into the woss::DefinitionHandler
@@ -161,6 +161,7 @@ WOSS/Definitions/Altimetry/Bretschneider set total_range_steps        -1
 WOSS/Definitions/Altimetry/Bretschneider set characteristic_height    1.0
 WOSS/Definitions/Altimetry/Bretschneider set average_period           1.0
 set cust_altimetry   [new "WOSS/Definitions/Altimetry/Bretschneider"]
+$cust_altimetry setDebug 0
 
 
 #### We set different SSP for different Time values, to account for time 
@@ -232,16 +233,16 @@ $woss_creator setSimulationTimes    0 0 1 1 2011 9 0 1 2 1 2011 1 0 1
 
 ### choose between single-threaded or multithreaded WossManager
 ### by uncomment/comment the followings lines
-WOSS/Manager/Simple set debug                       0
-WOSS/Manager/Simple set is_time_evolution_active    10
-WOSS/Manager/Simple set space_sampling              0.0
-set woss_manager [new "WOSS/Manager/Simple"]
+#WOSS/Manager/Simple set debug                       0
+#WOSS/Manager/Simple set is_time_evolution_active    10
+#WOSS/Manager/Simple set space_sampling              0.0
+#set woss_manager [new "WOSS/Manager/Simple"]
 
-#WOSS/Manager/Simple/MultiThread set debug                     0.0
-#WOSS/Manager/Simple/MultiThread set is_time_evolution_active  10.0
-#WOSS/Manager/Simple/MultiThread set space_sampling            0.0
-#WOSS/Manager/Simple/MultiThread set concurrent_threads        0
-#set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
+WOSS/Manager/Simple/MultiThread set debug                     0.0
+WOSS/Manager/Simple/MultiThread set is_time_evolution_active  10.0
+WOSS/Manager/Simple/MultiThread set space_sampling            0.0
+WOSS/Manager/Simple/MultiThread set concurrent_threads        0
+set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
 
 
 #### we create the mandatory woss::TransducerHandler
@@ -252,7 +253,7 @@ set transducer_handler [new "WOSS/Definitions/TransducerHandler"]
 #### we connect everything to the woss::WossController and we initialize it
 WOSS/Controller set debug 0
 set woss_controller [new "WOSS/Controller"]
-$woss_controller setTimeArrResultsDbCreator  $db_res_arr
+#$woss_controller setTimeArrResultsDbCreator  $db_res_arr
 $woss_controller setWossDbManager            $db_manager
 $woss_controller setWossManager              $woss_manager
 $woss_controller setWossCreator              $woss_creator
