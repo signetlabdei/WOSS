@@ -95,25 +95,22 @@ namespace woss {
     
     double debug_;
     
-    double is_time_evolution_active_;    
-    
-
+    double is_time_evolution_active_;
   };
-    
-    
+
   template< typename WMResDb >
   WossManagerSimpleTcl< WMResDb >::WossManagerSimpleTcl()
   : WossManagerSimple<WMResDb>()  
   { 
     TclObject::bind("debug", &this->debug_);
-    TclObject::bind("is_time_evolution_active", &this->is_time_evolution_active_); 
+    TclObject::bind("is_time_evolution_active", &this->is_time_evolution_active_);
     TclObject::bind("space_sampling",&this->space_sampling );
-    
+
     this->debug = (bool) this->debug_;
     this->is_time_evolution_active = (bool) this->is_time_evolution_active_;
   }
 
-  template< typename WMResDb >  
+  template< typename WMResDb > 
   int WossManagerSimpleTcl< WMResDb >::command( int argc, const char*const* argv ) {
     if(argc==2) {
       if(strcasecmp(argv[1], "reset") == 0) {
@@ -126,9 +123,35 @@ namespace woss {
     }
     return TclObject::command(argc,argv);
   }
-  
+
+#ifdef WOSS_MULTITHREAD
+  template<>
+  int WossManagerSimpleTcl< WossManagerResDbMT >::command( int argc, const char*const* argv ) {
+    if(argc==2) {
+      if(strcasecmp(argv[1], "reset") == 0) {
+        
+        if (this->debug) ::std::cout << "WossManagerSimpleTcl::command() reset called"  << ::std::endl;
+      
+        if ( this->reset() ) return TCL_OK;
+        else return TCL_ERROR;
+      }
+    }
+    else if (argc==3) {
+      if(strcasecmp(argv[1], "setConcurrentThreads") == 0) {
+        int threads = atoi(argv[2]);
+
+        if (this->debug) ::std::cout << "WossManagerSimpleTcl::command() setConcurrentThreads " 
+                                     << threads << " called"  << ::std::endl;
+
+        this->setConcurrentThreads(threads);
+
+        return TCL_OK;
+      }
+    }
+    return TclObject::command(argc,argv);
+  }
+#endif // WOSS_MULTITHREAD
 }
-  
 
 #endif // WOSS_NS_MIRACLE_SUPPORT
 

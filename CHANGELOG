@@ -149,3 +149,5 @@ v1.12.4 - Added support for GEBCO 2022
         - Fixed bug with WossDbManager
         - Added TCL debug capabilities to Altimetry classes
         - Refactored usage of streams' precision throughout the whole framework
+
+v1.12.5 - Minor fixes to ns-Miracle classes

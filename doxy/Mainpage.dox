@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.12.4
+ * @version 1.12.5
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -1306,6 +1306,9 @@
 *                            <li> Fixed bug with WossDbManager
 *                            <li> Added TCL debug capabilities to Altimetry classes
 *                            <li> Refactored usage of streams' precision throughout the whole framework
+*                      </ul>
+*  <li> <b>v.1.12.5</b> <ul>
+*                            <li> minor fixes to ns-Miracle classes
 *                      </ul>
 * </ul>
 **/
