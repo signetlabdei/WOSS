@@ -62,14 +62,15 @@ class WossWpPosition : public WossPosition {
   
   
   virtual bool isEquivalentTo( const woss::CoordZ& coordz );
-  
-  
+
+
   virtual woss::CoordZ getLocation();
 
-  
   virtual double getVerticalOrientation();
   
   virtual double getBearing();
+  
+  virtual double getSpeed();
   
   
   protected:
@@ -154,6 +155,7 @@ class WossWpPosition : public WossPosition {
   
   double last_time_update;
   
+  double current_speed;
   
   WayPointVect waypoint_vect;
   

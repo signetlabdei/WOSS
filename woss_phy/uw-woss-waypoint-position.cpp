@@ -107,6 +107,7 @@ public:
 WossWpPosition::WossWpPosition()
 : time_threshold(1e-5),
   last_time_update(0.0),
+  current_speed(0.0),
   waypoint_vect(),
   timeid_map()
 {
@@ -232,6 +233,7 @@ void WossWpPosition::update( double time ) {
     setLocation( pos );  
     updateVerticalOrientation( waypoint_vect[it->second - 1].getDestination(), pos );
     updateBearing( waypoint_vect[it->second - 1].getDestination(), pos );
+    current_speed = waypoint_vect[it->second -1].getSpeed();
   }
   
 //   ::std::cout << "WossWpPosition::update() update loc " << curr_coordz << ::std::endl;
@@ -328,7 +330,7 @@ woss::CoordZ WossWpPosition::getLocation() {
 
 
 double WossWpPosition::getVerticalOrientation() {
-  double now = Scheduler::instance().clock();             
+  double now = Scheduler::instance().clock();
   if (now>last_time_update+time_threshold) update(now);
 
 //   ::std::cout << "WossWpPosition::getVerticalOrientation() vertical orientation " << vertical_orientation << ::std::endl;
@@ -337,7 +339,7 @@ double WossWpPosition::getVerticalOrientation() {
 
 
 double WossWpPosition::getBearing() {
-  double now = Scheduler::instance().clock();             
+  double now = Scheduler::instance().clock();
   if (now>last_time_update+time_threshold) update(now);
 
 //   ::std::cout << "WossWpPosition::getBearing() current bearing " << ( bearing * 180.0 / M_PI ) << ::std::endl;
@@ -345,3 +347,10 @@ double WossWpPosition::getBearing() {
 }
 
 
+double WossWpPosition::getSpeed() {
+  double now = Scheduler::instance().clock();
+  if (now>last_time_update+time_threshold) update(now);
+
+//   ::std::cout << "WossWpPosition::getSpeed() current speed " << current_speed << ::std::endl;
+  return current_speed;
+}

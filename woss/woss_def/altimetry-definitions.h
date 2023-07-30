@@ -702,15 +702,31 @@ namespace woss {
      * @return a <i>new</i> Altimetry object
      **/
     virtual AltimBretschneider* randomize( double ratio_incr_value ) const;     
-    
-    
+
+    /**
+     * Configures H - the characteristic height of the wave [m]
+     * @param h characteristic height [m]
+     * @return AltimBretschneider reference to <i>this</i>
+     **/
     AltimBretschneider& setCharacteristicHeight( double h ) { char_height = h; return *this; }
-    
+
+    /**
+     * Configures T - the wave average period [s]
+     * @param h average period [s]
+     * @return AltimBretschneider reference to <i>this</i>
+     **/
     AltimBretschneider& setAveragePeriod( double p ) { average_period = p; return *this; }
-       
-    
+
+    /**
+     * Gets H - the characteristic height of the wave [m]
+     * @return characteristic height [m]
+     **/
     double getCharacteristicHeight() const { return char_height; }
-    
+
+    /**
+     * Gets T - the wave average period [s]
+     * @return h average period [s]
+     **/
     double getAveragePeriod() const { return average_period; }
       
     
@@ -719,9 +735,18 @@ namespace woss {
     
     virtual AltimBretschneider& createWaveSpectrum();
     
-      
+    /**
+     * H - Model's characteristic height [m]
+     * Refer to:
+     * G. J. Komen et al., Dynamics and modeling of ocean waves. Cambridge University Press, 1994. 
+     */
     double char_height;
     
+    /**
+     * T - Model's average wave period [s]
+     * Refer to:
+     * G. J. Komen et al., Dynamics and modeling of ocean waves. Cambridge University Press, 1994. 
+     */
     double average_period;
 
   };

@@ -280,8 +280,8 @@ $woss_creator setSimulationTimes   0 0 1 1 2010 0 0 1 2 1 2010 0 0 1
 
 WOSS/Manager/Simple/MultiThread set debug               0
 WOSS/Manager/Simple/MultiThread set space_sampling      2.0
-WOSS/Manager/Simple/MultiThread set concurrent_threads  0.0
 set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
+$woss_manager setConcurrentThreads 0
 
 
 WOSS/Definitions/TransducerHandler set debug 0
@@ -647,9 +647,7 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 ###############################
 
 proc finish {} {
-  global ns opt cbr mac propagation cbr_auv mac_auv phy_data phy_data_auv channel db_manager
-
-  $db_manager closeAllConnections
+  global ns opt cbr mac propagation cbr_auv mac_auv phy_data phy_data_auv channel db_manager woss_manager
 
   set totenergy                     0.0
   set total_cbr_tx_pkts             0.0
@@ -696,6 +694,9 @@ proc finish {} {
   $ns flush-trace
   close $opt(tracefile)
 
+  puts "Delete WOSS objects to force file operations"
+  delete $woss_manager
+  delete $db_manager
 }
  
 

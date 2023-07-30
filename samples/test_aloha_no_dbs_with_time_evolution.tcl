@@ -239,10 +239,10 @@ $woss_creator setSimulationTimes    0 0 1 1 2011 9 0 1 2 1 2011 1 0 1
 #set woss_manager [new "WOSS/Manager/Simple"]
 
 WOSS/Manager/Simple/MultiThread set debug                     0.0
-WOSS/Manager/Simple/MultiThread set is_time_evolution_active  10.0
+WOSS/Manager/Simple/MultiThread set is_time_evolution_active  1.0
 WOSS/Manager/Simple/MultiThread set space_sampling            0.0
-WOSS/Manager/Simple/MultiThread set concurrent_threads        0
 set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
+$woss_manager setConcurrentThreads 0
 
 
 #### we create the mandatory woss::TransducerHandler
@@ -526,11 +526,8 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 ###############################
 
 proc finish {} {
-    global ns opt cbr mac propagation cbr_sink mac_sink phy_data phy_data_sink channel db_manager propagation
-    global woss_manager
-
-#     $woss_manager reset
-    $db_manager closeAllConnections
+    global ns opt cbr mac propagation cbr_sink mac_sink phy_data phy_data_sink channel propagation
+    global db_manager woss_manager
 
     puts "\n"
 
@@ -558,6 +555,10 @@ proc finish {} {
 
     $ns flush-trace
     close $opt(tracefile)
+
+    puts "Delete WOSS objects to force file operations"
+    delete $woss_manager
+    delete $db_manager
 }
 
 ###################

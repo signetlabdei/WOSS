@@ -116,10 +116,9 @@ WOSS/Controller set debug 0.0
 
 WOSS/Definitions/RandomGenerator/C set seed_ 1
 
-# WOSS/Manager/Simple/MultiThread set max_thread_number         9
-# WOSS/Manager/Simple/MultiThread set is_time_evolution_active -1.0
-# WOSS/Manager/Simple/MultiThread set debug                     0.0
-# WOSS/Manager/Simple/MultiThread set space_sampling            0.0
+#WOSS/Manager/Simple/MultiThread set is_time_evolution_active -1.0
+#WOSS/Manager/Simple/MultiThread set debug                     0.0
+#WOSS/Manager/Simple/MultiThread set space_sampling            0.0
 
 PacketHeaderManager set tab_(PacketHeader/WOSS)    1
 
