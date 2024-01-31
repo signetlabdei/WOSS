@@ -151,3 +151,8 @@ v1.12.4 - Added support for GEBCO 2022
         - Refactored usage of streams' precision throughout the whole framework
 
 v1.12.5 - Minor fixes to ns-Miracle classes
+
+v1.12.6 - fixed gcc-13 warnings
+        - TCL examples updated to GEBCO 2023
+        - removed warning in woss::BellhopWoss
+        - changed URL of main WOSS website
