@@ -186,7 +186,8 @@ set db_bathy [new "WOSS/Creator/Database/NetCDF/Bathymetry/GEBCO"]
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2019.nc" 
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2020.nc" 
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2021.nc" 
-$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2022.nc" 
+#$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2022.nc" 
+$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2023.nc" 
 
 
 #$db_bathy useOneMinutePrecision

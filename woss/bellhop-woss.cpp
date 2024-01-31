@@ -456,29 +456,23 @@ void BellhopWoss::checkDepthOffsets(const CoordZ& coordinates, double& min_depth
 
   if ( total_depth_offset >= total_depth ) total_depth_offset = total_depth - total_depth/50.0;
     
-  bool printout = false;
-
   if ( (coordinates.getDepth() + min_depth_offset) <= min_depth_value ) {
     min_depth_offset = min_depth_value + min_depth_value/50.0 - coordinates.getDepth();
-    printout = true;
   }
 
   if ( (coordinates.getDepth() + max_depth_offset) <= min_depth_value ) {
     max_depth_offset = (min_depth_value + min_depth_value/50.0 + total_depth_offset) - coordinates.getDepth();
-    printout = true;
   }
 
   if ( (coordinates.getDepth() + min_depth_offset) >= max_depth_value ) {
     min_depth_offset = max_depth_value - max_depth_value/50.0 - total_depth_offset - coordinates.getDepth();
-    printout = true;
   }
 
   if ( (coordinates.getDepth() + max_depth_offset) >= max_depth_value ) {
     max_depth_offset = max_depth_value - max_depth_value/50.0 - coordinates.getDepth();
-    printout = true;
   }
 
-  if (printout) ::std::cerr << "BellhopWoss(" << woss_id << ")::checkDepthOffsets() WARNING, latitude = " 
+  if (debug) ::std::cerr << "BellhopWoss(" << woss_id << ")::checkDepthOffsets() WARNING, latitude = " 
                             << coordinates.getLatitude() << "; longitude = " << coordinates.getLongitude() 
                             << "; depth = " << (coordinates.getDepth())
                             << "; min depth value = " << min_depth_value << "; max depth value = " << max_depth_value 
@@ -499,7 +493,6 @@ void BellhopWoss::checkDepthOffsets() {
 
 
 void BellhopWoss::checkRangeOffsets() {
-  bool printout = false;
   double total_range_offset = abs( rx_max_range_offset - rx_min_range_offset );
 
   if ( total_range_offset >= 1.1*total_great_circle_distance ) total_range_offset = 1.1*total_great_circle_distance - total_great_circle_distance/50.0;
@@ -507,28 +500,24 @@ void BellhopWoss::checkRangeOffsets() {
   if ( rx_min_range_offset <= -total_great_circle_distance ) {
     double new_value = -total_great_circle_distance;
     rx_min_range_offset = new_value - new_value/1000.0;
-    printout = true;
   }
 
   if ( rx_max_range_offset <= -total_great_circle_distance ) {
     double new_value = (-total_great_circle_distance + total_range_offset);
     rx_max_range_offset = new_value - new_value/1000.0;
-    printout = true;
   }
 
   if ( rx_min_range_offset >= 0.1*total_great_circle_distance ) {
     double new_value = (1.1*total_great_circle_distance - total_range_offset);
     rx_min_range_offset = new_value - new_value/1000.0;
-    printout = true;
   }
 
   if ( rx_max_range_offset >= 0.1*total_great_circle_distance ) {
     double new_value = 0.1*total_great_circle_distance;
     rx_max_range_offset = new_value - new_value/1000.0;
-    printout = true;
   }
 
-  if (printout) ::std::cerr << "BellhopWoss(" << woss_id << ")::checkRangeOffsets() WARNING, tx latitude = " 
+  if (debug) ::std::cerr << "BellhopWoss(" << woss_id << ")::checkRangeOffsets() WARNING, tx latitude = " 
                             << tx_coordz.getLatitude() << "; tx longitude = " << tx_coordz.getLongitude() 
                             << "; rx latitude = " << rx_coordz.getLatitude() << "; rx longitude = " << rx_coordz.getLongitude() 
                             << "; total range offset = " << total_range_offset << "; total great circle distance = " << total_great_circle_distance
@@ -540,13 +529,15 @@ void BellhopWoss::checkRangeOffsets() {
 
 void BellhopWoss::checkAngles() {
   if ( total_great_circle_distance == 0.0 && total_distance != 0.0 ) {
-    
-    ::std::cerr << "BellhopWoss(" << woss_id << ")::checkAngles() vertical channel: old angles = " << min_angle << "; " << max_angle << ::std::endl; 
+
+    if (debug)
+      ::std::cout << "BellhopWoss(" << woss_id << ")::checkAngles() vertical channel: old angles = " << min_angle << "; " << max_angle << ::std::endl; 
     
     max_angle = ::std::max( ::std::abs( min_angle ), ::std::abs( max_angle ) );
     min_angle = -max_angle; 
-    
-    ::std::cerr << "BellhopWoss(" << woss_id << ")::checkAngles() vertical channel: new angles = " << min_angle << "; " << max_angle << ::std::endl; 
+
+    if (debug)
+      ::std::cout << "BellhopWoss(" << woss_id << ")::checkAngles() vertical channel: new angles = " << min_angle << "; " << max_angle << ::std::endl; 
   }
 }
 

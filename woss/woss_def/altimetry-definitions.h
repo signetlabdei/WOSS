@@ -135,14 +135,7 @@ namespace woss {
     * @return a heap-created copy of <b>this</b> instance
     **/
     virtual Altimetry* clone() const { return new Altimetry(*this); }
-  
-    /**
-    * Altimetry virtual factory method
-    * @param array_size size of array
-    * @return a heap-created array of size array_size
-    **/
-//     virtual Altimetry* createArray( unsigned int array_size ) const { return new Altimetry[array_size]; }
-    
+
     /**
     * Creates an instance not valid
     * @return a new instance not valid ( e.g. range 0.0 = +inf )
@@ -645,7 +638,20 @@ namespace woss {
     **/
     virtual AltimBretschneider* create( const AltimBretschneider& copy ) const { 
       return new AltimBretschneider( copy ); }
-    
+
+    /**
+    * AltimBretschneider virtual factory method
+    * @param copy AltimBretschneider to be copied
+    * @return a heap-created AltimBretschneider object
+    **/
+    virtual AltimBretschneider* create( const Altimetry& copy ) const { 
+      AltimBretschneider const* dyn_ptr = dynamic_cast<AltimBretschneider const*>(&copy);
+      if (dyn_ptr) {
+        return new AltimBretschneider( *dyn_ptr );
+      }
+      return create();
+    }
+
     /**
      * AltimBretschneider virtual factory method
      * @param ch_height characteristic wave height [m]

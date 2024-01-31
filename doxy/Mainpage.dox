@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.12.5
+ * @version 1.12.6
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -1007,17 +1007,17 @@
  *
  * The current WOSS version has the following compatibilities:
  * <ul>
- *    <li> <b>Acoustic Toolbox</b>: June 2020
- *    <li> <b>HDF5 library</b>: v1.8.13
- *    <li> <b>NetCDF C library</b>: v4.7.3
+ *    <li> <b>Acoustic Toolbox</b>: May 2023
+ *    <li> <b>HDF5 library</b>: v1.14.2
+ *    <li> <b>NetCDF C library</b>: v4.9.2
  *    <li> <b>NetCDF4 C++ library</b>: v4.3.1
- *    <li> <b>GEBCO databases</b>: 1D and 2D, 2008, 2014, 2019, 2020
+ *    <li> <b>GEBCO databases</b>: 1D and 2D, 2008, 2014, 2019, 2020, 2022, 2023
  * </ul>
 
  * \section  WOSS-req Requirements
  *
  * <ul>
- *    <li> Download the <b>recommended</b> <a href="http://telecom.dei.unipd.it/ns/woss/files/at.zip">Acoustic Toolbox Library</a>
+ *    <li> Download the <b>recommended</b> <a href="https://woss.dei.unipd.it/#libraries">Acoustic Toolbox Library</a>
  *         and follow installation instructions. The directory path that contains
  *         the binaries should be in the $PATH environment.
  *    <li> woss::BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 is compliant with Bellhop arr file 
@@ -1026,42 +1026,46 @@
  *         syntax of the acoustic toolbox library >= 31 March 2019 version. 
  *         This is the new factory value. 
  *         @see woss::BellhopCreator::setBellhopArrSyntax or tcl binded value bellhop_arr_syntax.
- *    <li> <b>In order to use the latest GEBCO 2019 and 2020 15 seconds of arc databases, NetCDF4 + HDF5 support had to be added to the framework.</b>
- *         If you wish to use NetCDF classes and databases, download the recommended <a href="http://telecom.dei.unipd.it/ns/woss/files/hdf5-1.8.13.tar.gz">HDF5 library</a>
- *         <a href="http://telecom.dei.unipd.it/ns/woss/files/netcdf-c-4.7.3.tar.gz">NetCDF C library</a>
- *         and <a href="http://telecom.dei.unipd.it/ns/woss/files/netcdf-cxx4-4.3.1.tar.gz">NetCDF C++ library</a> ; \n
+ *    <li> <b>In order to use the latest GEBCO 15 seconds of arc databases, NetCDF4 + HDF5 support had to be added to the framework.</b>
+ *         If you wish to use NetCDF classes and databases, download the recommended <a href="https://woss.dei.unipd.it/#libraries">HDF5 library</a>
+ *         <a href="https://woss.dei.unipd.it/#libraries">NetCDF C library</a>
+ *         and <a href="https://woss.dei.unipd.it/#libraries">NetCDF C++ library</a> ; \n
  *         All libraries have to be built <b>with support for dynamic libraries</b> and with <b>NetCDF4 support</b>. \n
  *         Please refer to NetCDF documentation for comprehensive set of installation instructions of the C and C++ libraries.
- *         Please note that the <tt>--prefix=\<optional_netcdf4_install_path\> </tt> option is strongly suggested, and should be the same for HDF5, NetCDF-C and NetCDF-C++4. \n
- *         <i>The previous NetCDF legacy installation instrucions are still supported by are obsolete and not recommended</i>. \n
+ *         Please note that the `--prefix=<optional_netcdf4_install_path>` option is strongly suggested, and should be the same for HDF5, NetCDF-C and NetCDF-C++4. \n
+ *         <i>The previous NetCDF legacy installation instructions are still supported by are obsolete and not recommended</i>. \n
  *         A simple installation script is given here as example:
  *         <ul>
  *         <li> install the recommended HDF5 library with these exact steps:
  *            <ul>
- *              <li><tt>./configure --enable-shared --prefix=\<optional_netcdf4_install_path\></tt>
- *              <li><tt>make</tt>
- *              <li><tt>make check</tt>
- *              <li>should any test fail, based on the test severity you could still try to continue with the installation by issuing <tt>make install</tt>
+ *              <li>`./configure --enable-shared --prefix=<optional_netcdf4_install_path>`
+ *              <li>`make`
+ *              <li>`make check`
+ *              <li>should any test fail, based on the test severity you could still try to continue with the installation by issuing `make install`
  *            </ul>
  *         <li> install the recommended NETCDF4 C library by passing the common installation path in both CPPFLAGS and LDFLAGS: 
  *            <ul>
- *               <li><tt>./configure --prefix=\<optional_netcdf4_install_path\> --enable-netcdf-4 --enable-shared --disable-dap CPPFLAGS="$CPPFLAGS -I<optional_netcdf4_install_path>/include" LDFLAGS="$LDFLAGS -L<optional_netcdf4_install_path>/lib</tt>
- *               <li><tt>make</tt>
- *               <li><tt>make check</tt>
- *              <li>should any test fail, based on the test severity you could still try to continue with the installation by issuing <tt>make install</tt>
+ *               <li> `./configure --prefix=<optional_netcdf4_install_path> --enable-netcdf-4 --enable-shared `
+ *                    `--disable-dap --disable-byterange CPPFLAGS="$CPPFLAGS -I<optional_netcdf4_install_path>/include" `
+ *                    `LDFLAGS="$LDFLAGS -L<optional_netcdf4_install_path>/lib" `
+ *               <li> `make`
+ *               <li> `make check`
+ *              <li>should any test fail, based on the test severity you could still try to continue with the installation by issuing `make install`
  *            </ul>
  *         <li> install the recommended NETCDF4 C++ library by passing the common installation path in both CPPFLAGS and LDFLAGS:
  *           <ul>
- *              <li><tt>./configure --prefix=\<optional_netcdf4_install_path\> --enable-shared CPPFLAGS="$CPPFLAGS -I<optional_netcdf4_install_path>/include" LDFLAGS="$LDFLAGS -L<optional_netcdf4_install_path>/lib"</tt>
- *              <li><tt>make</tt>
- *              <li><tt>make check</tt>
- *              <li><tt>make install</tt>
+ *              <li>`./configure --prefix=<optional_netcdf4_install_path> `
+ *                  `--enable-shared CPPFLAGS="$CPPFLAGS -I<optional_netcdf4_install_path>/include" `
+ *                  `LDFLAGS="$LDFLAGS -L<optional_netcdf4_install_path>/lib" `
+ *              <li>`make`
+ *              <li>`make check`
+ *              <li>`make install`
  *          </ul>
  *         </ul>
- *    <li> If you wish to add NS-Miracle support, download the <b>latest</b> version of NS-Miracle from the official git repository as instructed <a href="http://telecom.dei.unipd.it/pages/read/58/">here</a>: \n
+ *    <li> If you wish to add NS-Miracle support, download the <b>latest</b> version of NS-Miracle from the <a href="https://github.com/signetlabdei/nsmiracle">official git repository</a>: \n
  *         Read documentation provided in the above link for installation instructions.
- *    <li> If you wish to use WOSS with world data, download and extract the provided databases. 
- *         Download the <a href="https://www.bodc.ac.uk/data/open_download/gebco/gebco_2022/zip/">GEBCO 2022 2D Fifteen seconds zip archive</a> 
+ *    <li> If you wish to use WOSS with world environmental data, download and extract the latest WOSS databases. 
+ *         Download the <a href="https://www.bodc.ac.uk/data/open_download/gebco/gebco_2023/zip/">GEBCO 2023 2D Fifteen seconds zip archive</a> 
  *         or any of the <a href="https://www.gebco.net/data_and_products/historical_data_sets">previous data sets</a> 
  *         and put them in the same directory.
  * </ul>
@@ -1070,37 +1074,37 @@
  *
  * <ol>
  *    <li> extract the compressed file in a directory of your choice and cd into that directory;
- *    <li> run <tt>./autogen.sh</tt> 
- *    <li> run <tt>./configure</tt> with the following options:
+ *    <li> run `./autogen.sh` 
+ *    <li> run `./configure` with the following options:
  *         <ul>
- *             <li> <tt>--with-ns-allinone=\<<i>ns2-allinone_path</i>\></tt> <i> <b>optional</b>, needed if you want to compile the library for NS2 and NSMIRACLE.</i>
- *             <li> <tt>--with-nsmiracle=\<<i>ns-miracle_path</i>\></tt> <i> <b>optional</b>, needed if you want to compile the library for NS2 and NSMIRACLE.</i>
- *             <li> <tt>--with-netcdf4=\<<i>NetCDF4_install_path</i>\></tt> <i> <b>optional</b>, needed if you want to use NetCDF4 + HDF5 databases.
+ *             <li> `--with-ns-allinone=<ns2-allinone_path>` <i> <b>optional</b>, needed if you want to compile the library for NS2 and NSMIRACLE.</i> @see \ref ex_inst to avoid gcc-13 error compilation.
+ *             <li> `--with-nsmiracle=<ns-miracle_path>` <i> <b>optional</b>, needed if you want to compile the library for NS2 and NSMIRACLE.</i> @see \ref ex_inst to avoid gcc-13 error compilation.
+ *             <li> `--with-netcdf4=<NetCDF4_install_path>` <i> <b>optional</b>, needed if you want to use NetCDF4 + HDF5 databases.
  *                                                                           (The path is the same mentioned in the Requirements section, if NetCDF4
  *                                                                         was installed with no --prefix, the default path SHOULD be
  *                                                                         /usr/local) </i>
- *             <li> <tt>--with-pthread</tt> <i>optional</i> but <b>recommended</b>
- *             <li> <tt>--prefix=\<<i>path_where_libraries_will_be_installed</i>\></tt> 
+ *             <li> `--with-pthread` <i>optional</i> but <b>recommended</b>
+ *             <li> `--prefix=<path_where_libraries_will_be_installed>` 
  *                  \n this path is optional and should be the same one used with NS-Miracle installation.
  *                  If used, this path should be added to the environmental variable <i>LD_LIBRARY_PATH</i>. 
  *                  Please refer to NS-Miracle documentation for more info
  *         </ul>
- *    <li> run <tt>make</tt>
- *    <li> run <tt>make check</tt> to optionally perform any framework test
- *    <li> should any test fail, please enable its debug, rerun the test, collect the debug output file written <tt>woss/tests/</tt> directory and send a mail to WOSS@guerra-tlc.com
- *    <li> run <tt>make install</tt>
+ *    <li> run `make`
+ *    <li> run `make check` to optionally perform any framework test
+ *    <li> should any test fail, please enable its debug, rerun the test, collect the debug output file written `woss/tests/` directory and send a mail to WOSS@guerra-tlc.com
+ *    <li> run `make install`
  * </ol>
  *
  * \section ex_inst Examples
  *
  * The following line would install WOSS with pthread, and NetCDF4, but with no NS2/NS-Miracle support (stand-alone library).
  * 
- * <tt>./configure --with-netcdf4=\<<i>NetCDF4_install_path</i>\> --with-pthread --prefix=\<<i>path_where_libraries_will_be_installed</i>\></tt>
+ * `./configure --with-netcdf4=<NetCDF4_install_path> --with-pthread --prefix=<path_where_libraries_will_be_installed>`
  *
- * The next line would install WOSS with NetCDF4, NS2 and NS-Miracle support
+ * The next line would install WOSS with NetCDF4, NS2 and NS-Miracle support and it removes the gcc-13 overloaded-virtual warning
  *
- * <tt>./configure --with-netcdf4=\<<i>NetCDF4_install_path</i>\> --with-ns-allinone=\<<i>ns2-allinone_path</i>\> 
- * --with-nsmiracle=\<<i>ns-miracle_path</i>\> --with-pthread --prefix=\<<i>path_where_libraries_will_be_installed</i>\></tt>
+ * `CXXFLAGS="$CXXFLAGS -Wno-overloaded-virtual" ./configure --with-netcdf4=<NetCDF4_install_path> --with-ns-allinone=<ns2-allinone_path> 
+ * --with-nsmiracle=<ns-miracle_path> --with-pthread --prefix=<path_where_libraries_will_be_installed>`
 **/
  
 
@@ -1310,6 +1314,12 @@
 *  <li> <b>v.1.12.5</b> <ul>
 *                            <li> minor fixes to ns-Miracle classes
 *                      </ul>
+*  <li> <b>v.1.12.6</b> <ul>
+*                            <li> fixed gcc-13 warnings
+*                            <li> TCL examples updated to GEBCO 2023
+*                            <li> removed warning in woss::BellhopWoss
+*                            <li> changed URL of main WOSS website
+                      </ul>
 * </ul>
 **/
 
