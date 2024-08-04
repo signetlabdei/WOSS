@@ -65,8 +65,8 @@ namespace woss {
     /**
     * Destructor
     */
-    ~ShdData() { delete[] theta; delete[] tx_depths; delete[] rx_ranges; delete[] rx_depths; delete[] press_values ; }
-    
+    ~ShdData() { delete[] theta; delete[] tx_depths; delete[] rx_ranges; 
+                 delete[] rx_depths; delete[] press_values; }
     
     /**
     * Record byte length of a binary SHD file. See Bellhop code for more info
@@ -84,7 +84,6 @@ namespace woss {
     * Frequency value [Hz]
     */
     float frequency;
-
 
     /**
     * Total number of theta values. See Bellhop code for more info
@@ -167,9 +166,139 @@ namespace woss {
     */
     int getIndex( float value, float* array, int32_t array_size ) const;
 
-    
   };
 
+  /**
+  * \brief class for storing data of any acoustic toolbox SHD file
+  *
+  * class ShdData stores Pressure provided by any acoustic toolbox SHD file
+  */
+  class ShdData_v1 {
+
+    public:
+      
+    ShdData_v1();
+    
+    /**
+    * Destructor
+    */
+    ~ShdData_v1() { delete[] frequencies; delete[] theta; delete[] tx_depths; delete[] rx_ranges; 
+                 delete[] rx_depths; delete[] press_values; }
+    
+    /**
+    * Record byte length of a binary SHD file. See Bellhop code for more info
+    */
+    int32_t record_length;
+    
+
+    /**
+    * Plot typename. See Bellhop code for more info
+    */
+    char* plot_type;
+
+    
+    /**
+    * Frequency value [Hz]
+    */
+    double frequency;
+
+    int32_t Nfreq;
+
+    double* frequencies;
+
+    /**
+    * Total number of theta values. See Bellhop code for more info
+    */
+    int32_t Ntheta;
+
+    /**
+    * Pointer to an array of theta values
+    */
+    double* theta;
+
+
+    /**
+    * Total number of transmitter depths
+    */
+    int32_t Nsd;
+
+    /**
+    * Pointer to an array of transmitter depths [m]
+    */
+    float* tx_depths;
+
+
+    /**
+    * Total number of receiver depths
+    */
+    int32_t Nrd;
+
+    /**
+    * Pointer to an array of receiver depths [m]
+    */
+    float* rx_depths;
+
+    
+    /**
+    * Total number of receiver ranges
+    */
+    int32_t Nrr;
+
+    /**
+    * Pointer to an array of receiver ranges [m]
+    */
+    double* rx_ranges;
+
+    /**
+    * Total number of receiver per range
+    */
+    int32_t Nrx_per_range;
+
+    double stabil_atten;
+
+    /**
+    * Pointer to an array of complex\<double\> values [m]
+    */
+    ::std::complex<double>* press_values;
+
+
+    /**
+    * Initializes the struct 
+    */
+    void initialize() { plot_type = NULL; frequency = 0.0; Nfreq = 0; frequencies = NULL; Ntheta = 0; 
+                        theta = NULL; Nrx_per_range = 0; record_length = 0; tx_depths = NULL; stabil_atten = 0.0;
+                        rx_depths = NULL; rx_ranges = NULL; Nrr = 0; Nrd = 0; Nsd = 0; press_values = NULL; }
+
+
+    /**
+    * Returns the press_values index associated to given parameters
+    * @param tx_freq transmitter frequency [hZ]
+    * @param tx_depth transmitter depth [m]
+    * @param rx_depth receiver depth [m]
+    * @param rx_range receiver range [m]
+    * @param theta theta value
+    * @returns valid press_values index value
+    */
+    int getPressureIndex( double tx_freq, double tx_depth, double rx_depth, double rx_range, double theta = 0.0 ) const;
+
+    /**
+    * Returns the index of given array associated to given value
+    * @param value test value
+    * @param array valid pointer to an array 
+    * @param array_size size of passed array
+    * @returns valid array index value
+    */
+    int getIndex( float value, float* array, int32_t array_size ) const;
+
+    /**
+    * Returns the index of given array associated to given value
+    * @param value test value
+    * @param array valid pointer to an array 
+    * @param array_size size of passed array
+    * @returns valid array index value
+    */
+    int getIndex( double value, double* array, int32_t array_size ) const;
+  };
 
   /**
   * \brief Class for reading and manipulating results provided by any acoustic toolbox SHD file
@@ -204,6 +333,7 @@ namespace woss {
 
     /**
     * Gets the average Pressure value in given rx range-depth box
+    * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param start_rx_depth start receiver depth [m]
     * @param start_rx_range start receiver range [m]
@@ -211,27 +341,29 @@ namespace woss {
     * @param end_rx_range end receiver range [m]
     * @return a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
     **/  
-    virtual Pressure* readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range );
+    virtual Pressure* readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range );
 
     /**
     * Gets a Pressure value of given range, depths
+    * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
     * @return a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
     **/
-    virtual Pressure* readPressure( double tx_depth, double rx_depth, double rx_range ) const;
+    virtual Pressure* readPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const;
 
     
     /**
     * SHD files don't hold any time arrivals information. A special TimeArr is constructed from Pressure associated
     * to given paramaters.
+    * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
     * @return a special TimeArr that holds a single Pressure value and no delay information
     **/
-    virtual TimeArr* readTimeArr( double tx_depth, double rx_depth, double rx_range ) const; 
+    virtual TimeArr* readTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const; 
     
     
     protected:
@@ -259,6 +391,11 @@ namespace woss {
     */
     ShdData shd_file;
 
+    /**
+    * Struct that holds Pressure data read from SHD file with V1 syntax
+    */
+    ShdData_v1 shd_file_v1;
+
     double last_tx_depth;
 
     double last_start_rx_depth;
@@ -274,6 +411,7 @@ namespace woss {
 
     /**
     * Gets the average Pressure value in given rx range-depth box from ShdData Pressure array
+    * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param start_rx_depth start receiver depth [m]
     * @param start_rx_range start receiver range [m]
@@ -282,18 +420,19 @@ namespace woss {
     * @param theta theta value
     * @return a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
     **/  
-    ::std::complex<double> readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range, double theta = 0.0 );
+    ::std::complex<double> readMapAvgPressure(double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range, double theta = 0.0 );
 
 
     /**
     * Gets the Pressure value from ShdData Pressure array associated to given parameters
+    * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param rx_depth start receiver depth [m]
     * @param rx_range start receiver range [m]
     * @param theta theta value
     * @return a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
     **/  
-    ::std::complex<double> accessMap( double tx_depth, double rx_depth, double rx_range, double theta = 0.0 ) const;
+    ::std::complex<double> accessMap(double frequency, double tx_depth, double rx_depth, double rx_range, double theta = 0.0 ) const;
 
 
     /**
@@ -310,15 +449,6 @@ namespace woss {
     
     
   };
-
-
-  ////
-  // inline functions
-
-  inline ::std::complex<double> ShdResReader::accessMap( double tx_depth, double rx_depth, double rx_range, double theta ) const {
-    return( shd_file.press_values[ shd_file.getPressureIndex( tx_depth, rx_depth, rx_range, theta ) ] ); 
-  }
-
 
 }
 

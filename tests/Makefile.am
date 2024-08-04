@@ -34,7 +34,7 @@ LDADD = @NETCDF_LIBADD@ @NETCDF4_LIBADD@ @UW_WOSS_LIBADD@ @UW_WOSS_PHY_LIBADD@
 #TEST_EXTENSIONS = .sh
 
 # These are the tests programs.
-TESTPROGRAMS = woss-coord-definitions-test-bin
+TESTPROGRAMS = woss-coord-definitions-test-bin woss-bellhop-test-bin
 
 if NETCDF_BUILD
 #TESTPROGRAMS += 
@@ -47,6 +47,8 @@ TESTS = $(TESTPROGRAMS)
 
 # Here's the source code for the programs.
 woss_coord_definitions_test_bin_SOURCES = woss-test.cpp woss-coord-definitions-test.cpp
+
+woss_bellhop_test_bin_SOURCES = woss-test.cpp woss-bellhop-test.cpp
 
 EXTRA_DIST = woss-test.h
 

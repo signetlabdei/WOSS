@@ -84,6 +84,7 @@ namespace woss {
     
     /**
     * Gets the average Pressure value in given rx range-depth box
+    * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param start_rx_depth start receiver depth [m]
     * @param start_rx_range start receiver range [m]
@@ -91,26 +92,28 @@ namespace woss {
     * @param end_rx_range end receiver range [m]
     * @return a valid Pressure value 
     **/
-    virtual Pressure* readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) = 0;
+    virtual Pressure* readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) = 0;
 
     /**
     * Gets a Pressure value for given range, depths
+    * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
     * @return a valid Pressure value 
     **/
-    virtual Pressure* readPressure( double tx_depth, double rx_depth, double rx_range ) const = 0;
+    virtual Pressure* readPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
     
     
     /**
     * Gets a TimeArr value for given range, depths
+    * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
     * @return a valid Pressure value 
     **/
-    virtual TimeArr* readTimeArr( double tx_depth, double rx_depth, double rx_range ) const = 0;
+    virtual TimeArr* readTimeArr(double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
 
     
     /**

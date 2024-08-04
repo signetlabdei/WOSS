@@ -369,7 +369,21 @@ namespace woss {
     bool setCustomSediment( Sediment* const sediment, const Coord& tx_coord = CCSediment::DB_CDATA_ALL_OUTER_KEYS, 
                             double bearing = CCSediment::DB_CDATA_ALL_MEDIUM_KEYS, 
                             double range = CCSediment::DB_CDATA_ALL_INNER_KEYS );
-      
+
+    /**
+    * Converts the input :std::string into a woss::Sediment object and binds it to the designed geometry.
+    * \param sediment_string SSP in string format. syntax:
+    *  - Sed_typename|SSP[m/s]|vel_c[m/s]|vel_s[m/s]|dens[g/cm^3]|att_c[db/wavelength]|att_s[db/wavelength]|bottom_depth[m]
+    * \param txCoord the geometry originating geographical coordinates
+    * \param bearing the geometry bearing [radians]
+    * \param range the geometry range
+    * \returns true if successful, false otherwise
+    */
+    bool setCustomSediment( const ::std::string &sediment_string, 
+                            const Coord& txCoord = CCSediment::DB_CDATA_ALL_OUTER_KEYS,
+                            double bearing = CCSediment::DB_CDATA_ALL_MEDIUM_KEYS,
+                            double range = CCSediment::DB_CDATA_ALL_INNER_KEYS );
+
     /**
     * Gets the custom Sediment for given generator Coord
     * @param tx_coord const reference to a valid Coord (generator coordinates)
@@ -406,7 +420,23 @@ namespace woss {
                                        double bearing = CCSSP::DB_CDATA_ALL_MEDIUM_KEYS, 
                                        double range = CCSSP::DB_CDATA_ALL_INNER_KEYS,
                                        const Time& time_value = CCSSP::DB_CDATA_ALL_TIME_KEYS );
-      
+
+    /**
+    * Converts the input ::std::string into a custom woss::SSP object and assign it to the designed geometry
+    * and simulation time validity.
+    * \param sspString SSP in string format. syntax:
+    *  - tot_values|depth_1[m]|SSP[m/s]|....|depth_final[m]|SSP_final[m/s]
+    * \param txCoord the geometry originating geographical coordinates
+    * \param bearing the geometry bearing [radians]
+    * \param range the geometry range
+    * \param time_value the geometry time evolution step
+    * \returns true if successful, false otherwise
+    */
+    bool setCustomSSP( const std::string& sspString, const Coord& txCoord = CCSSP::DB_CDATA_ALL_OUTER_KEYS,
+                        double bearing = CCSSP::DB_CDATA_ALL_MEDIUM_KEYS,
+                        double range = CCSSP::DB_CDATA_ALL_INNER_KEYS,
+                        const Time& time_value = CCSSP::DB_CDATA_ALL_TIME_KEYS );
+
     /**
     * Imports a CustomSSP from file. \n
     * File format: 
@@ -468,7 +498,19 @@ namespace woss {
     bool setCustomBathymetry( Bathymetry* const bathymetry, const Coord& tx_coord = CCBathymetry::DB_CDATA_ALL_OUTER_KEYS, 
                                    double bearing = CCBathymetry::DB_CDATA_ALL_MEDIUM_KEYS, 
                                    double range = CCBathymetry::DB_CDATA_ALL_INNER_KEYS );
-       
+
+  /**
+   * Reads the input ::std::string and converts it into a custom woss::Bathymetry object and binds it to
+   * the input geometry
+   * \param bathyLine bathymetry in string format. syntax:
+   *  - tot_ranges|range_1[m]|dept_1[n]|....|range_final[m]|depth_final[m]
+   * \param txCoord the geometry originating geographical coordinates
+   * \param bearing the geometry bearing [radians]
+   * \returns true if successful, false otherwise
+   */
+    bool setCustomBathymetry (const ::std::string &bathyLine, const Coord& tx_coord = CCBathymetry::DB_CDATA_ALL_OUTER_KEYS, 
+                              double bearing = CCBathymetry::DB_CDATA_ALL_MEDIUM_KEYS);
+
     /**
     * Imports a CustomBathymetry from file. The file has to be a two column format: Range [m] Depth [m]
     * @param filename const reference to a string
@@ -616,7 +658,7 @@ namespace woss {
   }
 
 
-inline WossDbManager& WossDbManager::eraseCustomSSP( const Coord& tx_coord, double bearing, double range, const Time& time_key ) {
+  inline WossDbManager& WossDbManager::eraseCustomSSP( const Coord& tx_coord, double bearing, double range, const Time& time_key ) {
     ccssp_map.erase( tx_coord, bearing, range, time_key );
     return *this;
   }

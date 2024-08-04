@@ -451,7 +451,8 @@ void WossManagerResDbMT::checkConcurrentThreads() {
   else 
     concurrent_threads = ::std::min( max_thread_number, concurrent_threads );
   
-  ::std::cout << "WossManagerResDbMT::checkConcurrentThreads() " << concurrent_threads << ::std::endl;
+  if (debug)
+    ::std::cout << "WossManagerResDbMT::checkConcurrentThreads() " << concurrent_threads << ::std::endl;
 }
 
 

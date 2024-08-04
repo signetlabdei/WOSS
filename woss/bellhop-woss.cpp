@@ -932,7 +932,7 @@ Pressure* BellhopWoss::getAvgPressure( double frequency, double tx_depth, double
 
   checkBoundaries( frequency, tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range );
   
-  Pressure* ret_val = res_reader_map.find(frequency)->second->readAvgPressure( tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range );
+  Pressure* ret_val = res_reader_map.find(frequency)->second->readAvgPressure(frequency, tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range );
   *ret_val /= (double) total_runs;
   return ( ret_val );
 }
@@ -942,7 +942,7 @@ Pressure* BellhopWoss::getPressure( double frequency, double tx_depth, double rx
   assert( res_reader_map.size() > 0 );
 
   checkBoundaries( frequency, tx_depth, rx_depth, rx_range, rx_depth, rx_range );
-  Pressure* ret_val = res_reader_map.find(frequency)->second->readPressure( tx_depth, rx_depth, rx_range );
+  Pressure* ret_val = res_reader_map.find(frequency)->second->readPressure(frequency, tx_depth, rx_depth, rx_range );
   *ret_val /= (double) total_runs;
   return ( ret_val );
 }
@@ -952,7 +952,7 @@ TimeArr* BellhopWoss::getTimeArr( double frequency, double tx_depth, double rx_d
   assert( res_reader_map.size() > 0 );
 
   checkBoundaries( frequency, tx_depth, rx_depth, rx_range, rx_depth, rx_range );
-  TimeArr* ret_val = res_reader_map.find(frequency)->second->readTimeArr( tx_depth, rx_depth, rx_range );
+  TimeArr* ret_val = res_reader_map.find(frequency)->second->readTimeArr( frequency, tx_depth, rx_depth, rx_range );
   
    if ( debug ) ::std::cout << "BellhopWoss(" << woss_id << ")::getTimeArr() ret_val = " 
                             << *ret_val << ::std::endl;

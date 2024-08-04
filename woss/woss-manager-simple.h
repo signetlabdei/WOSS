@@ -75,6 +75,12 @@ namespace woss {
     virtual WossManagerSimple& eraseActiveWoss( const CoordZ& tx, const CoordZ& rx, double start_frequency, double end_frequency );
 
     /**
+    * Deletes all woss::Woss object
+    * @returns reference to *this
+    **/
+    virtual WossManagerSimple& eraseAllWoss(); 
+
+    /**
     * Deletes all created Woss instances
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
@@ -217,7 +223,23 @@ namespace woss {
     }
   }
   
- 
+  template< typename WMResDb >
+  WossManagerSimple< WMResDb >& WossManagerSimple< WMResDb >::eraseAllWoss() {
+    if (WMResDb::debug) ::std::cout << "WossManagerSimple::eraseAllWoss() map size = " << woss_map.size() << ::std::endl;
+    
+    for (WCIter it1 = woss_map.begin(); it1 != woss_map.end(); ++it1) {
+      for (WCZIter it2 = (it1->second).begin(); it2 != (it1->second).end(); ++it2) {
+        delete it2->second;
+      }
+    }
+    
+    woss_map.clear();
+
+    if (WMResDb::debug) ::std::cout << "WossManagerSimple::eraseAllWoss() final map size = " << woss_map.size() << ::std::endl;
+
+    return *this;
+  }
+
   template< typename WMResDb >
   WossManagerSimple< WMResDb >& WossManagerSimple< WMResDb >::eraseActiveWoss( const CoordZ& tx_coordz, const CoordZ& rx_coordz, double start_frequency, double end_frequency ) {
     if (WMResDb::debug) ::std::cout << "WossManagerSimple::eraseActiveWoss() tx coords " << tx_coordz << "; rx coords "

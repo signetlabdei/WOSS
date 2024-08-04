@@ -173,7 +173,7 @@ WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set debug          0
 WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage set woss_db_debug  0
 
 set db_ssp [new "WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage"]
-$db_ssp setDbPathName "${opt(db_path)}/ssp/WOA2018/WOA2018_SSP_June.nc"
+$db_ssp setDbPathName "${opt(db_path)}/ssp/WOA2023/WOA2023_SSP_July.nc"
 
 
 WOSS/Creator/Database/NetCDF/Bathymetry/GEBCO set debug           0

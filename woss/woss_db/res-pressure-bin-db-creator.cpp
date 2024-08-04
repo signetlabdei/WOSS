@@ -85,6 +85,8 @@ ResPressureBinDbCreator::~ResPressureBinDbCreator() {
 WossDb* const ResPressureBinDbCreator::createWossDb() {
   assert( pathname.length() > 0 );
   
+  if ( debug ) ::std::cout << "ResPressureBinDbCreator::createWossDb() pathname = " << pathname << ::std::endl;
+
   ResPressureTxtDb* woss_db = new ResPressureBinDb( pathname );
   
   woss_db->setSpaceSampling(space_sampling);

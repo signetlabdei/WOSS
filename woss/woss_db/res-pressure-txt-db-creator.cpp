@@ -59,10 +59,13 @@ ResPressureTxtDbCreator::~ResPressureTxtDbCreator() {
 
 WossDb* const ResPressureTxtDbCreator::createWossDb() {
   assert( pathname.length() > 0 );
-  
+
+  if ( debug ) ::std::cout << "ResPressureTxtDbCreator::createWossDb() pathname = " << pathname << ::std::endl;
+
   ResPressureTxtDb* woss_db = new ResPressureTxtDb( pathname );
-  
+
   woss_db->setSpaceSampling(space_sampling);
+
   bool ok = initializeDb( woss_db );  
   assert( ok );
   

@@ -178,10 +178,10 @@ bool ArrAscResReader::getArrAscHeader() {
     std::string sim_type; // '2D' or '3D'
     file_reader >> sim_type;
 
-    file_reader >> arr_file.frequency;
-
     if(sim_type.compare("'2D'") == 0)
     {
+      file_reader >> arr_file.frequency;
+
       //Read in num sources and source depths
       file_reader >> arr_file.Nsd;
       arr_file.tx_depths = new float[arr_file.Nsd];
@@ -326,8 +326,9 @@ bool ArrAscResReader::getArrAscFile() {
             file_reader >> curr_delay;
 
             if (bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 ||
-                bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2)
+                bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2) {
               file_reader >> curr_delay_imag;
+            }
 
             file_reader >> curr_src_angle;
             file_reader >> curr_rx_angle;
@@ -340,7 +341,8 @@ bool ArrAscResReader::getArrAscFile() {
               assert(!::std::isnan(curr_amplitude));      assert(!::std::isinf(curr_amplitude));
               assert(!::std::isnan(curr_phase));          assert(!::std::isinf(curr_phase));
               assert(!::std::isnan(curr_delay));          assert(!::std::isinf(curr_delay));       //assert(curr_delay >= 0.0);
-              if (bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 || bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2) {
+              if (bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 
+                 || bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2) {
                 assert(!::std::isnan(curr_delay_imag));   assert(!::std::isinf(curr_delay_imag));  //assert(curr_delay_imag >= 0.0);
               }
               assert(!::std::isnan(curr_src_angle));      assert(!::std::isinf(curr_src_angle));
@@ -405,24 +407,24 @@ bool ArrAscResReader::getArrAscFile() {
 }
 
 
-Pressure* ArrAscResReader::readPressure( double tx_depth, double rx_depth, double rx_range ) const {
-  return( SDefHandler::instance()->getPressure()->create( *readTimeArr( tx_depth, rx_depth, rx_range ) ) );
+Pressure* ArrAscResReader::readPressure(double frequency, double tx_depth, double rx_depth, double rx_range ) const {
+  return( SDefHandler::instance()->getPressure()->create( *readTimeArr( frequency, tx_depth, rx_depth, rx_range ) ) );
 }
 
 
-Pressure* ArrAscResReader::readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
+Pressure* ArrAscResReader::readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
   if ( !arr_asc_file_collected ) return SDefHandler::instance()->getPressure()->create( Pressure::createNotValid() );
-  return( SDefHandler::instance()->getPressure()->create( readMapAvgPressure( tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range ) ) );
+  return( SDefHandler::instance()->getPressure()->create( readMapAvgPressure( frequency, tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range ) ) );
 }
 
 
-TimeArr* ArrAscResReader::readTimeArr( double source_depth, double rx_depth, double rx_range ) const {
+TimeArr* ArrAscResReader::readTimeArr( double frequency, double source_depth, double rx_depth, double rx_range ) const {
   if ( !arr_asc_file_collected ) return( SDefHandler::instance()->getTimeArr()->create( TimeArr::createNotValid() ) );
-  return( SDefHandler::instance()->getTimeArr()->create( *accessMap( source_depth,rx_depth,rx_range ) ) );
+  return( SDefHandler::instance()->getTimeArr()->create( *accessMap(frequency, source_depth,rx_depth,rx_range ) ) );
 }
 
 
-::std::complex<double> ArrAscResReader::readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
+::std::complex<double> ArrAscResReader::readMapAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
   if ( ( last_tx_depth == tx_depth ) && ( last_start_rx_depth == start_rx_depth ) && ( last_start_rx_range == start_rx_range )
    &&  ( last_end_rx_depth == end_rx_depth ) && ( last_end_rx_range == end_rx_range ) )
      return last_ret_value;
