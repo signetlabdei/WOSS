@@ -314,7 +314,8 @@ void ResPressureTxtDb::printScreenMap() {
 
 
 bool ResPressureTxtDb::finalizeConnection() {
-  return importMap();
+  importMap();
+  return true;
 }
 
 

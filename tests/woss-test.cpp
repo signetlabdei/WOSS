@@ -164,7 +164,8 @@ WossTest::WossTest ()
     res_db_creator_debug (WH_DEBUG_DEFAULT),
     res_db_debug (WH_DEBUG_DEFAULT),
     res_db_use_binary (true),
-    res_db_use_time_arr (true),
+    res_db_use_time_arr (false),
+    res_db_use_pressure (false),
     res_db_space_sampling (WH_SPACE_SAMPLING_DEFAULT),
     res_db_file_path (WH_STRING_DEFAULT),
     res_db_file_name (WH_STRING_DEFAULT),
@@ -216,7 +217,8 @@ WossTest::WossTest ()
     total_rays (WH_TOTAL_RAYS_DEFAULT),
     min_angle (WH_MIN_ANGLE_DEFAULT),
     max_angle (WH_MAX_ANGLE_DEFAULT),
-    spp_depth_precision (WH_SSP_DEPTH_PRECISION_DEFAULT),
+    use_thorpe_att(true),
+    ssp_depth_precision (WH_SSP_DEPTH_PRECISION_DEFAULT),
     normalized_ssp_depth_steps (WH_NORMALIZED_SSP_DEPTH_STEPS_DEFAULT),
     work_dir_path (WH_WORK_PATH_DEFAULT),
     bellhop_path (WH_STRING_DEFAULT),
@@ -326,6 +328,7 @@ void WossTest::init() {
     def_handler->setTimeArr (time_arr_proto.clone ());
     def_handler->setSSP (ssp_proto.clone ());
     random_gen_proto.setSeed (woss_random_gen_stream);
+    random_gen_proto.initialize ();
     def_handler->setRandGenerator (random_gen_proto.clone ());
 
     woss_controller = new woss::WossController ();
@@ -394,9 +397,10 @@ void WossTest::init() {
         if (debug) {
           cout << "Setting TimeArr binary" << endl;
         }
+        string name = "arr_bin_" + res_db_file_name;
         res_db_creator_time_arr_bin = new woss::ResTimeArrBinDbCreator ();
-
-        res_db_creator_time_arr_bin->setDbPathName (res_db_file_path + "/" + res_db_file_name);
+        
+        res_db_creator_time_arr_bin->setDbPathName (res_db_file_path + "/" + name);
         res_db_creator_time_arr_bin->setDebug (res_db_creator_debug);
         res_db_creator_time_arr_bin->setWossDebug (res_db_debug);
 
@@ -406,33 +410,39 @@ void WossTest::init() {
         if (debug) {
           cout << "Setting TimeArr ASCII" << endl;
         }
+        string name = "arr_asc_" + res_db_file_name;
+
         res_db_creator_time_arr_txt = new woss::ResTimeArrTxtDbCreator ();
 
-        res_db_creator_time_arr_txt->setDbPathName (res_db_file_path + "/" +  res_db_file_name);
+        res_db_creator_time_arr_txt->setDbPathName (res_db_file_path + "/" +  name);
         res_db_creator_time_arr_txt->setDebug (res_db_creator_debug);
         res_db_creator_time_arr_txt->setWossDebug (res_db_debug);
 
         woss_controller->setTimeArrDbCreator (res_db_creator_time_arr_txt);
       }
-      else if ( res_db_use_binary == true && res_db_use_time_arr == false ) {
+      if ( res_db_use_binary == true && res_db_use_pressure == true ) {
         if (debug) {
           cout << "Setting Pressure binary" << endl;
         }
+        string name = "pres_bin_" + res_db_file_name;
+
         res_db_creator_press_bin = new woss::ResPressureBinDbCreator ();
 
-        res_db_creator_press_bin->setDbPathName (res_db_file_path + "/" + res_db_file_name);
+        res_db_creator_press_bin->setDbPathName (res_db_file_path + "/" + name);
         res_db_creator_press_bin->setDebug (res_db_creator_debug);
         res_db_creator_press_bin->setWossDebug (res_db_debug);
 
         woss_controller->setPressureDbCreator (res_db_creator_press_bin);
       }
-      else if ( res_db_use_binary == false && res_db_use_time_arr == false ) {
+      else if ( res_db_use_binary == false && res_db_use_pressure == true ) {
         if (debug) {
           cout << "Setting Pressure ASCII" << endl;
         }
+        string name = "pres_asc" + res_db_file_name;
+
         res_db_creator_press_txt = new woss::ResPressureTxtDbCreator ();
 
-        res_db_creator_press_txt->setDbPathName (res_db_file_path + "/" + res_db_file_name);
+        res_db_creator_press_txt->setDbPathName (res_db_file_path + "/" + name);
         res_db_creator_press_txt->setDebug (res_db_creator_debug);
         res_db_creator_press_txt->setWossDebug (res_db_debug);
 
@@ -451,7 +461,7 @@ void WossTest::init() {
     bellhop_creator->setWrkDirPath (work_dir_path);
     bellhop_creator->setCleanWorkDir (woss_clear_work_dir);
     bellhop_creator->setEvolutionTimeQuantum (evolution_time_quantum);
-    bellhop_creator->setThorpeAttFlag (true);
+    bellhop_creator->setThorpeAttFlag (use_thorpe_att);
     bellhop_creator->setTotalRuns (total_runs);
     bellhop_creator->setFrequencyStep (frequency_step);
     bellhop_creator->setTotalRangeSteps (total_range_steps);
@@ -466,7 +476,8 @@ void WossTest::init() {
     bellhop_creator->setRxMaxRangeOffset (rx_max_range_offset);
     bellhop_creator->setRaysNumber (total_rays);
     bellhop_creator->setAngles (woss::CustomAngles (min_angle, max_angle));
-    bellhop_creator->setSspDepthPrecision (spp_depth_precision);
+    bellhop_creator->setThorpeAttFlag (use_thorpe_att);
+    bellhop_creator->setSspDepthPrecision (ssp_depth_precision);
     bellhop_creator->setSspDepthSteps (normalized_ssp_depth_steps);
     bellhop_creator->setBellhopPath (bellhop_path);
     bellhop_creator->setBhMode (bellhop_mode);

@@ -347,6 +347,78 @@ void WossDbManager::insertPressure( const CoordZ& tx_coord, const CoordZ& rx_coo
 }
 
 
+bool WossDbManager::setCustomSSP(const ::std::string &sspString, const Coord& txCoord, double bearing,
+                          double range, const Time& timeValue)
+{
+  SSP* ssp = SDefHandler::instance()->getSSP()->create();
+  ::std::string sspTmp = sspString;
+  ::std::string::size_type tmp;
+
+  int totalDepths = 0;
+
+  tmp = sspTmp.find ("|");
+  if (tmp == std::string::npos) {
+    ::std::cerr << "WossDbManager::setCustomSSP() separator | not found, string parsed = " << sspTmp << ::std::endl;
+    return false;
+  }
+
+  std::string totDepths = sspTmp.substr (0, tmp);
+  sspTmp = sspTmp.substr (tmp + 1, sspTmp.npos);
+  totalDepths = ::std::atoi (totDepths.c_str ());
+
+  if(debug) {
+    ::std::cout << "WossDbManager::setCustomSSP() totalDepths = " << totalDepths << ::std::endl;
+  }
+
+  if (totalDepths <= 0) {
+    ::std::cerr << "WossDbManager::setCustomSSP() totalDepths < 0 " << totalDepths << ::std::endl;
+    return false;
+  }
+
+  for (int cnt = 0; cnt < totalDepths; ++cnt) {
+    double depth;
+    double sspValue;
+
+    tmp = sspTmp.find ("|");
+    if (tmp == std::string::npos) {
+    ::std::cerr << "WossDbManager::setCustomSSP() cnt = " << cnt 
+                << "; separator | not found, string parsed = " << sspTmp << ::std::endl;
+      return false;
+    }
+
+    std::string depthStr = sspTmp.substr (0, tmp);
+    sspTmp = sspTmp.substr (tmp + 1, sspTmp.npos);
+    depth = ::std::atof (depthStr.c_str ());
+
+    tmp = sspTmp.find ("|");
+    if ((tmp == std::string::npos) && (cnt != totalDepths - 1)) {
+    ::std::cerr << "WossDbManager::setCustomSSP() cnt = " << cnt 
+                << "; separator | not found, string parsed = " << sspTmp << ::std::endl;
+      return false;
+    }
+
+    std::string sspValueStr = sspTmp.substr (0, tmp);
+    sspTmp = sspTmp.substr (tmp + 1, sspTmp.npos);
+    sspValue = ::std::atof (sspValueStr.c_str ());
+
+    if(debug) {
+      ::std::cout << "WossDbManager::setCustomSSP() cnt = " << cnt 
+                  << "; depth = " << depth << "; sspValue = " << sspValue << ::std::endl;
+    }
+
+    if (sspValue < 0.0) {
+    ::std::cerr << "WossDbManager::setCustomSSP() cnt = " << cnt 
+                << "; depth = " << depth << "< 0 " << ::std::endl;
+      return false;
+    }
+    else {
+      ssp->insertValue(depth, sspValue);
+    }
+  }
+
+  return setCustomSSP(ssp, txCoord, bearing, range, timeValue);
+}
+
 
 bool WossDbManager::importCustomSSP( const ::std::string& filename, const Time& time, const Coord& tx_coord, double bearing ) {
   ::std::ifstream ssp_in ( filename.c_str() );
@@ -469,6 +541,83 @@ bool WossDbManager::importCustomSSP( const ::std::string& filename, const Time& 
   return true;
 }
 
+bool
+WossDbManager::setCustomBathymetry(const ::std::string &bathyLine, const Coord& txCoord, double bearing)
+{
+  ::std::string bathyTmp = bathyLine;
+  ::std::string::size_type tmp;
+
+  int totalRanges = 0;
+
+  if (debug) {
+    ::std::cout << "WossDbManager::setCustomBathymetry() txCoord = " << txCoord 
+                << "; bearing = " << bearing << ::std::endl;
+  }
+
+  tmp = bathyTmp.find ("|");
+  if (tmp == std::string::npos) {
+    ::std::cerr << "WossDbManager::setCustomBathymetry() " 
+                << "separator | not found, string parsed = " << bathyTmp << ::std::endl;
+    return false;
+  }
+
+  std::string totRanges = bathyTmp.substr (0, tmp);
+  bathyTmp = bathyTmp.substr (tmp + 1, bathyTmp.npos);
+  totalRanges = ::std::atoi (totRanges.c_str ());
+
+  if (debug) {
+    ::std::cout << "WossDbManager::setCustomBathymetry() " 
+                << "totalRanges = " << totalRanges << ::std::endl;
+  }
+
+  if (totalRanges <= 0) {
+    return false;
+  }
+
+  for (int cnt = 0; cnt < totalRanges; ++cnt) {
+    double range;
+    double depth;
+
+    tmp = bathyTmp.find ("|");
+    if (tmp == std::string::npos) {
+      ::std::cerr << "WossDbManager::setCustomBathymetry() " 
+                  << "cnt = " << cnt 
+                  << "; separator | not found, string parsed:" << bathyTmp << ::std::endl;
+
+      return false;
+    }
+
+    std::string rangeStr = bathyTmp.substr (0, tmp);
+    bathyTmp = bathyTmp.substr (tmp + 1, bathyTmp.npos);
+    range = ::std::atof (rangeStr.c_str ());
+
+    tmp = bathyTmp.find ("|");
+    if ((tmp == std::string::npos) && (cnt != totalRanges - 1)) {
+      ::std::cerr << "WossDbManager::setCustomBathymetry() " 
+                  << "cnt = " << cnt 
+                  << "; separator | not found, string parsed:" << bathyTmp << ::std::endl;
+      return false;
+    }
+
+    std::string depthStr = bathyTmp.substr (0, tmp);
+    bathyTmp = bathyTmp.substr (tmp + 1, bathyTmp.npos);
+    depth = ::std::atof (depthStr.c_str ());
+
+    if (debug) {
+      ::std::cout << "WossDbManager::setCustomBathymetry() " 
+                  << " cnt = " << cnt << "; range = " << range 
+                  << "; depth = " << depth << ::std::endl;
+    }
+
+    if (depth < 0.0) {
+        return false;
+    }
+    else {
+        setCustomBathymetry(&depth, txCoord, bearing, range);
+    }
+  }
+  return true;
+}
 
 bool WossDbManager::importCustomBathymetry( const ::std::string& filename, const Coord& tx_coord, double bearing ) {
   ::std::ifstream bathy_in ( filename.c_str() );
@@ -492,5 +641,49 @@ bool WossDbManager::importCustomBathymetry( const ::std::string& filename, const
   return true;
 }
 
+bool WossDbManager::setCustomSediment(const ::std::string &sedimentString, const Coord& txCoord, double bearing, double range) {
 
- 
+  ::std::string sedimentType;
+  ::std::string sedimTmp = sedimentString;
+  ::std::string::size_type tmp;
+  double param[5];
+
+  tmp = sedimTmp.find ("|");
+  if (tmp == std::string::npos) {
+    ::std::cout << "WossDbManager::setCustomSediment() " 
+                << "separator | not found, string parsed = " << sedimTmp << ::std::endl;
+    return false;
+  }
+
+  sedimentType = sedimTmp.substr (0, tmp);
+  sedimTmp = sedimTmp.substr (tmp + 1, sedimTmp.npos);
+
+  if (debug) {
+    ::std::cout << "WossDbManager::setCustomSediment() " 
+                << "sedimentType = " << sedimentType << ::std::endl;
+  }
+
+  for (int cnt = 0; cnt < 5; ++cnt) {
+    tmp = sedimTmp.find ("|");
+    if ((tmp == std::string::npos) && (cnt != 5 - 1)) {
+      ::std::cerr << "WossDbManager::setCustomSediment() " 
+                  << "cnt = " << cnt << "; separator | not found, string parsed = " 
+                  << sedimTmp << ::std::endl;
+
+      return false;
+    }
+
+    std::string paramStr = sedimTmp.substr (0, tmp);
+    sedimTmp = sedimTmp.substr (tmp + 1, sedimTmp.npos);
+    param[cnt] = ::std::atof (paramStr.c_str ());
+
+    if (debug) {
+      ::std::cout << "WossDbManager::setCustomSediment() " 
+                  << "cnt = " << cnt << "; param = " << param[cnt] << ::std::endl;
+    }
+  }
+
+  Sediment* sediment = SDefHandler::instance()->getSediment()->create(sedimentType, param[0], param[1], param[2], param[3], param[4]);
+
+  return setCustomSediment(sediment, txCoord, bearing, range);
+}

@@ -54,7 +54,7 @@ void RandomGenerator::initialize() {
 
 double RandomGenerator::getRand() const { 
   if (!initialized) {
-    ::std::cerr << "RandomGenerator::getRand() WARNING this instance is not initialized!!" << ::std::endl;
+    ::std::cerr << "RandomGenerator::getRand() ERROR this instance is not initialized!!" << ::std::endl;
     exit(1);
   }
 
@@ -64,7 +64,7 @@ double RandomGenerator::getRand() const {
 
 int RandomGenerator::getRandInt() const { 
   if (!initialized) {
-    ::std::cerr << "RandomGenerator::getRandInt() WARNING this instance is not initialized!!" << ::std::endl;
+    ::std::cerr << "RandomGenerator::getRandInt() ERROR this instance is not initialized!!" << ::std::endl;
     exit(1);
   }
   

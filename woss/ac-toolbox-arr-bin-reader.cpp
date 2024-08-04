@@ -115,6 +115,8 @@ bool ArrBinResReader::getArrBinHeader() {
       return false;
   }
 
+  ::std::cout.precision(WOSS_DECIMAL_PRECISION);
+
   const BellhopWoss* bwoss_ptr = dynamic_cast<const BellhopWoss*>(woss_ptr);
 
   assert( NULL != bwoss_ptr );
@@ -136,16 +138,17 @@ bool ArrBinResReader::getArrBinHeader() {
 
     file_reader.ignore(8); // ::std::ios_base::beg;
     file_reader.read(reinterpret_cast<char*>(&arr_file.frequency),sizeof(float));
-    file_reader.ignore(8);
 
     if(strcmp(sim_type, "'2D'") == 0)
     {
+
+      file_reader.ignore(8);
       //Read in num sources and source depths
       file_reader.read(reinterpret_cast<char*>(&arr_file.Nsd),sizeof(int32_t));
       arr_file.tx_depths = new float[arr_file.Nsd];
       file_reader.read( reinterpret_cast<char*>(arr_file.tx_depths), arr_file.Nsd * sizeof(float) );
-      file_reader.ignore(8);
 
+      file_reader.ignore(8);
       //Read in num receivers depths and receiver depths
       file_reader.read(reinterpret_cast<char*>(&arr_file.Nrd),sizeof(int32_t));
       arr_file.rx_depths = new float[arr_file.Nrd];
@@ -155,7 +158,14 @@ bool ArrBinResReader::getArrBinHeader() {
       //Read in num receivers ranges and receiver ranges
       file_reader.read(reinterpret_cast<char*>(&arr_file.Nrr),sizeof(int32_t));
       arr_file.rx_ranges = new float[arr_file.Nrr];
-      file_reader.read( reinterpret_cast<char*>(arr_file.rx_ranges), arr_file.Nrr * sizeof(float) );
+
+      double* rx_ranges_tmp = new double[arr_file.Nrr];
+      file_reader.read( reinterpret_cast<char*>(rx_ranges_tmp), arr_file.Nrr * sizeof(double) );
+      
+      for (int i = 0; i < arr_file.Nrr; i++) {
+        arr_file.rx_ranges[i] = (float)rx_ranges_tmp[i];
+      }
+      delete[] rx_ranges_tmp;
     } else
     {
       ::std::cout << "ArrBinResReader(" << woss_ptr->getWossId()
@@ -272,8 +282,9 @@ bool ArrBinResReader::getArrBinFile() {
             file_reader.read( reinterpret_cast<char*>(&curr_phase), sizeof(float) );
             file_reader.read( reinterpret_cast<char*>(&curr_delay), sizeof(float) );
             if (bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 ||
-                bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2)
+                bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2) {
               file_reader.read( reinterpret_cast<char*>(&curr_delay_imag), sizeof(float) );
+            }
             file_reader.read( reinterpret_cast<char*>(&curr_src_angle), sizeof(float) );
             file_reader.read( reinterpret_cast<char*>(&curr_rx_angle), sizeof(float) );
             file_reader.read( reinterpret_cast<char*>(&curr_top_bounces), sizeof(float) );
@@ -286,7 +297,8 @@ bool ArrBinResReader::getArrBinFile() {
               assert(!::std::isnan(curr_amplitude));      assert(!::std::isinf(curr_amplitude));
               assert(!::std::isnan(curr_phase));          assert(!::std::isinf(curr_phase));
               assert(!::std::isnan(curr_delay));          assert(!::std::isinf(curr_delay));       //assert(curr_delay >= 0.0);
-              if (bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 || bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2) {
+              if (bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_1 
+                || bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2) {
                 assert(!::std::isnan(curr_delay_imag));   assert(!::std::isinf(curr_delay_imag));  //assert(curr_delay_imag >= 0.0);
               }
               assert(!::std::isnan(curr_src_angle));      assert(!::std::isinf(curr_src_angle));
@@ -296,10 +308,12 @@ bool ArrBinResReader::getArrBinFile() {
             }
 
             // GLITCH RECOVERY FROM VERTICAL CHANNEL SIMULATIONS ( HORIZ RANGE == 0, ONLY VERTICAL DEPTH )
-            if ( curr_delay <= 0.0 || arr_file.rx_ranges[irr] <= 0.0 )
+            if ( curr_delay <= 0.0 || arr_file.rx_ranges[irr] <= 0.0 ) {
               curr_delay = ( abs( arr_file.rx_depths[ird] - arr_file.tx_depths[isd] ) ) / 1500.0;
-            if ( curr_delay <= 0.0 ) curr_delay = abs( curr_delay );
-
+            }
+            if ( curr_delay <= 0.0 ) {
+              curr_delay = abs( curr_delay );
+            }
             if (bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_0) {
               curr_pressure_ptr = new Pressure( (curr_amplitude * cos(2.0 * M_PI * arr_file.frequency + curr_phase * M_PI / 180.0) ) ,
                                                 (curr_amplitude * sin(2.0 * M_PI * arr_file.frequency + curr_phase * M_PI / 180.0) ) );
@@ -353,24 +367,24 @@ bool ArrBinResReader::getArrBinFile() {
 }
 
 
-Pressure* ArrBinResReader::readPressure( double tx_depth, double rx_depth, double rx_range ) const {
-  return( SDefHandler::instance()->getPressure()->create( *readTimeArr( tx_depth, rx_depth, rx_range ) ) );
+Pressure* ArrBinResReader::readPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const {
+  return( SDefHandler::instance()->getPressure()->create( *readTimeArr( frequency, tx_depth, rx_depth, rx_range ) ) );
 }
 
 
-Pressure* ArrBinResReader::readAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
+Pressure* ArrBinResReader::readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
   if ( !arr_bin_file_collected ) return SDefHandler::instance()->getPressure()->create( Pressure::createNotValid() );
-  return( SDefHandler::instance()->getPressure()->create( readMapAvgPressure( tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range ) ) );
+  return( SDefHandler::instance()->getPressure()->create( readMapAvgPressure( frequency, tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range ) ) );
 }
 
 
-TimeArr* ArrBinResReader::readTimeArr(double source_depth, double rx_depth, double rx_range) const {
+TimeArr* ArrBinResReader::readTimeArr(double frequency, double source_depth, double rx_depth, double rx_range) const {
   if ( !arr_bin_file_collected ) SDefHandler::instance()->getTimeArr()->create( TimeArr::createNotValid() );
-  return( SDefHandler::instance()->getTimeArr()->create( *accessMap( source_depth,rx_depth,rx_range ) ) );
+  return( SDefHandler::instance()->getTimeArr()->create( *accessMap( frequency, source_depth,rx_depth,rx_range ) ) );
 }
 
 
-::std::complex<double> ArrBinResReader::readMapAvgPressure( double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
+::std::complex<double> ArrBinResReader::readMapAvgPressure(double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) {
   if ( ( last_tx_depth == tx_depth ) && ( last_start_rx_depth == start_rx_depth ) && ( last_start_rx_range == start_rx_range )
    &&  ( last_end_rx_depth == end_rx_depth ) && ( last_end_rx_range == end_rx_range ) )
      return last_ret_value;

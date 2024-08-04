@@ -194,8 +194,17 @@ namespace woss {
     static double getTxLossDb( const ::std::complex<double>& val ) { if ( val == ::std::complex<double>( HUGE_VAL, HUGE_VAL ) ) return -HUGE_VAL;
                                 else if( val == ::std::complex<double>( 0.0, 0.0 ) ) return HUGE_VAL; 
                                 else return( -20.0 * log10( ::std::abs(val) ) ); }
-  
-  
+
+    /**
+    * Returns the Transmission Loss measured in db
+    * @return the Transmission Loss [db]
+    **/
+    double getTxLossDb() const { 
+      if (isValid() == false) return -HUGE_VAL;
+      else if ( complex_pressure == ::std::complex<double>( 0.0, 0.0 ) ) return HUGE_VAL;
+      else return ( -20.0 * log10( abs() ));
+    }
+
     /**
     * Checks if the attuenuation provided by the complex pressure is truly an attenuation,
     * e.g. if abs < 1. If not, replace the pressure with the attenuation provided by Thorp absorption process at given frequency
@@ -405,7 +414,7 @@ namespace woss {
     
 
   inline ::std::ostream& operator<<( ::std::ostream& os, const Pressure& instance ) { 
-    os << instance.complex_pressure;
+    os << instance.complex_pressure << " TL = " << instance.getTxLossDb() << " dB";
     return os; 
   }
 

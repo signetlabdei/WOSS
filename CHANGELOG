@@ -156,3 +156,10 @@ v1.12.6 - fixed gcc-13 warnings
         - TCL examples updated to GEBCO 2023
         - removed warning in woss::BellhopWoss
         - changed URL of main WOSS website
+
+v1.13.0 - Added support for SSP NetCDF4 databases generated from WOA2023 dataset
+        - added bellhop autotools test unit
+        - improved the WossTest framework
+        - woss::ResReader fixed importing of bellhop's SPL and arrivals from binary mode
+        - woss::WossDbManager - added support for importing bathymetry, SSP and sediment from a string
+        - woss::WossManager - added API to erase all WOSS instances

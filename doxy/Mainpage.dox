@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.12.6
+ * @version 1.13.0
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -153,7 +153,7 @@
  *         woss::BellhopCreator];
  *    <li> interface implementation and custom NetCDF db of monthly averaged SSPs, 
  *         calculated with the TEOS-10 exact formula [6] based on the temperature, salinity and depth data taken 
- *         from the World Ocean Atlas database of 2001 [7], 2005 [8], 2009 [9], 2013 [10] and 2018 [11] 
+ *         from the World Ocean Atlas database of 2001 [7], 2005 [8], 2009 [9], 2013 [10], 2018 [11] and 2023 [12] 
  *         [woss::SspWoa2005Db, woss::SspWoa2005DbCreator];
  *    <li> interface implementation for the GEBCO NetCDF bathymetry databases 
  *         (all versions: 1D, 2D, 2008, 2014, 2019, 2020, 2021, 2022) [12], [woss::BathyGebcoDb, woss::BathyGebcoDbCreator];
@@ -185,6 +185,7 @@
  *    <li> World Ocean Atlas 2009, https://www.nodc.noaa.gov/OC5/WOA09/pr_woa09.html .
  *    <li> World Ocean Atlas 2013, https://www.nodc.noaa.gov/OC5/woa13/ .
  *    <li> World Ocean Atlas 2018, https://www.nodc.noaa.gov/OC5/woa18/ .
+ *    <li> World Ocean Atlas 2023, https://www.nodc.noaa.gov/OC5/woa23/ .
  *    <li> General bathymetric chart of the oceans, http://www.gebco.net .
  *    <li> National geophysical data center, seafloor surficial sediment descriptions,
  *         http://www.ngdc.noaa.gov/mgg/geology/deck41.html .
@@ -231,7 +232,7 @@
  * @see woss::SSP, woss::SspWoa2005Db, woss::SspWoa2005DbCreator
  *
  *
- * \section ssp_db_2013 World Ocean Atlas 2001, 2013 and 2018 SSP Databases
+ * \section ssp_db_2013 World Ocean Atlas 2001, 2013, 2018 and 2023 SSP Databases
  * 
  * These databases contain monthly, seasonal and annual average of sound speed profiles, calculated with the TEOS-10
  * exact formula, and based on the depth, temperature and salinity provided by the World Ocean Atlas.
@@ -1319,7 +1320,15 @@
 *                            <li> TCL examples updated to GEBCO 2023
 *                            <li> removed warning in woss::BellhopWoss
 *                            <li> changed URL of main WOSS website
-                      </ul>
+*                      </ul>
+*  <li> <b>v.1.13.0</b> <ul>
+*                            <li> Added support for SSP NetCDF4 databases generated from WOA2023 dataset
+*                            <li> added bellhop autotools test unit
+*                            <li> improved the WossTest framework
+*                            <li> woss::ResReader fixed importing of bellhop's SPL and arrivals from binary mode
+*                            <li> woss::WossDbManager - added support for importing bathymetry, SSP and sediment from a string
+*                            <li> woss::WossManager - added API to erase all WOSS instances
+*                      </ul>
 * </ul>
 **/
 
