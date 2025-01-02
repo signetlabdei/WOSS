@@ -933,8 +933,8 @@ namespace woss {
 
   inline void BellhopWoss::writeSediment() {
     f_out << "\'A*\' 0.0" << ::std::setw(30) << "! BOTTOM TYPE" << ::std::endl
-          << max_normalized_ssp_depth << " " << sediment_value->getStringValues() <<  "  /  ! " 
-          << sediment_value->getType() << " BOTTOM TYPE " << ::std::endl;
+          << max_normalized_ssp_depth << " " << sediment_map.begin()->second->getStringValues() <<  "  /  ! " 
+          << sediment_map.begin()->second->getType() << " BOTTOM TYPE " << ::std::endl;
   }
 
 

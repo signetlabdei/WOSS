@@ -63,7 +63,7 @@ set opt(start_clock) [clock seconds]
 set opt(start_lat)     42.59 
 set opt(start_long)    10.125
 set opt(nn)            4
-set opt(pktsize)       512
+set opt(pktsize)       50
 set opt(cbr_period)    400
 set opt(stoptime)      100000.0
 set opt(rep_num)       10
@@ -82,9 +82,9 @@ set opt(txduration) [expr $opt(stoptime) - $opt(starttime)]
 
 set opt(maxinterval_)   500.0
 
-set opt(freq)           11500.0
-set opt(bw)             5000.0
-set opt(bitrate)        4800.0
+set opt(freq)           5000.0
+set opt(bw)             600.0
+set opt(bitrate)        200.0
 
 #set opt(tracefilename) "/tmp/${argv0}.tr"
 set opt(tracefilename) "/dev/null"
@@ -245,8 +245,8 @@ $woss_creator setWorkDirPath        "/dev/shm/woss/aloha_with_dbs/"
 $woss_creator setBellhopPath        ""
 $woss_creator setBellhopMode        0 0 "A"
 $woss_creator setBeamOptions        0 0 "B"
-$woss_creator setBathymetryType     0 0 "L"
-$woss_creator setBathymetryMethod   0 0 "S"
+$woss_creator setBathymetryType     0 0 "LL"
+$woss_creator setBathymetryMethod   0 0 "D"
 $woss_creator setAltimetryType      0 0 "L"
 $woss_creator setSimulationTimes    0 0 1 1 2010 0 0 1 2 1 2010 0 0 1
 
@@ -330,7 +330,7 @@ WOSS/Module/MPhy/BPSK  set AcquisitionThreshold_dB_   10.0
 WOSS/Module/MPhy/BPSK  set BitRate_                   $opt(bitrate)
 WOSS/Module/MPhy/BPSK  set MaxTxSPL_dB_               190
 WOSS/Module/MPhy/BPSK  set MinTxSPL_dB_               10
-WOSS/Module/MPhy/BPSK  set MaxTxRange_                10000
+WOSS/Module/MPhy/BPSK  set MaxTxRange_                15000
 WOSS/Module/MPhy/BPSK  set PER_target_                0.01
 WOSS/Module/MPhy/BPSK  set TxSPLMargin_dB_            10
 WOSS/Module/MPhy/BPSK  set RxSnrPenalty_dB_           -10.0
@@ -401,7 +401,7 @@ proc createNode { id  }  {
      $node($id) addPlugin $posdb($id) 20 "PDB"
      $posdb($id) addpos [$ipif($id) addr] $position($id)
      
-     set coord_x [ expr 1000.0 * $id ]
+     set coord_x [ expr 5000.0 * $id ]
      set curr_lon   [ $woss_utilities getLongfromDistBearing $opt(start_lat) $opt(start_long) 90.0  $coord_x ]
      set curr_depth [ expr [ $db_manager getBathymetry $opt(start_lat) $curr_lon ] + $opt(node_bathy_offset) ]
 
@@ -482,7 +482,7 @@ proc createSink { } {
      $node_sink addPlugin $posdb_sink 20 "PDB"
      $posdb_sink addpos [$ipif_sink addr] $position_sink
 
-     set coord_x [ expr (($opt(nn) - 1.0) * 1000.0) / 2.0 ]
+     set coord_x [ expr (($opt(nn) - 1.0) * 5000.0) / 2.0 ]
      set curr_lon [ $woss_utilities getLongfromDistBearing $opt(start_lat) $opt(start_long) 90.0  $coord_x ]
 
      $position_sink setLatitude_  $opt(start_lat)

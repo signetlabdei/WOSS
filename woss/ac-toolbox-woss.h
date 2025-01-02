@@ -50,12 +50,21 @@ namespace woss {
   
   class Sediment;
   class Altimetry;
-  
-  /**
-  * A vector of SSP
-  **/  
-  typedef ::std::vector< SSP* > SSPVector;
 
+  /**
+  * Vector of range values [m]
+  **/
+  typedef ::std::vector< double > RangeVector;
+
+  /**
+  * A map of dynamically allocated woss::SSP
+  **/
+  typedef ::std::map< int, SSP* > SSPMap;
+
+  /**
+   * A map of dynamically woss::Sediment
+   **/
+  typedef ::std::map< int, Sediment* > SedimentMap;
 
   /**
   * \brief base class for implementing acoustic-toolbox channel simulators (Bellhop, Kraken, etc...) 
@@ -111,7 +120,7 @@ namespace woss {
     * @param steps total number of range steps
     **/
     ACToolboxWoss& setRangeSteps( int steps ) { total_range_steps = steps; coordz_vector.reserve(steps + 2); 
-                                      range_vector.reserve(steps + 2); ssp_vector.reserve(steps + 2); return *this; }
+                                      range_vector.reserve(steps + 2); return *this; }
 
     /**
     * Sets the depth precision for all SSP that will be created
@@ -238,19 +247,14 @@ namespace woss {
     RangeVector range_vector;
 
     /**
-    * Vector of all SSP involved. Its size is less or equal to total_range_steps
+    * Map of all SSP involved. Its size is less or equal to total_range_steps
     **/
-    SSPVector ssp_vector;
+    SSPMap ssp_map;
 
     /**
-    * Set of of ssp_vector indexes that link to unique SSP
+    * Map of all Sediment involved. Its size is less or equal to total_range_steps
     **/
-    ::std::set< int > ssp_unique_indexes;
-
-    /**
-    * Sediment in use
-    **/
-    Sediment* sediment_value;
+    SedimentMap sediment_map;
 
     /**
     * Altimetry in use
@@ -259,10 +263,10 @@ namespace woss {
     
 
     /**
-    * <i>True</i> if ssp_vector is transformable
+    * <i>True</i> if ssp_map is transformable
     * @see SSP::isTransformable()
     **/
-    bool is_ssp_vector_transformable;
+    bool is_ssp_map_transformable;
 
 
     /**
@@ -272,6 +276,12 @@ namespace woss {
     **/
     virtual bool checkSSPUnicity( SSP*& ptr );
 
+    /**
+    * Checks if the given Sediment is not equal to previous values
+    * @param value pointer to a valid Sediment object
+    * @returns <i>true</i> if input is unique, <i>false</i> otherwise
+    **/
+    virtual bool checkSedimentUnicity( Sediment*& ptr );
 
     /**
     * Initializes range_vector
@@ -286,10 +296,15 @@ namespace woss {
     virtual bool initCoordZVector();
     
     /**
-    * Initializes sediment_value
+    * Initializes sediment_map
     * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
     **/
-    virtual bool initSediment();
+    virtual bool initSedimentMap();
+
+    /**
+    * Resets sediment_map
+    **/    
+    virtual void resetSedimentMap(); 
 
     /**
     * Initializes altimetry_value
@@ -298,15 +313,15 @@ namespace woss {
     virtual bool initAltimetry();
         
     /**
-    * Initializes ssp_vector
+    * Initializes ssp_map
     * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
     **/
-    virtual bool initSSPVector();
+    virtual bool initSSPMap();
 
     /**
-    * Resets ssp_vector
+    * Resets ssp_map
     **/    
-    virtual void resetSSPVector(); 
+    virtual void resetSSPMap(); 
     
   };
 

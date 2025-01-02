@@ -3,7 +3,7 @@
  *
  * @author Federico Guerra - federico@guerra-tlc.com
  *
- * @version 1.13.0
+ * @version 1.14.0
  *
  * This document provides a short techical description of the <i>World Ocean Simulation System</i> (WOSS) library 
  * and of its integration into <i>Multi InteRfAce Cross Layer Extension</i> (NS-Miracle).<p>
@@ -1328,6 +1328,11 @@
 *                            <li> woss::ResReader fixed importing of bellhop's SPL and arrivals from binary mode
 *                            <li> woss::WossDbManager - added support for importing bathymetry, SSP and sediment from a string
 *                            <li> woss::WossManager - added API to erase all WOSS instances
+*                      </ul>
+* <li> <b>v.1.14.0</b> <ul>
+*                            <li> Added support for Bellhop "LL" bathymetry, i.e with multiple geoacoustic parameters
+*                            <li> refactored woss::WossManager
+*                            <li> improved tests and examples
 *                      </ul>
 * </ul>
 **/

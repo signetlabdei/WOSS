@@ -26,7 +26,7 @@
 # whose support is gratefully acknowledged.
 
 
-AC_INIT([WOSS], [1.13.0], [woss@guerra-tlc.com])
+AC_INIT([WOSS], [1.14.0], [woss@guerra-tlc.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_MSG_NOTICE([WOSS AC_PACKAGE_VERSION])
@@ -77,7 +77,7 @@ UW_WOSS_WARN="$UW_WOSS_WARN "'-Wall -Werror'
 UW_WOSS_PHY_CPPFLAGS="$UW_WOSS_PHY_CPPFLAGS "'-I$(top_srcdir)/woss/woss_def'
 UW_WOSS_PHY_CPPFLAGS="$UW_WOSS_PHY_CPPFLAGS "'-I$(top_srcdir)/woss/woss_db'
 UW_WOSS_PHY_CPPFLAGS="$UW_WOSS_PHY_CPPFLAGS "'-I$(top_srcdir)/woss'
-UW_WOSS_PHY_WARN="$UW_WOSS_PHY_WARN "'-Wall -Werror -Wno-write-strings'
+UW_WOSS_PHY_WARN="$UW_WOSS_PHY_WARN "'-Wall -Werror -Wno-write-strings -Wno-overloaded-virtual'
 
 UW_WOSS_LDFLAGS='-L$(top_srcdir)/woss/woss_def'
 UW_WOSS_LDFLAGS="$UW_WOSS_LDFLAGS "'-L$(top_srcdir)/woss/woss_db'

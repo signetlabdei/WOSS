@@ -154,15 +154,15 @@ bool WossDbManager::closeAllConnections() {
 
 
 Altimetry* WossDbManager::getAltimetry( const CoordZ& tx_coord, const CoordZ& rx_coord ) const {
-  if( debug ) ::std::cout << "WossDbManager::getAltimetry() tx_coord = " << tx_coord << "; rx_coord = " << rx_coord 
-                          << "; ccaltimetry_map.size() = " << ccaltimetry_map.size() << ::std::endl;
+  if( debug ) 
+    ::std::cout << "WossDbManager::getAltimetry() tx_coord = " << tx_coord << "; rx_coord = " << rx_coord 
+                << "; ccaltimetry_map.size() = " << ccaltimetry_map.size() << ::std::endl;
   
   Altimetry* ptr = ccaltimetry_map.get( tx_coord, rx_coord );
   
-  if( debug && ptr != NULL && ptr->isValid() ) ::std::cout << "WossDbManager::getAltimetry() altimetry found " << *ptr << ::std::endl;
+  if( debug && ptr != NULL && ptr->isValid() ) 
+    ::std::cout << "WossDbManager::getAltimetry() altimetry found " << *ptr << ::std::endl;
 
-//   debugWaitForUser();
-  
   if ( ptr != NULL ) return ptr;
   
   return SDefHandler::instance()->getAltimetry()->create( Altimetry::createNotValid() );  
@@ -171,21 +171,26 @@ Altimetry* WossDbManager::getAltimetry( const CoordZ& tx_coord, const CoordZ& rx
 
 Sediment* WossDbManager::getSediment( const CoordZ& tx_coord, const CoordZ& rx_coord ) const {
 
-  if(debug) ::std::cout << "WossDbManager::getSediment() tx_coord = " << tx_coord << "; rx_coord = " << rx_coord 
-                        << "; ccsediment_map.size() = " << ccsediment_map.size() << ::std::endl;
+  if(debug) 
+    ::std::cout << "WossDbManager::getSediment() tx_coord = " << tx_coord << "; rx_coord = " << rx_coord 
+                << "; ccsediment_map.size() = " << ccsediment_map.size() << ::std::endl;
   
-  Sediment* ptr = ccsediment_map.get( tx_coord, rx_coord );
+  if (ccsediment_map.empty() == false) {
+    Sediment* ptr = ccsediment_map.get( tx_coord, rx_coord );
 
-  if(debug && ptr != NULL) ::std::cout << "WossDbManager::getSediment() sed found = " << ptr << "; " << *ptr << ::std::endl;
-  
-  if ( ptr != NULL ) return ptr;
-  
+    if(debug && ptr != NULL) 
+      ::std::cout << "WossDbManager::getSediment() sed found = " << ptr << "; " << *ptr << ::std::endl;
+
+    if ( ptr != NULL ) return ptr;
+  }
+
   if ( !sediment_db ) {
     ::std::cerr << "WossDbManager::getSediment() WARNING, no database nor custom Sediment was found for tx = " << tx_coord 
                 << "; rx_coord = " << rx_coord << ::std::endl;
                 
     return SDefHandler::instance()->getSediment()->create();
   }
+
   return sediment_db->getValue( rx_coord ); 
 }
 
@@ -195,7 +200,8 @@ Sediment* WossDbManager::getSediment( const CoordZ& tx_coord, const CoordZVector
   
   ::std::map< ::std::string, ::std::vector<Sediment*> > sedim_map;
   
-  if ( ccsediment_map.empty() ) goto db_sediment;
+  if ( ccsediment_map.empty() ) 
+    goto db_sediment;
 
   for ( int i = 0; i < (int) rx_coordz_vector.size(); i++ ) {
     ptr = getSediment( tx_coord, rx_coordz_vector[i] );
@@ -205,30 +211,34 @@ Sediment* WossDbManager::getSediment( const CoordZ& tx_coord, const CoordZVector
   }
   
   if ( !sedim_map.empty() ) {
-    
-    if (debug) ::std::cout << "WossDbManager::getSediment() sedim_map.size() = " << sedim_map.size() << ::std::endl;
+    if (debug) 
+      ::std::cout << "WossDbManager::getSediment() sedim_map.size() = " << sedim_map.size() << ::std::endl;
     
     int max_size = -1;
     ptr = NULL;
     
     for (  ::std::map< ::std::string, ::std::vector<Sediment*> >::iterator it = sedim_map.begin(); it != sedim_map.end(); it++ ) {
-      if (debug) ::std::cout << "WossDbManager::getSediment() it->second.size() = " << it->second.size() 
-                           <<"; max = " << max_size << ::std::endl;
+      if (debug) 
+        ::std::cout << "WossDbManager::getSediment() it->second.size() = " << it->second.size() 
+                    <<"; max = " << max_size << ::std::endl;
 
       if ( (int)it->second.size() > max_size ) {
         max_size = it->second.size();
         ptr = it->second.back();
         it->second.pop_back();
         
-        if (debug) ::std::cout << "WossDbManager::getSediment() it->second.size() = " << it->second.size() 
-                             << " > max = " << max_size << "; ptr = " << ptr << "; sed = " << *ptr << ::std::endl;
+        if (debug) 
+          ::std::cout << "WossDbManager::getSediment() it->second.size() = " << it->second.size() 
+                      << " > max = " << max_size << "; ptr = " << ptr << "; sed = " << *ptr << ::std::endl;
       }   
       for ( int i = 0; i < (int) it->second.size(); i++ ) {
         delete (it->second)[i];
         it->second[i] = NULL;
       }
 
-      if (debug) ::std::cout << "WossDbManager::getSediment() after delete it->second.size() = " << it->second.size() << ::std::endl;
+      if (debug) 
+        ::std::cout << "WossDbManager::getSediment() after delete it->second.size() = " << it->second.size()   
+                    << ::std::endl;
     }
     sedim_map.clear();
 
@@ -248,10 +258,11 @@ Sediment* WossDbManager::getSediment( const CoordZ& tx_coord, const CoordZVector
 }
 
 
-double WossDbManager::getBathymetry( const Coord& tx_coord, const Coord& rx_coord ) const {
+Bathymetry WossDbManager::getBathymetry( const Coord& tx_coord, const Coord& rx_coord ) const {
   
-  if(debug) ::std::cout << "WossDbManager::getBathymetry() tx_coord = " << tx_coord << "; rx_coord = " << rx_coord 
-                      << "; ccbathy_map.size() = " << ccbathy_map.size() << ::std::endl;
+  if(debug) 
+    ::std::cout << "WossDbManager::getBathymetry() tx_coord = " << tx_coord << "; rx_coord = " << rx_coord 
+                << "; ccbathy_map.size() = " << ccbathy_map.size() << ::std::endl;
   
   if ( !ccbathy_map.empty() ) {
       const Bathymetry* ptr = ccbathy_map.get( tx_coord, rx_coord );
@@ -443,8 +454,9 @@ bool WossDbManager::importCustomSSP( const ::std::string& filename, const Time& 
   ssp_in >> curr_latitude;
   ssp_in >> curr_longitude;
   
-  if (debug) ::std::cout << "WossDbManager::importCustomSSP() ssp type = " << ssp_type 
-                       << "; latitude = " << curr_latitude <<"; longitude = " << curr_longitude << ::std::endl;
+  if (debug) 
+    ::std::cout << "WossDbManager::importCustomSSP() ssp type = " << ssp_type 
+                << "; latitude = " << curr_latitude <<"; longitude = " << curr_longitude << ::std::endl;
 
   if ( ssp_type == "SSP" ) {
     double last_range = -HUGE_VAL;
@@ -462,7 +474,8 @@ bool WossDbManager::importCustomSSP( const ::std::string& filename, const Time& 
       ssp_in >> curr_depth;
       ssp_in >> curr_ssp;
       
-      if (debug) ::std::cout << "WossDbManager::importCustomSSP() range = " << range << "; depth = " << curr_depth << "; ssp value = " << curr_ssp << ::std::endl;
+      if (debug) 
+        ::std::cout << "WossDbManager::importCustomSSP() range = " << range << "; depth = " << curr_depth << "; ssp value = " << curr_ssp << ::std::endl;
         
       curr_ptr->insertValue( curr_depth, curr_ssp );
     }
@@ -486,8 +499,9 @@ bool WossDbManager::importCustomSSP( const ::std::string& filename, const Time& 
       ssp_in >> curr_press;
       ssp_in >> curr_ssp;
       
-      if (debug) ::std::cout << "WossDbManager::importCustomSSP() range = " << range << "; depth = " << curr_depth << "; temperature = " << curr_temp
-                           << "; salinity = " << curr_sal << "; pressure = " << curr_press << "; ssp value = " << curr_ssp << ::std::endl;
+      if (debug) 
+        ::std::cout << "WossDbManager::importCustomSSP() range = " << range << "; depth = " << curr_depth << "; temperature = " << curr_temp
+                    << "; salinity = " << curr_sal << "; pressure = " << curr_press << "; ssp value = " << curr_ssp << ::std::endl;
 
       curr_ptr->insertValue( curr_depth, curr_temp, curr_sal, ::std::complex<double>(curr_press), curr_ssp );
     }
@@ -509,8 +523,9 @@ bool WossDbManager::importCustomSSP( const ::std::string& filename, const Time& 
       ssp_in >> curr_sal;
       ssp_in >> curr_press;
       
-      if (debug) ::std::cout << "WossDbManager::importCustomSSP() range = " << range << "; temperature = " << curr_temp << "; salinity = " << curr_sal
-                           << "; pressure = " << curr_press << ::std::endl;
+      if (debug) 
+        ::std::cout << "WossDbManager::importCustomSSP() range = " << range << "; temperature = " << curr_temp << "; salinity = " << curr_sal
+                    << "; pressure = " << curr_press << ::std::endl;
       
       curr_ptr->insertValue( curr_temp, curr_sal, ::std::complex<double>(curr_press), Coord(curr_latitude, curr_longitude) );
     }
@@ -532,8 +547,9 @@ bool WossDbManager::importCustomSSP( const ::std::string& filename, const Time& 
       ssp_in >> curr_temp;
       ssp_in >> curr_sal;
       
-      if (debug) ::std::cout << "WossDbManager::importCustomSSP() range = " << range << "; depth = " << curr_depth << "; temperature = " << curr_temp 
-                           << "; salinity = " << curr_sal << ::std::endl;
+      if (debug) 
+        ::std::cout << "WossDbManager::importCustomSSP() range = " << range << "; depth = " << curr_depth << "; temperature = " << curr_temp 
+                    << "; salinity = " << curr_sal << ::std::endl;
       
       curr_ptr->insertValue( curr_depth, curr_temp, curr_sal, Coord(curr_latitude, curr_longitude) );
     }
@@ -634,7 +650,8 @@ bool WossDbManager::importCustomBathymetry( const ::std::string& filename, const
     bathy_in >> curr_range;
     bathy_in >> curr_bathy;
     
-    if (debug) ::std::cout << "WossDbManager::importCustomBathymetry() range = " << curr_range << "; bathymetry = " << curr_bathy << ::std::endl;
+    if (debug) 
+      ::std::cout << "WossDbManager::importCustomBathymetry() range = " << curr_range << "; bathymetry = " << curr_bathy << ::std::endl;
     
     ccbathy_map[tx_coord][bearing][curr_range] = curr_bathy;
   }
