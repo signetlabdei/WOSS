@@ -146,8 +146,8 @@ void WossBellhopTest::doConfig() {
   setWossNormalizedSspDepthSteps(100000);
   setWossBellhopMode("a");
   setWossBellhopBeamOptions("B");
-  setWossBellhopBathyType("L");
-  setWossBellhopBathyMethod("S");
+  setWossBellhopBathyType("LL");
+  setWossBellhopBathyMethod("D");
   setWossBellhopAltimType("L");
   setWossBellhopArraySyntax(BELLHOP_CREATOR_ARR_FILE_SYNTAX_2);
   setWossBellhopShdSyntax(BELLHOP_CREATOR_SHD_FILE_SYNTAX_1);
@@ -190,7 +190,7 @@ void WossBellhopTest::doRun() {
           cout << "freq = " << (*it3) << endl;
         }
         // we need to erase the current woss in order to run it again with different setting
-        curr_woss_manager->eraseAllWoss();
+        curr_woss_manager->reset();
         bellhop_creator->setBhMode("A");
         bellhop_creator->setWrkDirPath(res_path + "arr_asc/");
 
@@ -207,7 +207,7 @@ void WossBellhopTest::doRun() {
         }
 
         // we need to erase the current woss in order to run it again with Pressure setting
-        curr_woss_manager->eraseAllWoss();
+        curr_woss_manager->reset();
         bellhop_creator->setBhMode("a");
         bellhop_creator->setWrkDirPath(res_path + "arr_bin/");
 
@@ -228,7 +228,7 @@ void WossBellhopTest::doRun() {
         }
 
         // we need to erase the current woss in order to run it again with Pressure setting
-        curr_woss_manager->eraseAllWoss();
+        curr_woss_manager->reset();
         bellhop_creator->setBhMode("C");
         bellhop_creator->setWrkDirPath(res_path + "press_shd/");
 

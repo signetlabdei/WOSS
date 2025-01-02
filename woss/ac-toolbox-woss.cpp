@@ -60,15 +60,14 @@ ACToolboxWoss::ACToolboxWoss()
     total_range_steps(0),
     coordz_vector(),
     range_vector(),
-    ssp_vector(),
-    ssp_unique_indexes(),
-    sediment_value(NULL),
+    ssp_map(),
+    sediment_map(),
     altimetry_value(NULL),
-    is_ssp_vector_transformable(false)
+    is_ssp_map_transformable(false)
 {
 
 }
-   
+
 
 ACToolboxWoss::ACToolboxWoss( const CoordZ& tx, const CoordZ& rx, const Time& start_t, const Time& end_t, double start_freq, double end_freq, double freq_step ) 
   : WossResReader( tx, rx, start_t, end_t, start_freq, end_freq, freq_step ),
@@ -84,36 +83,44 @@ ACToolboxWoss::ACToolboxWoss( const CoordZ& tx, const CoordZ& rx, const Time& st
     total_range_steps(0),
     coordz_vector(),
     range_vector(),
-    ssp_vector(),
-    ssp_unique_indexes(),
-    sediment_value(NULL),
+    ssp_map(),
+    sediment_map(),
     altimetry_value(NULL),
-    is_ssp_vector_transformable(false)
+    is_ssp_map_transformable(false)
 {
 
 }
 
 ACToolboxWoss::~ACToolboxWoss() {
-  delete sediment_value;
   delete altimetry_value;
-  
-  sediment_value = NULL;
   altimetry_value = NULL;
-  
-  resetSSPVector();
+
+  resetSSPMap();
+  resetSedimentMap();
 }
 
 
 bool ACToolboxWoss::isValid() const {
-  return( start_time.isValid() && end_time.isValid() && tx_coordz.isValid() && rx_coordz.isValid() && frequencies.size() > 0);
+  return( start_time.isValid() && end_time.isValid() && tx_coordz.isValid() 
+          && rx_coordz.isValid() && frequencies.size() > 0);
 }
 
 
-void ACToolboxWoss::resetSSPVector() {
-  for( SSPVector::iterator it = ssp_vector.begin(); it != ssp_vector.end(); it++) {
-    if ( *it != NULL ) delete *it;
+void ACToolboxWoss::resetSSPMap() {
+  for( SSPMap::iterator it = ssp_map.begin(); it != ssp_map.end(); it++) {
+    if ( it->second != NULL ) 
+      delete it->second;
   }
-  ssp_vector.clear();  
+  ssp_map.clear();
+}
+
+
+void ACToolboxWoss::resetSedimentMap() {
+  for( SedimentMap::iterator it = sediment_map.begin(); it != sediment_map.end(); it++) {
+    if ( it->second != NULL ) 
+      delete it->second;
+  }
+  sediment_map.clear();
 }
 
 
@@ -130,11 +137,8 @@ bool ACToolboxWoss::initialize() {
   is_ok = initCoordZVector();
   assert(is_ok);
 
-  if ( sediment_value != NULL ) {
-    delete sediment_value;
-    sediment_value = NULL;
-  }
-  is_ok = initSediment();
+  resetSedimentMap();
+  is_ok = initSedimentMap();
   assert(is_ok);
 
   if ( altimetry_value != NULL ) {
@@ -142,15 +146,11 @@ bool ACToolboxWoss::initialize() {
     altimetry_value = NULL;
   }
   is_ok = initAltimetry();
-  if (is_ok) assert( (min_bathymetry_depth > min_altimetry_depth) && (max_altimetry_depth < max_bathymetry_depth) );
+  if (is_ok) 
+    assert( (min_bathymetry_depth > min_altimetry_depth) && (max_altimetry_depth < max_bathymetry_depth) );
   
-//   ::std::cout << "ACToolboxWoss(" << woss_id << ")::initialize() altimetry_value " << altimetry_value 
-//               << "; is valid = " << altimetry_value->isValid() << ::std::flush << ::std::endl;
-  
-//   debugWaitForUser();
-  
-  resetSSPVector();
-  is_ok = initSSPVector();
+  resetSSPMap();
+  is_ok = initSSPMap();
   assert(is_ok);
   
   return true;
@@ -161,9 +161,9 @@ bool ACToolboxWoss::initRangeVector() {
   for (int i = 0; i <= total_range_steps; i++) {
     range_vector.push_back( ( total_great_circle_distance / (total_range_steps) ) * i );
     
-    if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initRangeVector() i = " << i;
-    if (debug) ::std::cout << "; curr range = " << range_vector[i] << ::std::endl; 
-    
+    if (debug)
+      ::std::cout << "ACToolboxWoss(" << woss_id << ")::initRangeVector() i = " << i
+                  << "; curr range = " << range_vector[i] << ::std::endl; 
   }
   return( range_vector.size() > 0 );
 }
@@ -175,13 +175,18 @@ bool ACToolboxWoss::initCoordZVector() {
   bool valid = true;
   CoordZ curr_coord;
   double curr_bathy;
-  
-  for (int i = 0; i <= total_range_steps; i++) {
 
-    if ( i == 0 ) curr_coord = tx_coordz;
-    else if ( i == total_range_steps ) curr_coord = rx_coordz;
-    else curr_coord = CoordZ( Coord::getCoordFromBearing(tx_coordz, bearing, range_vector[i]) );
-      
+  for (RangeVector::iterator it = range_vector.begin() ; it != range_vector.end(); ++it) {
+    if ( *it == 0.0 ) { // first range
+      curr_coord = tx_coordz;
+    }
+    else if ( *it == total_great_circle_distance ) { // last range
+      curr_coord = rx_coordz;
+    }
+    else {
+      curr_coord = CoordZ( Coord::getCoordFromBearing(tx_coordz, bearing, *it) );
+    }
+
     curr_bathy = db_manager->getBathymetry( tx_coordz, curr_coord );
 
     assert( curr_bathy != HUGE_VAL && curr_bathy >= 0);
@@ -193,21 +198,14 @@ bool ACToolboxWoss::initCoordZVector() {
     
     valid = valid && curr_coord.isValid();
 
-    if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initCoordZVector() i = " << i << " coordinate " << curr_coord << ::std::endl;
+    if (debug)
+      ::std::cout << "ACToolboxWoss(" << woss_id << ")::initCoordZVector() i = " 
+                  << ::std::distance(range_vector.begin(), it)  << " coordinate " << curr_coord << ::std::endl;
 
     coordz_vector.push_back(curr_coord);
   }
 
   return valid;
-}
-
-
-bool ACToolboxWoss::initSediment() {
-  sediment_value = db_manager->getSediment( tx_coordz, coordz_vector );
-  
-  if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSediment() Sediment = " << *sediment_value << ::std::endl;
-  
-  return( sediment_value->isValid() );
 }
 
 
@@ -221,53 +219,93 @@ bool ACToolboxWoss::initAltimetry() {
   altimetry_value->setTotalRangeSteps(total_range_steps);
   altimetry_value->setDepth( max_bathymetry_depth );
   
-  if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")initAltimetry() altimetry_value " 
+  if (debug) 
+    ::std::cout << "ACToolboxWoss(" << woss_id << ")initAltimetry() altimetry_value " 
                          << altimetry_value << "; is valid = " << altimetry_value->isValid() << ::std::flush << ::std::endl;
-            
-//   debugWaitForUser();
-  
+
   if ( altimetry_value->isValid() == true ) {
-  
-    if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initAltimetry() range =  " << altimetry_value->getRange() 
-                           << "; total range steps = " << altimetry_value->getTotalRangeSteps() << ::std::endl;
-              
+    if (debug) 
+      ::std::cout << "ACToolboxWoss(" << woss_id << ")::initAltimetry() range =  " << altimetry_value->getRange() 
+                  << "; total range steps = " << altimetry_value->getTotalRangeSteps() << ::std::endl;
+
     ret_value = altimetry_value->initialize();
 
     if ( ret_value == true ) {   
       min_altimetry_depth = altimetry_value->getMinAltimetryValue();
       max_altimetry_depth = altimetry_value->getMaxAltimetryValue();
 
-  
-      if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initAltimetry() Altimetry = " 
-                             << altimetry_value << "; " << *altimetry_value 
-                             << "; min altim depth = " << min_altimetry_depth 
-                             << "; max altim depth = " << max_altimetry_depth << ::std::endl;    
-      
-//       debugWaitForUser();
-      
+      if (debug) 
+        ::std::cout << "ACToolboxWoss(" << woss_id << ")::initAltimetry() Altimetry = " 
+                    << altimetry_value << "; " << *altimetry_value 
+                    << "; min altim depth = " << min_altimetry_depth 
+                    << "; max altim depth = " << max_altimetry_depth << ::std::endl;
     }
   }
   else {
-    //delete altimetry_value;
-    //altimetry_value = SDefHandler::instance()->getAltimetry()->create( Altimetry::createFlat() );
-    //altimetry_value = NULL;
     ret_value = false;
   }
   return( ret_value );
 }
 
 
-bool ACToolboxWoss::initSSPVector() {
-  is_ssp_vector_transformable = true;
-  
-  for( int i = 0; i <= total_range_steps; i++ ) {
-    SSP* curr_ssp;
-   
-    curr_ssp = db_manager->getSSP( tx_coordz, coordz_vector[i], current_time );
+bool ACToolboxWoss::initSedimentMap() {
+  for (CoordZVector::iterator it = coordz_vector.begin() ; it != coordz_vector.end(); ++it) {
+    Sediment* curr_sediment = db_manager->getSediment( tx_coordz, *it );
 
+    if ( curr_sediment->isValid() ) {
+      if (debug)
+        ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSedimentMap() i = " 
+                    << ::std::distance(coordz_vector.begin(), it) << "; sedim_addr = " << curr_sediment 
+                    << "; sediment = " << *curr_sediment << ::std::endl;
+
+      if (true == checkSedimentUnicity( curr_sediment ))
+      {
+        ::std::pair< SedimentMap::iterator, bool > ret = 
+                      sediment_map.insert( ::std::pair< int, Sediment* >( ::std::distance(coordz_vector.begin(), it), curr_sediment) );
+        
+        assert(ret.second == true);
+
+        if (debug)
+          ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSedimentMap() unique sedim found, i = " 
+                      << ret.first->first << "; range = " << range_vector[ret.first->first]
+                      << "; sediment map size = " << sediment_map.size() << ::std::endl;
+      }
+    }
+    else {
+      if (debug) 
+        ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSedimentMap() invalid sediment at range step i = " 
+                    << ::std::distance(coordz_vector.begin(), it) << ::std::endl;
+    }
+  }
+
+  if (debug) 
+    ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSedimentMap() sediment map size = " << sediment_map.size() 
+                << ::std::endl;
+
+  return( sediment_map.size() > 0 );
+}
+
+
+bool ACToolboxWoss::checkSedimentUnicity( Sediment*& ptr ) {
+  for( SedimentMap::iterator it = sediment_map.begin(); it != sediment_map.end(); it++) {
+    if( *ptr == *(it->second) ) {
+      delete ptr;
+      ptr = NULL;
+      return false;
+    }
+  }
+  return true;
+}
+
+
+bool ACToolboxWoss::initSSPMap() {
+  is_ssp_map_transformable = true;
+  
+  for( CoordZVector::iterator it = coordz_vector.begin(); it != coordz_vector.end(); ++it ) {
+    SSP* curr_ssp = db_manager->getSSP( tx_coordz, *it, current_time );
 
     if ( curr_ssp->isValid() ) {
-      is_ssp_vector_transformable = is_ssp_vector_transformable && curr_ssp->isTransformable();
+      is_ssp_map_transformable = is_ssp_map_transformable && curr_ssp->isTransformable();
 
       min_ssp_depth_set.insert( curr_ssp->getMinDepthValue() );
       max_ssp_depth_set.insert( curr_ssp->getMaxDepthValue() );
@@ -275,39 +313,47 @@ bool ACToolboxWoss::initSSPVector() {
       if ( curr_ssp->size() > max_ssp_depth_steps ) max_ssp_depth_steps = curr_ssp->size();
       if ( curr_ssp->size() < min_ssp_depth_steps ) min_ssp_depth_steps = curr_ssp->size();
 
-      if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPVector() i = " << i 
-                             << "; ssp_addr = " << curr_ssp << "; ssp = " << *curr_ssp << ::std::endl;
-
-      if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPVector() ssp vector size = " << ssp_vector.size() 
-                             << "; unique ssp = " << ssp_unique_indexes.size() << ::std::endl;
+      if (debug) 
+        ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPMap() i = " 
+                    << ::std::distance(coordz_vector.begin(), it)
+                    << "; ssp_addr = " << curr_ssp << "; ssp = " << *curr_ssp << ::std::endl;
 
       if (true == checkSSPUnicity( curr_ssp ))
       {
-        ssp_vector.push_back( curr_ssp );
+        ::std::pair< SSPMap::iterator, bool > ret = 
+              ssp_map.insert( ::std::pair< int, SSP*> ( ::std::distance(coordz_vector.begin(), it), curr_ssp) );
+
+        assert(ret.second == true);
+
+        if (debug) 
+          ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPMap() unique SSP found, i = " << ret.first->first
+                      << "; range = " << range_vector[ret.first->first] 
+                      << "; ssp map size = " << ssp_map.size() << ::std::endl;
       }
     }
     else {
-      if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPVector() invalid ssp at range step i = " << i << ::std::endl;
+      if (debug)
+        ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPMap() invalid ssp at range step i = " 
+                    << ::std::distance(coordz_vector.begin(), it) << ::std::endl;
     }
   }
 
-  if (debug) ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPVector() ssp vector size = " << ssp_vector.size() 
-                         << "; unique ssp = " << ssp_unique_indexes.size() << ::std::endl;
-  
-  return( ssp_vector.size() > 0 );
+  if (debug)
+    ::std::cout << "ACToolboxWoss(" << woss_id << ")::initSSPMap() ssp vector size = " 
+                << ssp_map.size() << ::std::endl;
+
+  return( ssp_map.size() > 0 );
 }
 
 
 bool ACToolboxWoss::checkSSPUnicity( SSP*& ptr ) {
-  for( SSPVector::iterator it = ssp_vector.begin(); it != ssp_vector.end(); it++) {
-    if( *ptr == **it ) {
+  for( SSPMap::iterator it = ssp_map.begin(); it != ssp_map.end(); it++) {
+    if( *ptr == *(it->second) ) {
       delete ptr;
       ptr = NULL;
       return false;
     }
   }
-  ssp_unique_indexes.insert( ssp_vector.size() );
+
   return true;
 }
-
-

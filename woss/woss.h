@@ -60,11 +60,6 @@ namespace woss {
   
   class WossDbManager;
 
-  /**
-  * Vector of range values [m]
-  **/
-  typedef ::std::vector< double > RangeVector;
-
 
   /**
   * Set of frequencies [Hz]
@@ -440,15 +435,14 @@ namespace woss {
     protected:
 
 
-    #ifdef WOSS_MULTITHREAD    
+#ifdef WOSS_MULTITHREAD
     /**
     * Spinlock for syncronization purposes
     **/
     static pthread_spinlock_t woss_mutex;
     
     friend void destroyWossSpinlock();
-
-    #endif // WOSS_MULTITHREAD
+#endif // WOSS_MULTITHREAD
     
     /**
     * Unique instances id-counter
@@ -577,14 +571,12 @@ namespace woss {
   };
 
   
-  #ifdef WOSS_MULTITHREAD    
-
+#ifdef WOSS_MULTITHREAD
   /**
   * Function used to destroy the static pthread_spin_t woss_mutex
   **/
   void destroyWossSpinlock();
-  
-  #endif // WOSS_MULTITHREAD
+#endif // WOSS_MULTITHREAD
 
   
   /**
@@ -658,9 +650,7 @@ namespace woss {
     
   };
 
-  
 }
-
 
 #endif /* WOSS_PROGRAM_DEFINITIONS_H */
 

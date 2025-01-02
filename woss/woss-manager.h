@@ -125,12 +125,6 @@ namespace woss {
     virtual WossManager& eraseActiveWoss( const CoordZ& tx, const CoordZ& rx, double start_frequency, double end_frequency ) = 0;
     
     /**
-    * Deletes all woss::Woss object
-    * @returns reference to *this
-    **/
-    virtual WossManager& eraseAllWoss() = 0;
-        
-    /**
     * Returns a valid Pressure* for given parameters
     * @param tx const reference to a valid CoordZ object ( transmitter )
     * @param rx const reference to a valid CoordZ object ( receiver )

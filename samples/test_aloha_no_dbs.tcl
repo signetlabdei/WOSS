@@ -204,8 +204,8 @@ $woss_creator setWorkDirPath        "/dev/shm/woss/aloha_no_dbs/"
 $woss_creator setBellhopPath        ""
 $woss_creator setBellhopMode        0 0 "A"
 $woss_creator setBeamOptions        0 0 "B"
-$woss_creator setBathymetryType     0 0 "L"
-$woss_creator setBathymetryMethod   0 0 "S"
+$woss_creator setBathymetryType     0 0 "LL"
+$woss_creator setBathymetryMethod   0 0 "D"
 $woss_creator setAltimetryType      0 0 "L"
 $woss_creator setSimulationTimes    0 0 1 12 2009 0 0 1 1 12 2009 0 0 1
 
@@ -234,7 +234,7 @@ set transducer_handler [new "WOSS/Definitions/TransducerHandler"]
 WOSS/Controller set debug 0
 set woss_controller [new "WOSS/Controller"]
 #uncomment if you wish to store results to a db on filesystem
-$woss_controller setTimeArrResultsDbCreator  $db_res_arr
+#$woss_controller setTimeArrResultsDbCreator  $db_res_arr
 $woss_controller setWossDbManager            $db_manager
 $woss_controller setWossManager              $woss_manager
 $woss_controller setWossCreator              $woss_creator
