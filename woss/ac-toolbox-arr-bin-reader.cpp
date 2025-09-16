@@ -129,7 +129,7 @@ bool ArrBinResReader::getArrBinHeader() {
 
   if (bwoss_ptr->getBellhopArrSyntax() == BELLHOP_CREATOR_ARR_FILE_SYNTAX_2)
   {
-    char sim_type[4]; // '2D' or '3D'
+    char sim_type[4] = {0}; // '2D' or '3D'
     file_reader.read(sim_type, 4);
 
     if (woss_ptr->usingDebug())
@@ -139,7 +139,7 @@ bool ArrBinResReader::getArrBinHeader() {
     file_reader.ignore(8); // ::std::ios_base::beg;
     file_reader.read(reinterpret_cast<char*>(&arr_file.frequency),sizeof(float));
 
-    if(strcmp(sim_type, "'2D'") == 0)
+    if(strncmp(sim_type, "'2D'", sizeof(sim_type)) == 0)
     {
 
       file_reader.ignore(8);
