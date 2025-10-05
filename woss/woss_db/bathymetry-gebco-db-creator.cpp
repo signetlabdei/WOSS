@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -45,31 +38,19 @@
 using namespace woss;
 
 
-BathyGebcoDbCreator::BathyGebcoDbCreator()
-:  gebco_type( GEBCO_2D_30_SECONDS_BATHY_TYPE )
-{
-
-}
-
-
-BathyGebcoDbCreator::~BathyGebcoDbCreator() {
-
-}
-  
-
-WossDb* const BathyGebcoDbCreator::createWossDb() {
+std::unique_ptr<WossDb> BathyGebcoDbCreator::createWossDb() const {
   assert( pathname.length() > 0 );
    
-  BathyGebcoDb* woss_db = new BathyGebcoDb( pathname );
+  auto woss_db = std::make_unique< BathyGebcoDb >( pathname );
   
   woss_db->setGebcoType( gebco_type );
   
-  assert( initializeDb( woss_db ) );
+  assert( initializeDb( *woss_db ) );
   return( woss_db );
 }
 
 
-bool BathyGebcoDbCreator::initializeDb( WossDb* const woss_db ) {
+bool BathyGebcoDbCreator::initializeDb( WossDb& woss_db ) const {
   return( WossDbCreator::initializeDb( woss_db ) );
 }
 

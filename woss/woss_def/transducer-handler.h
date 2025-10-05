@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
-
 /**
  * @file   transducer-handler.h
  * @author Federico Guerra
@@ -41,19 +33,15 @@
 #define WOSS_TRANSDUCER_HANDLER_DEFINITIONS_H
 
 
-// #include <cmath>
-// #include <cassert>
-// #include <iostream>
 #include <string>
-#include <map>
+#include <unordered_map>
+#include <memory>
 
 
-namespace woss {    
-  
-  
+namespace woss {
+
   class Transducer;
-  
-  
+
   /**
   * \brief Transducer creator and handler class
   *
@@ -62,44 +50,34 @@ namespace woss {
   **/
   class TransducerHandler {
 
-		
     protected:
-      
-      
+
     /**
     * Map that links a string to a pointer to a woss::Transducer
-    **/      
-    typedef ::std::map< ::std::string, Transducer* > TransducerMap;
-    typedef TransducerMap::iterator TMIter;
-    typedef TransducerMap::reverse_iterator TMRIter;
-    typedef TransducerMap::const_iterator TMCIter;
-    typedef TransducerMap::const_reverse_iterator TMCRIter;
-    
-    
+    **/
+    using TransducerMap = std::unordered_map< std::string, std::unique_ptr<Transducer> >;
+    using TMIter = TransducerMap::iterator;
+    using TMCIter = TransducerMap::const_iterator;
+
     public:
-    
 
     /**
     * TransducerHandler default constructor
     **/        
     TransducerHandler();
 
-    /**
-    * TransducerHandler copy constructor
-    * @param copy const reference a TransducerHandler
-    **/      
-    TransducerHandler( const TransducerHandler& copy );
+    TransducerHandler( const TransducerHandler& copy ) = default;
+
+    TransducerHandler( TransducerHandler&& tmp ) = default;
     
     /**
     * TransducerHandler constructor.
     * @param transduc_map TransducerMap to be inserted
     **/     
     TransducerHandler( TransducerMap& transduc_map );
-      
-    
-    virtual ~TransducerHandler();
-     
-   
+
+    virtual ~TransducerHandler() = default;
+
     /**
     * Inserts and doesn't replace if another pointer to a woss::Transducer is found for given key; in this case
     * the given pointer is deleted.
@@ -107,8 +85,7 @@ namespace woss {
     * @param transducer constant pointer to a woss::Transducer
     * @return <i>true</i> if inserted, <i>false</i> otherwise
     **/
-    bool insertValue( const ::std::string& name, Transducer* const transducer );
-    
+    bool insertValue( const std::string& name, const Transducer& transducer );
 
     /**
     * Replaces a pointer to a woss::Transducer for given key. The old value is deleted
@@ -116,25 +93,22 @@ namespace woss {
     * @param transducer constant pointer to a woss::Transducer
     * @return <i>true</i> if inserted, <i>false</i> otherwise
     **/
-    TransducerHandler& replaceValue( const ::std::string& name, Transducer* const transducer );
-    
-    
-    /**
-    * Returns a const iterator to the woss::Transducer for given string.
-    * @param name const reference to string
-    * @returns constant pointer to a constant woss::Transducer that is invalid if the given key is not found.
-    **/    
-    const Transducer* const getValue( const ::std::string& name ) const;
+    TransducerHandler& replaceValue( const std::string& name, const Transducer& transducer );
 
-    
+    /**
+    * Returns a std::unique_ptr to a  woss::Transducer for the input string.
+    * @param name const reference to string
+    * @returns a std::unique_ptr to a heap allocated woss::Transducer that is invalid if the given key is not found.
+    **/
+    std::unique_ptr<Transducer> getValue( const std::string& name ) const;
+
     /**
     * Erases and deletes the pointer to a woss::Transducer for given string
     * @param name const reference to string
     * @return reference to <b>*this</b>
-    **/        
-    TransducerHandler& eraseValue( const ::std::string& name );
-    
-    
+    **/
+    TransducerHandler& eraseValue( const std::string& name );
+
     /**
     * Returns the number of pointers stored
     * @return number of pointers stored
@@ -146,153 +120,114 @@ namespace woss {
     * @return <i>true</i> if condition applies, <i>false</i> otherwise
     **/
     bool empty() const;
-    
-    
+
     /**
     * Deletes all pointers and clears the map
     * @return reference to <b>*this</b>
-    **/       
+    **/
     TransducerHandler& clear();
-    
-    
+
     /**
     * Returns a const iterator to the beginning of the tranducer map
     * @returns const iterator 
     **/
     TMCIter begin() const;
-    
+
     /**
     * Returns a const iterator to the end of the tranducer map
     * @returns const iterator 
-    **/    
+    **/
     TMCIter end() const;
-    
-    /**
-    * Returns a const reverse iterator to the reverse beginning of the tranducer map
-    * @returns const reverse iterator 
-    **/    
-    TMCRIter rbegin() const;
-    
-    /**
-    * Returns a const reverse iterator to the reverse end of the tranducer map
-    * @returns const reverse iterator 
-    **/    
-    TMCRIter rend() const;          
-    
+
     /**
     * Imports a woss::Transducer from the given file and with given string key
     * @param type_name transducer type name
     * @param file_name file path
     * @return true if method was successful, false otherwise
     **/
-    virtual bool importValueAscii( const ::std::string& type_name, const ::std::string& file_name );
-    
+    virtual bool importValueAscii( const std::string& type_name, const std::string& file_name );
+
     /**
     * Imports a woss::Transducer from the given binary file and with given string key
     * @param type_name transducer type name
     * @param file_name file path
     * @return true if method was successful, false otherwise
     **/
-    virtual bool importValueBinary( const ::std::string& type_name, const ::std::string& file_name );
-    
-   
+    virtual bool importValueBinary( const std::string& type_name, const std::string& file_name );
+
     /**
     * Writes a woss::Transducer to the given file
     * @param type_name transducer type name
     * @param file_name file path
     * @return true if method was successful, false otherwise
     **/
-    virtual bool writeValueAscii( const ::std::string& type_name, const ::std::string& file_name );
-    
+    virtual bool writeValueAscii( const std::string& type_name, const std::string& file_name );
+
     /**
     * Writes a woss::Transducer to the given binary file
     * @param type_name transducer type name
     * @param file_name file path
     * @return true if method was successful, false otherwise
     **/
-    virtual bool writeValueBinary( const ::std::string& type_name, const ::std::string& file_name );    
-    
-    
-    /**
-    * Assignment operator
-    * @param copy const reference to a TransducerHandler object to be copied
-    * @return TransducerHandler reference to <i>this</i>
-    **/
-    TransducerHandler& operator=( const TransducerHandler& x ) ;
+    virtual bool writeValueBinary( const std::string& type_name, const std::string& file_name );    
 
-     
+    TransducerHandler& operator=( const TransducerHandler& copy ) = default;
+
+    TransducerHandler& operator=( TransducerHandler&& copy ) = default;
+
     /**
     * Sets debug flag for all instances
     * @param flag debug bool
     **/
     TransducerHandler& setDebug( bool flag );
-            
-		bool getDebug() { return debug; }
-		
-    
+
+    bool getDebug() const { return debug; }
+
     protected:
-      
- 
+
+    void initializeNotValid();
+
     /**
     * string key that represents an invalid woss::Transducer
-    **/      
-    static const ::std::string TRANSDUCER_NOT_VALID;
-    
-    
+    **/
+    static const std::string TRANSDUCER_NOT_VALID;
+
     /**
     * debug flag
-    **/    
+    **/
     bool debug;
 
-    
     /**
     * beam pattern map
-    **/    
+    **/
     TransducerMap transducer_map;
-              
-    
+
   };
     
-   
   /////////////////
 
   inline int TransducerHandler::size() const {
     return transducer_map.size();
   }
 
-
   inline bool TransducerHandler::empty() const {
     return transducer_map.empty();
   }
-   
 
   inline TransducerHandler::TMCIter TransducerHandler::begin() const {
     return transducer_map.begin();
   }
-  
-  
+
   inline TransducerHandler::TMCIter TransducerHandler::end() const {
     return transducer_map.end();
   }
-  
-
-  inline TransducerHandler::TMCRIter TransducerHandler::rbegin() const {
-    return transducer_map.rbegin();  
-  }
-
-  inline TransducerHandler::TMCRIter TransducerHandler::rend() const {
-    return transducer_map.rend();  
-  }    
-
 
   inline TransducerHandler& TransducerHandler::setDebug( bool flag ) {
     debug = flag;
     return *this;
   }
 
-  
 }
-
 
 #endif // WOSS_TRANSDUCER_HANDLER_DEFINITIONS_H
 

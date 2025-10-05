@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -41,189 +34,264 @@
 #define WOSS_DEF_HANDLER_H
 
 
+#include <iostream>
 #include <cassert>
-#include <singleton-definitions.h>
-#include <time-definitions.h>
-#include <random-generator-definitions.h>
-
+#include <cstdlib>
+#include <memory>
+#include "singleton-definitions.h"
+#include "time-definitions.h"
+#include "altimetry-definitions.h"
+#include "random-generator-definitions.h"
+#include "pressure-definitions.h"
+#include "location-definitions.h"
+#include "sediment-definitions.h"
+#include "time-arrival-definitions.h"
+#include "transducer-definitions.h"
+#include "ssp-definitions.h"
 
 namespace woss {
   
-    
-  class WossDbCreator;
-  class WossCreator;
-  class WossDbManager;
-  class WossManager;
-  class SSP;
-  class Sediment;
-  class Pressure;
-  class TimeArr;
-  class Transducer;
-  class Altimetry;
-  
-
   /**
   * \brief Class for managing dynamic instantiation of foundation classes
   *
-  * woss::DefHandler is a class that handle dynamic 
-  * instances of woss::SSP, woss::Sediment, woss::TimeArr, woss::Pressure. A client should 
-  * aks for a pointer to any of them, and then call the virtual <b>create</b> method for 
-  * an instance of that particular class. In this way a class that inherits from any of those mentioned 
-  * above, could be "plugged-in" at run time in any WOSS class without changing the code. It should be created
-  * with singleton pattern for safety reasons (e.g. woss::Sigleton< woss::DefHandler > )
+  * woss::DefHandler is a class that handle the creation of dynamic 
+  * instances of woss::SSP, woss::Sediment, woss::TimeArr, woss::Pressure, woss::RandomGenerator, woss::TimeReference, 
+  * woss::Transducer, woss::Location and woss::Altimetry. 
+  * A custom derived definition class can be "plug in" at run time in the WOSS framework without changing the framework source code.
+  * DefHandler has been be created with singleton pattern for safety reasons (e.g. woss::Sigleton< woss::DefHandler > )
   */
   class DefHandler {
 
-		
     public:
-      
-    
+
+    DefHandler() = default;
+
+    DefHandler( const DefHandler& copy ) = default;
+
+    DefHandler( DefHandler&& tmp ) = default;
+
+    DefHandler& operator=( const DefHandler& copy ) = default;
+
+    DefHandler& operator=( DefHandler&& tmp ) = default;
+
+    ~DefHandler() = default;
+
+
     /**
-    * Default constructor
+    * Sets the wos::Pressure prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::Pressure object.
     */
-    DefHandler();
-    
-    
+    void setPressure( std::unique_ptr<Pressure> ptr ) { pressure_creator = std::move(ptr); }
     /**
-    * Copy constructor
+    * Sets the wos::TimeArr prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::TimeArr object.
     */
-    DefHandler( const DefHandler& copy ); 
-    
+    void setTimeArr( std::unique_ptr<TimeArr> ptr ) { time_arr_creator = std::move(ptr); }
     /**
-    * Assignment operator 
+    * Sets the wos::SSP prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::SSP object.
     */
-    DefHandler& operator=( const DefHandler& copy ); 
-    
-         
+    void setSSP( std::unique_ptr<SSP> ptr ) { ssp_creator = std::move(ptr); }
     /**
-    * Destructor
+    * Sets the wos::Sediment prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::Sediment object.
     */
-    virtual ~DefHandler();
-    
+    void setSediment( std::unique_ptr<Sediment> ptr ) { sediment_creator = std::move(ptr); }
+    /**
+    * Sets the wos::TimeReference prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::TimeReference object.
+    */
+    void setTimeReference( std::unique_ptr<TimeReference> ptr ) { time_reference = std::move(ptr); }
+    /**
+    * Sets the wos::RandomGenerator prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::RandomGenerator object.
+    */
+    void setRandGenerator( std::unique_ptr<RandomGenerator> ptr ) { rand_generator = std::move(ptr); }
+    /**
+    * Sets the wos::Transducer prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::Transducer object.
+    */
+    void setTransducer( std::unique_ptr<Transducer> ptr ) { transducer_creator = std::move(ptr); }
+    /**
+    * Sets the wos::Altimetry prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::Altimetry object.
+    */
+    void setAltimetry( std::unique_ptr<Altimetry> ptr ) { altimetry_creator = std::move(ptr); }
+    /**
+    * Sets the wos::Location prototype, that will be used by the whole WOSS framework.
+    * The ownership of the input smart pointer will be trasfered to the woss::DefHandler instance.
+    * 
+    * @param ptr a std::unique_ptr to a woss::Location object.
+    */
+    void setLocation( std::unique_ptr<Location> ptr) { location_creator = std::move(ptr); }
+    /**
+    * Sets the debug flag.
+    * 
+    * @param flag debug flag
+    */
+    void setDebug( bool flag ) { debug = flag; }
 
     /**
     * Returns a random value from the connected woss::RandomGenerator object
     * @returns a random value
     */
-    double getRand() const; 
-    
+    double getRand() const { assert(rand_generator); return rand_generator->getRand(); }
     /**
      * Returns a random integer from the connected woss::RandomGenerator object
      * @returns a random integer value
      */
-    int getRandInt() const; 
-    
-
+    int getRandInt() const { assert(rand_generator); return rand_generator->getRandInt(); }
     /**
     * Returns the current simulation time reference from the connected woss::TimeReference object
     * @returns a simulation time reference in seconds
     */
-    double getTimeReference() const; 
+    double getTimeReference() const { assert(time_reference); return time_reference->getTimeReference(); }
+    /**
+    * Returns the current debug flag 
+    * @returns boolean debug flag
+    */
+    bool getDebug() const { return debug; }
 
+    /**
+    * Returns a std::unique_ptr to heap allocated instance of the woss::Sediment class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::Sediment::create() function
+    * @returns a std::unique_ptr to a woss::Sediment instance
+    */
+    template<class... Args>
+    std::unique_ptr<Sediment> createSediment(Args&&... args) const { assert(sediment_creator); return sediment_creator->create(std::forward<Args>(args)...); }
+    /**
+    * Returns a std::unique_ptr to heap allocated instance of the woss::Transducer class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::Transducer::create() function
+    * @returns a std::unique_ptr to a woss::Transducer instance
+    */
+    template<class... Args>
+    std::unique_ptr<Transducer> createTransducer(Args&&... args) const { assert(transducer_creator); return transducer_creator->create(std::forward<Args>(args)...); }
+    /**
+    * Returns a std::unique_ptr to heap allocated instance of the woss::Altimetry class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::Altimetry::create() function
+    * @returns a std::unique_ptr to a woss::Altimetry instance
+    */
+    template<class... Args>
+    std::unique_ptr<Altimetry> createAltimetry(Args&&... args) const { assert(altimetry_creator); return altimetry_creator->create(std::forward<Args>(args)...); }
+    /**
+    * Returns a std::unique_ptr to heap allocated instance of the woss::Location class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::Location::create() function
+    * @returns a std::unique_ptr to a woss::Location instance
+    */
+    template<class... Args>
+    std::unique_ptr<Location> createLocation(Args&&... args) const { assert(location_creator); return location_creator->create(std::forward<Args>(args)...); }
+    /**
+    * Returns a std::unique_ptr to heap allocated instance of the woss::SSP class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::SSP::create() function
+    * @returns a std::unique_ptr to a woss::SSP instance
+    */
+    template<class... Args>
+    std::unique_ptr<SSP> createSSP(Args&&... args) const { assert(ssp_creator); return ssp_creator->create(std::forward<Args>(args)...); }
+    /**
+    * Returns a std::unique_ptr to heap allocated instance of the woss::Pressure class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::Pressure::create() function
+    * @returns a std::unique_ptr to a woss::Pressure instance
+    */
+    template<class... Args>
+    std::unique_ptr<Pressure> createPressure(Args&&... args) const { assert(pressure_creator); return pressure_creator->create(std::forward<Args>(args)...); }
+    /**
+    * Returns a std::unique_ptr to heap allocated instance of the woss::TimeArr class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::TimeArr::create() function
+    * @returns a std::unique_ptr to a woss::TimeArr instance
+    */
+    template<class... Args>
+    std::unique_ptr<TimeArr> createTimeArr(Args&&... args) const { assert(time_arr_creator); return time_arr_creator->create(std::forward<Args>(args)...); }
+    /**
+    * Returns a std::unique_ptr to heap allocated array of instances of the woss::Pressure class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::Pressure::createArray() function
+    * @returns a std::unique_ptr to an array of woss::Pressure instances
+    */
+    template<class... Args>
+    std::unique_ptr<Pressure[]> createPressureArray(Args&&... args) const { assert(pressure_creator); return pressure_creator->createArray(std::forward<Args>(args)...); }
+    /**
+    * Returns a std::unique_ptr to heap allocated array of instances of the woss::TimeArr class hierarchy. 
+    * 
+    * @param args variadic arguments that will be perfectly forwarded to the underlying woss::TimeArr::createArray() function
+    * @returns a std::unique_ptr to an array of woss::TimeArr instances
+    */
+    template<class... Args>
+    std::unique_ptr<TimeArr[]> createTimeArrArray(Args&&... args) const { assert(time_arr_creator); return time_arr_creator->createArray(std::forward<Args>(args)...); }
 
-    void setPressure( Pressure* const ptr ) { pressure_creator = ptr; }
-    
-    void setTimeArr( TimeArr* const ptr ) { time_arr_creator = ptr; }
-    
-    void setSSP( SSP* const ptr ) { ssp_creator = ptr; }
-    
-    void setSediment( Sediment* const ptr ) { sediment_creator = ptr; }
+    private:
 
-    void setTimeReference( TimeReference* const ptr ) { time_reference = ptr; }
-
-    void setRandGenerator( RandomGenerator* const ptr ) { rand_generator = ptr; }
-       
-    void setTransducer( Transducer* const ptr ) { transducer = ptr; }
-    
-    void setAltimetry( Altimetry* const ptr ) { altimetry_creator = ptr; }
-    
-    
-    const Pressure* const getPressure() const { assert(pressure_creator); return pressure_creator; }
-    
-    const TimeArr* const getTimeArr() const { assert(time_arr_creator); return time_arr_creator; }
-    
-    const SSP* const getSSP() const { assert(ssp_creator); return ssp_creator; }
-    
-    const Sediment* const getSediment() const { assert(sediment_creator); return sediment_creator; }
-                                    
-    RandomGenerator* const getRandomGenerator() const { assert(rand_generator); return rand_generator; }
-        
-    const Transducer* const getTransducer() const { assert(transducer); return transducer; }
-    
-    const Altimetry* const getAltimetry() const { assert(altimetry_creator); return altimetry_creator; }
-    
-    
-    void setDebug( bool flag ) { debug = flag; }
-    
-    bool getDebug() { return debug; }
-    
-    
-    protected:
-      
-    
     /**
     * Debug flag
     */
-    bool debug; 
-        
-    
-    SSP* ssp_creator;
-    
-    Sediment* sediment_creator;
-    
-    Pressure* pressure_creator;
-    
-    TimeArr* time_arr_creator;
- 
-    TimeReference* time_reference;
-    
-    RandomGenerator* rand_generator;
-        
-    Transducer* transducer;
-    
-    Altimetry* altimetry_creator;
-    
+    bool debug = false; 
+    /**
+    * std::unique_ptr of an instance of the woss::SSP class hierarchy
+    */
+    std::unique_ptr<SSP> ssp_creator = nullptr;
+    /**
+    * std::unique_ptr of an instance of the woss::Sediment class hierarchy
+    */
+    std::unique_ptr<Sediment> sediment_creator = nullptr;
+    /**
+    * std::unique_ptr of an instance of the woss::TimeReference class hierarchy
+    */
+    std::unique_ptr<TimeReference> time_reference = nullptr;
+    /**
+    * std::unique_ptr of an instance of the woss::RandomGenerator class hierarchy
+    */
+    std::unique_ptr<RandomGenerator> rand_generator = nullptr;
+    /**
+    * std::unique_ptr of an instance of the woss::Transducer class hierarchy
+    */
+    std::unique_ptr<Transducer> transducer_creator = nullptr;
+    /**
+    * std::unique_ptr of an instance of the woss::Altimetry class hierarchy
+    */
+    std::unique_ptr<Altimetry> altimetry_creator = nullptr;
+    /**
+    * std::unique_ptr of an instance of the woss::Location class hierarchy
+    */
+    std::unique_ptr<Location> location_creator = nullptr;
+    /**
+    * std::unique_ptr of an instance of the woss::Pressure class hierarchy
+    */
+    std::unique_ptr<Pressure> pressure_creator = nullptr;
+    /**
+    * std::unique_ptr of an instance of the woss::TimeArr class hierarchy
+    */
+    std::unique_ptr<TimeArr> time_arr_creator = nullptr;
   };
 
-  
   /**
   * \brief Singleton implementation of DefHandler class
   *
   * Singleton implementation of DefHandler class
   */
   typedef Singleton< DefHandler > SDefHandler;
-  
-  
-  //inline functions
-  
-  inline double DefHandler::getRand() const { 
-    if (rand_generator) return rand_generator->getRand(); 
-    else {
-      ::std::cerr << "DefHandler::getRand() ERROR, random generator wasn't set" << ::std::endl;
-      exit(1);
-    }
-  }
-  
-  
-  inline int DefHandler::getRandInt() const { 
-    if (rand_generator) return rand_generator->getRandInt(); 
-    else {
-      ::std::cerr << "DefHandler::getRandInt() ERROR, random generator wasn't set" << ::std::endl;
-      exit(1);
-    }
-  }  
-  
-  
-  inline double DefHandler::getTimeReference() const { 
-    if (time_reference) return time_reference->getTimeReference(); 
-    else {
-      ::std::cerr << "DefHandler::getTimeReference() ERROR, time reference wasn't set" << ::std::endl;
-      exit(1);
-    }
-  }
-  
-  
-}
 
+}
 
 #endif /* WOSS_DEF_HANDLER_H */ 

@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -61,7 +54,6 @@ namespace woss {
   **/
   class SedimDeck41MarsdenOneDb : public WossNetcdfDb {
 
-
     public:
 
     /**
@@ -69,7 +61,7 @@ namespace woss {
     * @param name pathname of database
     * @param db_type DECK41 db type
     **/
-    SedimDeck41MarsdenOneDb( const ::std::string& name = DB_NAME_NOT_SET );
+    SedimDeck41MarsdenOneDb( const std::string& name = DB_NAME_NOT_SET );
 
 #if defined (WOSS_NETCDF4_SUPPORT)
     /**
@@ -77,10 +69,10 @@ namespace woss {
     * @param name pathname of database
     * @param db_type DECK41 db type
     **/
-    SedimDeck41MarsdenOneDb( const ::std::string& name, DECK41DbType db_type );
+    SedimDeck41MarsdenOneDb( const std::string& name, DECK41DbType db_type );
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 
-    virtual ~SedimDeck41MarsdenOneDb() { }
+    virtual ~SedimDeck41MarsdenOneDb() override = default;
 
 
     /**
@@ -88,23 +80,22 @@ namespace woss {
     * @param coordinates const reference to a valid MarsdenCoord object
     * @returns a Deck41Types value ( main type value, secondary type value )
     **/
-    Deck41Types getSeaFloorType( const MarsdenCoord& marsden_coord ) const; 
-
+    Deck41Types getSeaFloorType( const MarsdenCoord& marsden_coord ) const;
 
     /**
     * Checks the validity of SedimDeck41MarsdenOneDb 
     * @return <i>true</i> if pathname is valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() { return( WossNetcdfDb::isValid() 
-                                    && db_name != DB_NAME_NOT_SET
-                                   && deck41_db_type != DECK41_DB_INVALID_TYPE ); }
+    virtual bool isValid() const override { return( WossNetcdfDb::isValid() 
+                                            && db_name != DB_NAME_NOT_SET
+                                            && deck41_db_type != DECK41DbType::DECK41_DB_INVALID_TYPE ); }
 
 
     /**
     * Post openConnection() actions, used to create and initialize NetCDF variables
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool finalizeConnection();
+    virtual bool finalizeConnection() override;
 
 #if defined (WOSS_NETCDF4_SUPPORT)
     /**
@@ -165,12 +156,8 @@ namespace woss {
 
   };
 
-  
 }
 
 #endif // WOSS_NETCDF_SUPPORT
 
 #endif /* WOSS_SEDIMENT_DECK41_MARSDEN_ONE_DB_H */
-
-  
- 

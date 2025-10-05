@@ -1,9 +1,9 @@
 # WOSS - World Ocean Simulation System -
 # 
-# Copyright (C) 2009 Federico Guerra 
+# Copyright (C) 2009 2025 Federico Guerra 
 # and regents of the SIGNET lab, University of Padova
 # 
-# Author: Federico Guerra - federico@guerra-tlc.com
+# Author: Federico Guerra - WOSS@guerra-tlc.com
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,13 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-# This software has been developed by Federico Guerra
-# and SIGNET lab, University of Padova, 
-# in collaboration with the NATO Centre for Maritime Research 
-# and Experimentation (http://www.cmre.nato.int ; 
-# E-mail: pao@cmre.nato.int), 
-# whose support is gratefully acknowledged.
 
 # Module libraries
 
@@ -64,7 +57,7 @@ set opt(start_long)    10.125
 set opt(nn)            4
 set opt(pktsize)       512
 set opt(cbr_period)    400
-set opt(stoptime)      100000.0
+set opt(stoptime)      14400.0
 set opt(rep_num)       10
 
 #sink depth [m]
@@ -114,18 +107,20 @@ set time_reference      [new "WOSS/Definitions/TimeReference/NS2"]
 set transducer_creator  [new "WOSS/Definitions/Transducer"]
 set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
 #set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
+set location_generator  [new "WOSS/Position"]
 $rand_generator initialize
 
 #### we plug the chosen prototypes into the woss::DefinitionHandler
 set def_handler [new "WOSS/Definitions/Handler"]
-$def_handler setSSPCreator         $ssp_creator
-$def_handler setSedimentCreator    $sediment_creator
-$def_handler setPressureCreator    $pressure_creator
-$def_handler setTimeArrCreator     $time_arr_creator
-$def_handler setTransducerCreator  $transducer_creator
-$def_handler setTimeReference      $time_reference
-$def_handler setRandomGenerator    $rand_generator
-$def_handler setAltimetryCreator   $altimetry_creator
+$def_handler setSSPCreator                $ssp_creator
+$def_handler setSedimentCreator           $sediment_creator
+$def_handler setPressureCreator           $pressure_creator
+$def_handler setTimeArrCreator            $time_arr_creator
+$def_handler setTransducerCreator         $transducer_creator
+$def_handler setTimeReferenceCreator      $time_reference
+$def_handler setRandomGeneratorCreator    $rand_generator
+$def_handler setAltimetryCreator          $altimetry_creator
+$def_handler setLocationCreator           $location_generator
 
 #WOSS/Creator/Database/Textual/Results/TimeArr set debug           0
 #WOSS/Creator/Database/Textual/Results/TimeArr set woss_db_debug   0
@@ -170,12 +165,12 @@ set time_evo_ssp_1 [new "WOSS/Definitions/Time"]
 set time_evo_ssp_2 [new "WOSS/Definitions/Time"]
 set time_evo_ssp_3 [new "WOSS/Definitions/Time"]
 
-#first ssp, time key is 1st january 2011, 9:01 am
-$time_evo_ssp_1 setTime 1 1 2011 9 0 1
-#first ssp, time key is 1st january 2011, 12:01 am
-$time_evo_ssp_2 setTime 1 1 2011 12 0 1
-#first ssp, time key is 1st january 2011, 18:01 am
-$time_evo_ssp_3 setTime 1 1 2011 18 0 1
+#first ssp, time key is 1st january 2023, 9:01
+$time_evo_ssp_1 setTime 1 1 2023 9 0 1
+#second ssp, time key is 1st january 2023, 12:01
+$time_evo_ssp_2 setTime 1 1 2023 12 0 1
+#third ssp, time key is 1st january 2023, 14:01
+$time_evo_ssp_3 setTime 1 1 2023 14 0 1
 
 #### We create the mandatory woss::WossDbManager and we set a custom sediment and SSP for ALL
 #### the channel computations involved. 
@@ -198,7 +193,7 @@ WOSS/Creator/Bellhop set debug                        0.0
 WOSS/Creator/Bellhop set woss_debug                   0.0
 WOSS/Creator/Bellhop set woss_clean_workdir           1.0
 WOSS/Creator/Bellhop set bellhop_arr_syntax           2
-WOSS/Creator/Bellhop set evolution_time_quantum       3600.0
+WOSS/Creator/Bellhop set evolution_time_quantum       2400.0
 WOSS/Creator/Bellhop set total_runs                   5
 WOSS/Creator/Bellhop set frequency_step               0.0
 WOSS/Creator/Bellhop set total_range_steps            1000.0
@@ -225,10 +220,10 @@ $woss_creator setWorkDirPath        "/dev/shm/woss/aloha_no_dbs_with_time_evolut
 $woss_creator setBellhopPath        ""
 $woss_creator setBellhopMode        0 0 "A"
 $woss_creator setBeamOptions        0 0 "B"
-$woss_creator setBathymetryType     0 0 "L"
-$woss_creator setBathymetryMethod   0 0 "S"
+$woss_creator setBathymetryType     0 0 "LL"
+$woss_creator setBathymetryMethod   0 0 "D"
 $woss_creator setAltimetryType      0 0 "L"
-$woss_creator setSimulationTimes    0 0 1 1 2011 9 0 1 2 1 2011 1 0 1
+$woss_creator setSimulationTimes    0 0 1 1 2023 9 0 1 1 1 2023 14 30 1
 
 
 ### choose between single-threaded or multithreaded WossManager
@@ -243,6 +238,7 @@ WOSS/Manager/Simple/MultiThread set is_time_evolution_active  1.0
 WOSS/Manager/Simple/MultiThread set space_sampling            0.0
 set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
 $woss_manager setConcurrentThreads 0
+#$woss_manager setThreadPoolUsage   1
 
 
 #### we create the mandatory woss::TransducerHandler
@@ -270,10 +266,10 @@ WOSS/ChannelEstimator set avg_coeff_       0.5
 set channel_estimator [ new "WOSS/ChannelEstimator"]
 
 
-WOSS/Module/Channel set channel_eq_snr_threshold_db_ 	 0
-WOSS/Module/Channel set channel_symbol_resolution_     5e-3
-WOSS/Module/Channel set channel_eq_time_ 	             -1
-WOSS/Module/Channel set debug_                    	   0
+WOSS/Module/Channel set channel_eq_snr_threshold_db_     0
+WOSS/Module/Channel set channel_symbol_resolution_       5e-3
+WOSS/Module/Channel set channel_eq_time_ 	               -1
+WOSS/Module/Channel set debug_                           0
 WOSS/Module/Channel set windspeed_                       0.0
 WOSS/Module/Channel set shipping_                        0.0
 WOSS/Module/Channel set practical_spreading_             1.75
@@ -557,8 +553,9 @@ proc finish {} {
     close $opt(tracefile)
 
     puts "Delete WOSS objects to force file operations"
-    delete $woss_manager
+    $db_manager closeAllConnections
     delete $db_manager
+    delete $woss_manager
 }
 
 ###################

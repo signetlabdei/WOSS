@@ -1,9 +1,9 @@
 # WOSS - World Ocean Simulation System -
 # 
-# Copyright (C) 2009 Federico Guerra 
+# Copyright (C) 2009 2025 Federico Guerra 
 # and regents of the SIGNET lab, University of Padova
 # 
-# Author: Federico Guerra - federico@guerra-tlc.com
+# Author: Federico Guerra - WOSS@guerra-tlc.com
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,25 +18,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# This software has been developed by Federico Guerra
-# and SIGNET lab, University of Padova, 
-# in collaboration with the NATO Centre for Maritime Research 
-# and Experimentation (http://www.cmre.nato.int ; 
-# E-mail: pao@cmre.nato.int), 
-# whose support is gratefully acknowledged.
 
-
-AC_INIT([WOSS], [1.14.1], [woss@guerra-tlc.com])
+AC_INIT([WOSS], [2.0.0], [woss@guerra-tlc.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_MSG_NOTICE([WOSS AC_PACKAGE_VERSION])
 
 AC_PROG_CXX
 AC_PROG_MAKE_SET
-
+AC_ENABLE_SHARED
 AC_DISABLE_STATIC
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
+LT_INIT
 
 AC_CONFIG_MACRO_DIRS([m4])
 
@@ -65,14 +57,13 @@ AC_CHECK_NETCDF4([have_netcdf4=yes],[have_netcdf4=no])
 #    is --with-netcdf4 set correctly?])
 #fi  
 
-
-AC_ARG_WITH(pthread, [--with-pthread      enables pthread extensions])
-
+#C++17 is mandatory
+AC_MSG_NOTICE([C++17 support is mandatory and it has been added])
+UW_WOSS_CXX_FLAGS="-std=c++17"
 
 UW_WOSS_CPPFLAGS="$UW_WOSS_CPPFLAGS "'-I$(top_srcdir)/woss/woss_def'
 UW_WOSS_CPPFLAGS="$UW_WOSS_CPPFLAGS "'-I$(top_srcdir)/woss/woss_db'
 UW_WOSS_WARN="$UW_WOSS_WARN "'-Wall -Werror'
-
 
 UW_WOSS_PHY_CPPFLAGS="$UW_WOSS_PHY_CPPFLAGS "'-I$(top_srcdir)/woss/woss_def'
 UW_WOSS_PHY_CPPFLAGS="$UW_WOSS_PHY_CPPFLAGS "'-I$(top_srcdir)/woss/woss_db'
@@ -121,17 +112,13 @@ else
   AC_MSG_NOTICE([NS ALLINONE path is NOT correct, NS MIRACLE support will NOT be built.])
 fi
 
-if test "$with_pthread" == "yes"
-then
-  AC_MSG_NOTICE([Pthread support will be built.])
-  UW_WOSS_CPPFLAGS="$UW_WOSS_CPPFLAGS "'-DWOSS_MULTITHREAD -pthread'
-  UW_WOSS_PHY_CPPFLAGS="$UW_WOSS_PHY_CPPFLAGS "'-DWOSS_MULTITHREAD -pthread'
-  UW_WOSS_LIBADD="$UW_WOSS_LIBADD "'-lpthread'
-  UW_WOSS_PHY_LIBADD="$UW_WOSS_PHY_LIBADD "'-lpthread'
-else
-  AC_MSG_NOTICE([Pthread support will NOT be built.])
-fi
+AC_MSG_NOTICE([multi-thread support will be built.])
 
+UW_WOSS_CPPFLAGS="$UW_WOSS_CPPFLAGS "'-DWOSS_MULTITHREAD'
+UW_WOSS_PHY_CPPFLAGS="$UW_WOSS_PHY_CPPFLAGS "'-DWOSS_MULTITHREAD'
+
+
+AC_SUBST(UW_WOSS_CXX_FLAGS)
 
 AC_SUBST(UW_WOSS_CPPFLAGS)
 AC_SUBST(UW_WOSS_PHY_CPPFLAGS)
@@ -153,8 +140,8 @@ AC_DEFINE(CPP_NAMESPACE,std)
 AC_MSG_NOTICE([generating header files and makefiles])
 
 AC_CONFIG_FILES([Makefile
-                            doxy/Makefile
-                            doxy/imgs/Makefile
+                            doc/Makefile
+                            doc/imgs/Makefile
                             woss/woss_def/Makefile
                             woss/woss_db/Makefile
                             woss/Makefile

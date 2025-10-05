@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -43,6 +36,7 @@
 #include "ssp-woa2005-db-creator-tcl.h"
 
 #ifdef WOSS_NETCDF_SUPPORT
+
 using namespace woss;
 
 
@@ -51,7 +45,7 @@ static class SspWoa2013DbCreatorClass : public TclClass {
 public:
   SspWoa2013DbCreatorClass() : TclClass("WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage") {}
   TclObject* create(int, const char*const*) {    
-    return( new SspWoa2005DbCreatorTcl(WOA_DB_TYPE_2013) );
+    return( new SspWoa2005DbCreatorTcl(WOADbType::WOA_DB_TYPE_2013) );
   }
 } class_SspWoa2013DbCreator;
 #else
@@ -61,9 +55,9 @@ static class SspWoa2013DbCreatorClass : public TclClass {
 public:
   SspWoa2013DbCreatorClass() : TclClass("WOSS/Creator/Database/NetCDF/SSP/WOA2013/MonthlyAverage") {}
   TclObject* create(int, const char*const*) {
-    ::std::cerr << "WOSS/Creator/Database/NetCDF/SSP/WOA2013 can't be instantiated. NETCDF4 support was not enabled!" 
-                << ::std::endl;
-    exit(1);    
+    std::cerr << "WOSS/Creator/Database/NetCDF/SSP/WOA2013 can't be instantiated. NETCDF4 support was not enabled!" 
+              << std::endl;
+    exit(1);
   }
 } class_SspWoa2013DbCreator;
 #endif // defined (WOSS_NETCDF4_SUPPORT)
@@ -104,7 +98,8 @@ int SspWoa2005DbCreatorTcl::command(int argc, const char*const* argv) {
   if ( argc == 3 ) {
     if(strcasecmp(argv[1], "setDbPathName") == 0) {
       
-      if (debug) ::std::cout << "SspWoa2005DbCreatorTcl::command() setDbPathName " << argv[2] << " called"  << ::std::endl;
+      if (debug) 
+        std::cout << "SspWoa2005DbCreatorTcl::command() setDbPathName " << argv[2] << " called"  << std::endl;
 
       pathname = argv[2];
       
@@ -121,9 +116,9 @@ static class SspWoa2005DbCreatorClass : public TclClass {
 public:
   SspWoa2005DbCreatorClass() : TclClass("WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage") {}
   TclObject* create(int, const char*const*) {    
-    ::std::cerr << "WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage can't be instantiated. NETCDF support was not enabled!" 
-                << ::std::endl;
-    exit(1);    
+    std::cerr << "WOSS/Creator/Database/NetCDF/SSP/WOA2005/MonthlyAverage can't be instantiated. NETCDF support was not enabled!" 
+              << std::endl;
+    exit(1);
   }
 } class_SspWoa2005DbCreator;
 

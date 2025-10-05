@@ -1,9 +1,9 @@
 # WOSS - World Ocean Simulation System -
 # 
-# Copyright (C) 2009 Federico Guerra 
+# Copyright (C) 2009 2025 Federico Guerra 
 # and regents of the SIGNET lab, University of Padova
 # 
-# Author: Federico Guerra - federico@guerra-tlc.com
+# Author: Federico Guerra - WOSS@guerra-tlc.com
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,12 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# This software has been developed by Federico Guerra
-# and SIGNET lab, University of Padova, 
-# in collaboration with the NATO Centre for Maritime Research 
-# and Experimentation (http://www.cmre.nato.int ; 
-# E-mail: pao@cmre.nato.int), 
-# whose support is gratefully acknowledged.
 
 lib_LTLIBRARIES = libWOSS.la
 
@@ -74,6 +68,7 @@ libWOSS_la_SOURCES = ./woss_def/definitions.h ./woss_def/definitions.cpp \
                      initlib.cc 
 
 
-libWOSS_la_CPPFLAGS = @NETCDF_CPPFLAGS@ @NETCDF4_CPPFLAGS@ @UW_WOSS_CPPFLAGS@ @UW_WOSS_WARN@
+libWOSS_la_CXXFLAGS = @UW_WOSS_CXX_FLAGS@ @UW_WOSS_WARN@
+libWOSS_la_CPPFLAGS = @NETCDF_CPPFLAGS@ @NETCDF4_CPPFLAGS@ @UW_WOSS_CPPFLAGS@ 
 libWOSS_la_LDFLAGS =  @NETCDF_LDFLAGS@  @NETCDF4_LDFLAGS@  @UW_WOSS_LDFLAGS@ 
 libWOSS_la_LIBADD =   @NETCDF_LIBADD@   @NETCDF4_LIBADD@   @UW_WOSS_LIBADD@ 

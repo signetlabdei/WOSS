@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2024 Federico Guerra
+ * Copyright (C) 2024 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   woss-bellhop-test.cpp
@@ -39,6 +32,7 @@
 
 #include <iostream>
 #include <vector>
+#include <sstream>
 #include "woss-test.h"
 
 using namespace std;
@@ -50,7 +44,7 @@ class WossBellhopTest : public WossTest {
   
   WossBellhopTest();
   
-  virtual ~WossBellhopTest() {}
+  virtual ~WossBellhopTest() override = default;
 
   void setTxCoordZVector(vector<CoordZ>& tx) { 
     tx_coordz_vector.clear(); tx_coordz_vector = tx; }
@@ -60,21 +54,25 @@ class WossBellhopTest : public WossTest {
 
   private:
 
-  virtual void doConfig();
+  virtual void doConfig() override;
 
-  virtual void doInit();
+  virtual void doInit() override;
 
-  virtual void doRun();
+  virtual void doRun() override;
 
   vector<CoordZ> tx_coordz_vector;
 
   vector<CoordZ> rx_coordz_vector;
-  
+
+  CoordZPairVect coordz_pair_vector;
+
   vector<double> frequencies_vector;
-  
+
   string db_path;
-  
+
   string res_path;
+
+  bool skip_single_tests = false;
 
 };
 
@@ -106,18 +104,21 @@ void WossBellhopTest::doConfig() {
 
   //db_path = "";
 
+#if defined (WOSS_NETCDF_SUPPORT)
   if (db_path != "") {
-    setSedimDeck41DbType(DECK41_DB_V2_TYPE);
+    setSedimDeck41DbType(DECK41DbType::DECK41_DB_V2_TYPE);
     setSedimDbCoordFilePath(db_path + "/seafloor_sediment/DECK41_V2_coordinates.nc");
     setSedimDbMarsdenFilePath(db_path + "seafloor_sediment/DECK41_V2_marsden_square.nc");
     setSedimDbMarsdenOneFilePath(db_path + "seafloor_sediment/DECK41_V2_marsden_one_degree.nc");
 
-    setSspDbFilePath(db_path + "/ssp/WOA2018/WOA2018_SSP_June.nc");
-    setSspWoaDbType(WOA_DB_TYPE_2013);
-
-    setBathyDbFilePath(db_path + "bathymetry/GEBCO_2023.nc");
-    setBathyDbGebcoFormat(GEBCO_2D_15_SECONDS_BATHY_TYPE);
+    setSspDbFilePath(db_path + "/ssp/WOA2023/WOA2023_SSP_June.nc");
+#if defined (WOSS_NETCDF4_SUPPORT)
+    setSspWoaDbType(WOADbType::WOA_DB_TYPE_2013);
+#endif // defined (WOSS_NETCDF4_SUPPORT)
+    setBathyDbFilePath(db_path + "bathymetry/GEBCO_2025_sub_ice.nc");
+    setBathyDbGebcoFormat(GEBCO_BATHY_TYPE::GEBCO_2D_15_SECONDS_BATHY_TYPE);
   }
+#endif // defined (WOSS_NETCDF_SUPPORT)
 
   //setWossBellhopPath();
   setWossCreatorDebug(false);
@@ -149,23 +150,37 @@ void WossBellhopTest::doConfig() {
   setWossBellhopBathyType("LL");
   setWossBellhopBathyMethod("D");
   setWossBellhopAltimType("L");
-  setWossBellhopArraySyntax(BELLHOP_CREATOR_ARR_FILE_SYNTAX_2);
-  setWossBellhopShdSyntax(BELLHOP_CREATOR_SHD_FILE_SYNTAX_1);
+  setWossBellhopArraySyntax(BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_SYNTAX_2);
+  setWossBellhopShdSyntax(BellhopShdSyntax::BELLHOP_CREATOR_SHD_FILE_SYNTAX_1);
   setWossBoxDepth(-3000.0);
   setWossBoxRange(-3000.0);
 
   setWossManagerDebug(false);
   setWossManagerTimeEvoActive(false);
-  setWossManagerThreads(0.0);
+  setWossManagerThreads(0);
   setWossManagerSpaceSampling(0.0);
+  setWossManagerUseThreadPool(false);
   setWossManagerUseMultiThread(true);
 
-  tx_coordz_vector.push_back(CoordZ(42.59, 10.125, 80.0));
-  rx_coordz_vector.push_back(CoordZ(42.59, 10.1615, 1.0));
+  tx_coordz_vector.emplace_back(CoordZ(42.59, 10.125, 80.0));
+  rx_coordz_vector.emplace_back(CoordZ(42.59, 10.1615, 1.0));
+
+  coordz_pair_vector = { make_pair<CoordZ, CoordZ>(CoordZ(42.59, 10.125, 1.0), CoordZ(42.59, 10.1615, 50.0)),
+                         make_pair<CoordZ, CoordZ>(CoordZ(42.59, 10.125, 1.0), CoordZ(42.59, 10.1613, 40.0)), 
+                         make_pair<CoordZ, CoordZ>(CoordZ(42.59, 10.125, 1.0), CoordZ(42.59, 10.1612, 22.0)),
+                         make_pair<CoordZ, CoordZ>(CoordZ(42.59, 10.125, 1.0), CoordZ(42.59, 10.1621, 33.0)),
+                         make_pair<CoordZ, CoordZ>(CoordZ(42.59, 10.125, 1.0), CoordZ(42.59, 10.1710, 44.0)),
+                         make_pair<CoordZ, CoordZ>(CoordZ(42.59, 10.125, 1.0), CoordZ(42.59, 10.1501, 30.0)),
+                         make_pair<CoordZ, CoordZ>(CoordZ(42.59, 10.125, 1.0), CoordZ(42.59, 10.1601, 40.0)),
+                         make_pair<CoordZ, CoordZ>(CoordZ(42.59, 10.125, 1.0), CoordZ(42.59, 10.1644, 50.0)),
+                      };
+
   for (int i = 0; i < 25; ++i)
   {
-    frequencies_vector.push_back(500.0 + i*1000.0);
+    frequencies_vector.emplace_back(500.0 + i*1000.0);
   }
+
+  skip_single_tests = false;
 }
 
 void WossBellhopTest::doInit() {
@@ -178,85 +193,199 @@ void WossBellhopTest::doInit() {
 
 
 void WossBellhopTest::doRun() {
-  WossManager* curr_woss_manager = woss_controller->getWossManager();
+  auto curr_woss_manager = woss_controller->getWossManager();
 
-  for (vector< CoordZ >::iterator it = tx_coordz_vector.begin(); it != tx_coordz_vector.end(); ++it) {
-    for (vector< CoordZ >::iterator it2 = rx_coordz_vector.begin(); it2 != rx_coordz_vector.end(); ++it2) {
-      for (vector< double >::iterator it3 = frequencies_vector.begin(); it3 != frequencies_vector.end(); ++it3 ) {
-        if (debug) {
-          cout << endl << endl;
-          cout << "tx coordz = " << (*it) << endl;
-          cout << "rx coordz = " << (*it2) << endl;
-          cout << "freq = " << (*it3) << endl;
-        }
-        // we need to erase the current woss in order to run it again with different setting
-        curr_woss_manager->reset();
-        bellhop_creator->setBhMode("A");
-        bellhop_creator->setWrkDirPath(res_path + "arr_asc/");
+  if (curr_woss_manager == nullptr) {
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_INVALID_PARAM);
+  }
 
-        TimeArr* curr_time_arr_asc = curr_woss_manager->getWossTimeArr((*it), (*it2), (*it3), (*it3));
-        
-        if (curr_time_arr_asc == NULL) {
-          throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_MEMORY);
-        }
+  if ( skip_single_tests == false ) {
+    for (auto& tx_coordz : tx_coordz_vector) {
+      for (auto& rx_coordz : rx_coordz_vector) {
+        for (auto& freq : frequencies_vector) {
+          if (debug) {
+            cout << endl << endl;
+            cout << "tx coordz = " << tx_coordz << endl;
+            cout << "rx coordz = " << rx_coordz << endl;
+            cout << "freq = " << freq << endl;
+          }
+          // we need to erase the current woss in order to run it again with different setting
+          curr_woss_manager->reset();
+          bellhop_creator->setBhMode("A");
+          bellhop_creator->setWrkDirPath(res_path + "arr_asc/");
 
-        Pressure* press_temp_asc = SDefHandler::instance()->getPressure()->create( *curr_time_arr_asc );
+          auto curr_time_arr_asc = curr_woss_manager->getWossTimeArr(tx_coordz, rx_coordz, freq, freq);
+          
+          if (curr_time_arr_asc == nullptr) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+          }
 
-        if (press_temp_asc == NULL) {
-          throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_MEMORY);
-        }
+          if (curr_time_arr_asc->isConvertedFromPressure() == true) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_BAD_FORMAT);
+          }
 
-        // we need to erase the current woss in order to run it again with Pressure setting
-        curr_woss_manager->reset();
-        bellhop_creator->setBhMode("a");
-        bellhop_creator->setWrkDirPath(res_path + "arr_bin/");
+          auto press_temp_asc = SDefHandler::instance().createPressure( *curr_time_arr_asc );
 
-        TimeArr* curr_time_arr_bin = curr_woss_manager->getWossTimeArr((*it), (*it2), (*it3), (*it3));
-        
-        if (curr_time_arr_bin == NULL) {
-          throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_MEMORY);
-        }
+          if (press_temp_asc == nullptr) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+          }
 
-        Pressure* press_temp_bin = SDefHandler::instance()->getPressure()->create( *curr_time_arr_bin );
+          // we need to erase the current woss in order to run it again with Pressure setting
+          curr_woss_manager->reset();
+          bellhop_creator->setBhMode("a");
+          bellhop_creator->setWrkDirPath(res_path + "arr_bin/");
 
-        if (press_temp_bin == NULL) {
-          throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_MEMORY);
-        }
+          auto curr_time_arr_bin = curr_woss_manager->getWossTimeArr(tx_coordz, rx_coordz, freq, freq);
+          
+          if (curr_time_arr_bin == nullptr) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+          }
 
-        if ( abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb()) > 1.0) {
-          throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
-        }
+          if (curr_time_arr_bin->isConvertedFromPressure() == true) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_BAD_FORMAT);
+          }
 
-        // we need to erase the current woss in order to run it again with Pressure setting
-        curr_woss_manager->reset();
-        bellhop_creator->setBhMode("C");
-        bellhop_creator->setWrkDirPath(res_path + "press_shd/");
+          auto press_temp_bin = SDefHandler::instance().createPressure( *curr_time_arr_bin );
 
-        Pressure* curr_pressure = curr_woss_manager->getWossPressure((*it), (*it2), (*it3), (*it3));
+          if (press_temp_bin == nullptr) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+          }
 
-        if (curr_pressure == NULL) {
-          throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_MEMORY);
-        }
+          if ( abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb()) > 1.0) {
+            stringstream ss;
+            ss << "abs press diff(" << abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb()) << ")";
+            WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
+          }
 
-        if (debug) {
-          cout << endl;
-          cout << "curr_time_arr_asc = " << (*curr_time_arr_asc) << endl;
-          cout << "curr_time_arr_bin = " << (*curr_time_arr_bin) << endl;
-          cout << "time_arr_asc TL = " << (*press_temp_asc) << endl;
-          cout << "time_arr_bin TL = " << (*press_temp_bin) << endl;
-          cout << "curr_pressure = " << (*curr_pressure) << endl;
+          // we need to erase the current woss in order to run it again with Pressure setting
+          curr_woss_manager->reset();
+          bellhop_creator->setBhMode("C");
+          bellhop_creator->setWrkDirPath(res_path + "press_shd/");
+
+          auto curr_time_arr_press = curr_woss_manager->getWossTimeArr(tx_coordz, rx_coordz, freq, freq);
+          
+          if (curr_time_arr_press == nullptr) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+          }
+
+          if (curr_time_arr_press->isConvertedFromPressure() == false) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_BAD_FORMAT);
+          }
+
+          auto press_temp_shd = SDefHandler::instance().createPressure( *curr_time_arr_press );
+
+          if (press_temp_shd == nullptr) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+          }
+
+          auto curr_pressure = curr_woss_manager->getWossPressure(tx_coordz, rx_coordz, freq, freq);
+
+          if (curr_pressure == nullptr) {
+            WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+          }
+
+          if ( abs(press_temp_shd->getTxLossDb() - curr_pressure->getTxLossDb()) > 1.0) {
+            stringstream ss;
+            ss << "abs press diff(" << abs(press_temp_shd->getTxLossDb() - curr_pressure->getTxLossDb()) << ")";
+            WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
+          }
+
+          if (debug) {
+            cout << endl;
+            cout << "curr_time_arr_asc = " << (*curr_time_arr_asc) << endl;
+            cout << "curr_time_arr_bin = " << (*curr_time_arr_bin) << endl;
+            cout << "time_arr_asc TL = " << (*press_temp_asc) << endl;
+            cout << "time_arr_bin TL = " << (*press_temp_bin) << endl;
+            cout << "curr_time_arr_press = " << (*curr_time_arr_press) << endl;
+            cout << "curr_pressure = " << (*curr_pressure) << endl;
+          }
         }
       }
     }
+  }
+
+  if (debug) {
+    cout << endl << endl;
+    cout << "coordz_pair_vector size = " << coordz_pair_vector.size() << endl;
+    cout << "freq = " << *frequencies_vector.begin() << endl;
+  }
+  // we need to erase the current woss in order to run it again with different setting
+  curr_woss_manager->reset();
+  bellhop_creator->setBhMode("A");
+  bellhop_creator->setWrkDirPath(res_path + "arr_asc_MT/");
+
+  auto curr_time_arr_asc_vect = curr_woss_manager->getWossTimeArr(coordz_pair_vector, *frequencies_vector.begin(), *frequencies_vector.begin());
+  
+  if (curr_time_arr_asc_vect.empty()) {
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+  }
+
+  // we need to erase the current woss in order to run it again with Pressure setting
+  curr_woss_manager->reset();
+  bellhop_creator->setBhMode("a");
+  bellhop_creator->setWrkDirPath(res_path + "arr_bin_MT/");
+
+  auto curr_time_arr_bin_vect = curr_woss_manager->getWossTimeArr(coordz_pair_vector, *frequencies_vector.begin(), *frequencies_vector.begin());
+  
+  if (curr_time_arr_bin_vect.empty()) {
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+  }
+
+  // we need to erase the current woss in order to run it again with Pressure setting
+  curr_woss_manager->reset();
+  
+  // run MT pressure with woss::ThreadPool
+  WossManagerResDbMT* curr_wm_MT = dynamic_cast<WossManagerResDbMT*>(curr_woss_manager.get());
+  if (curr_wm_MT == nullptr) {
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_BAD_FORMAT);
+  }
+
+  curr_wm_MT->setUseThreadPoolFlag(true);
+
+  bellhop_creator->setBhMode("C");
+  bellhop_creator->setWrkDirPath(res_path + "press_shd_MT/");
+
+  auto curr_pressure_vect = curr_woss_manager->getWossPressure(coordz_pair_vector, *frequencies_vector.begin(), *frequencies_vector.begin());
+
+  if (curr_pressure_vect.empty()) {
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+  }
+
+  auto it = curr_time_arr_asc_vect.cbegin();
+  auto it2 = curr_time_arr_bin_vect.cbegin();
+
+  for ( ; it != curr_time_arr_asc_vect.cend() && it2 != curr_time_arr_bin_vect.cend(); ++it, ++it2) {
+    auto press_temp_asc = SDefHandler::instance().createPressure( **it );
+    auto press_temp_bin = SDefHandler::instance().createPressure( **it2 );
+
+    if (press_temp_asc == nullptr) {
+      WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+    }
+
+    if (press_temp_bin == nullptr) {
+      WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+    }
+
+    if ( abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb()) > 1.0) {
+      stringstream ss;
+      ss << "abs press diff(" << abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb()) << ")";
+      WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
+    }
+  }
+
+  if (debug) {
+    cout << endl;
+    cout << "curr_time_arr_asc_vect = " << curr_time_arr_asc_vect.size() << endl;
+    cout << "curr_time_arr_bin_vect = " << curr_time_arr_asc_vect.size() << endl;
+    cout << "curr_pressure_vect = " << curr_pressure_vect.size() << endl;
   }
 }
 
 
 int main(int argc, char* argv [])
 {
-  WossBellhopTest* woss_bh_test = new WossBellhopTest();
+  auto woss_bh_test = make_unique<WossBellhopTest>();
   woss_bh_test->run();
-  delete woss_bh_test;
 
   return 0;
 }

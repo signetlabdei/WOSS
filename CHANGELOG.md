@@ -1,0 +1,241 @@
+# WOSS changelog
+
+## v2.0.0
+
+- Complete refactory of the WOSS framework
+- memory handling with std::unique_ptr and std::shared_ptr
+- modern C++ idioms and syntax update
+- support of C++17 is mandatory
+- multi-thread support default enabled and handled with std::thread
+- improved tests and samples
+- added support for commandline simulation run
+
+## v1.14.0 
+
+- Added support for Bellhop "LL" bathymetry, i.e with multiple geoacoustic parameters
+- refactored woss::WossManager
+- improved tests and examples
+
+## v1.13.0
+
+ - Added support for SSP NetCDF4 databases generated from WOA2023 dataset
+- added bellhop autotools test unit
+- improved the WossTest framework
+- woss::ResReader fixed importing of bellhop's SPL and arrivals from binary mode
+- woss::WossDbManager - added support for importing bathymetry, SSP and sediment from a string
+- woss::WossManager - added API to erase all WOSS instances
+
+## v1.12.6
+
+- fixed gcc-13 warnings
+- TCL examples updated to GEBCO 2023
+- removed warning in woss::BellhopWoss
+- changed URL of main WOSS website
+
+## v1.12.5 
+
+- Minor fixes to ns-Miracle classes
+
+## v1.12.4 
+
+- Added support for GEBCO 2022
+- Fixed TCL samples
+- Refactor of function member's static variables in order to guarantee re-entrancy
+- Fixed bug with WossDbManager
+- Added TCL debug capabilities to Altimetry classes
+- Refactored usage of streams' precision throughout the whole framework
+
+## v1.12.3 
+
+- New geographical to cartesian conversion model, based on spherical, GRS80 and WGS84 models
+
+## v1.12.2 
+
+- Fixed issue with SSP::truncate c++11 syntax
+
+## v1.12.1
+
+- Fixed issue with autotools distribution.
+- Added SSP truncate option to both woss::SSP and woss::BellhopWoss (thanks to Randall Plate).
+- Improved woss::CoordZ::getCoordZFromCartesianCoords() function (thanks to Randall Plate).
+
+## v1.12.0
+
+- Added support for DECK41V2 databases in NetCDF4 format with revised data format.
+- Added support for GEBCO 2020 database.
+- Added support for autotools tests, installation procedure has been updated.
+- Fix for woss::BellhopWoss SSP max depth
+
+## v1.11.0
+
+- Added support for SSP NetCDF4 databases generated from WOA2018 and WOA2001 dataset.
+- Fix for woss::BellhopWoss ray angles env file write operation.
+- Added support for Bellhop latest shade file reader syntax.
+
+## v1.10.0
+
+- Added support for SSP NetCDF4 databases generated from WOA2013 dataset.
+- Fix for Bellhop quad SSP scenario
+
+## v1.9.0
+
+ - added support for NetCDF4 and HDF5, which is required in order to open_
+the latest GEBCO 2019 database.
+- a new bellhop arr file syntax option has been introduced in order to be aligned
+Acoustic Toolbox >= 31 March 2019.
+- BE ADVISED THAT factory value is using the latest syntax 
+(i.e. acoustic toolbox >= 31 March 2019)
+- Credits to Randall Plate for helping with the implementation.
+- WossDb GEBCO has been refactored in order to support 2D netcdf format.
+- Bug fixes and improvements in woss::ACToolboxWoss and woss::BellhopWoss
+
+## v1.8.0
+
+- new UTM CSV Database model added
+- WossChannel minor fixes
+
+## v1.7.0
+
+- bug fixing in WossManager
+- new feature in WossChannelModule
+
+## v1.6.2
+
+- bug fix in box depth and box range for ns2 tcl hooks
+
+## v1.6.1 
+
+- license changed
+
+## v1.6.0 
+
+- bug fix in volumetrical attenuation computations
+- new APIs introduced
+
+## v1.5.1 
+
+- gcc-6 warning removal
+
+## v1.5.0 
+
+- memory leak fixed (thanks to Raúl Sáez Cañete)
+- new bathymetry write mode introduced (thanks to Randall Plate)
+- new attenuation complex tap calculation introduced:
+travel time phase is now properly used
+- a bellhop arr file syntax option has been introduced, in order to make WOSS work with both
+acoustic tool box >= 16 Aug 2016 and previous versions.
+BE ADVISED THAT factory value is using the latest syntax (i.e. acoustic toolbox >= 16 Aug 2016)
+
+## v1.4.0
+
+- minor bug fixes
+
+## v1.3.9
+
+- minor bug fixes
+- syntax now compliant with C++11 standard
+
+## v1.3.8
+
+- minor bug fixes
+- license changed to GPLv2
+
+## v1.3.7
+
+- warnings system revised. 
+- tcl warnings removed
+- bug fixes (thanks to Raúl Sáez Cañete)
+
+## v1.3.6
+
+- warnings removal and minor bug fixes
+
+## v1.3.5
+
+- minor bug fixes
+- UwmStd lib has been moved to NS-Miracle for a better compatibility with DESERT framework.
+
+## v1.3.4
+
+- minor bug fixes
+
+## v1.3.3 
+
+- minor bug fixes
+
+## v1.3.2
+
+- minor bug fixes
+
+## v1.3.1 
+
+- TCL dependancies moved to WossPhy library
+
+## v1.3.0 
+
+- WossChannelModule : channel_eq_time_, channel_symbol_time_ and channel_eq_threshold_db_ introduced, channel_time_resolution_ removed;
+- the channel now coherently sums all taps at channel_symbol_resolution_ 
+- from channel_eq_snr_threshold_db_ the attenuation threshold is calculated
+- the first tap that has txloss <= channel_eq_att_threshold_db is found
+- then all taps after the above tap + channel_equalization_time_ are incoherently summed
+if channel_equalization_time_ == 0 no eq is done
+if channel_equalization_time_ < 0 then all taps are incoherently summed 
+- all taps after channel_equalization_time_ are left untouched
+- Altimetry concept introduced.
+- Altimetry time evolution introduced.
+- Woss, WossManager, WossCreator: time evolution concept introduced.
+- WossDbManager: custom SSP with time evolution introduced.
+- WOSS can now be installed: with/without NS-Miracle, with/without NetCDF, with/without pthread
+
+## v1.2.0
+
+- woss::RandomGenerator : bug fixed.
+- woss::WossManagerResDbMT : some bugs fixed in thread allocation.
+- woss::ACToolboxWoss : bug fixed.
+- woss::ResTimeArrBinDb, woss::ResTimeArrBinDbCreator, woss::ResPressureBinDb, woss::ResPressureBinDbCreator :
+       classes for storing computed results in a binary file.
+- ChannelEstimator, ChannelEstimatorPlugin : now works with MAC address instead of IP address to permit power control at MAC level.
+       this now requires that only the MLL ARP table has to be filled instead of routing tables and ARP tables.
+       Space sampling capability added.
+- woss::Transducer : transducer definitions added.
+- woss::TransducerHandler : transducer handler definitions added.
+- woss::BellhopWoss : addded beam pattern capabilities.
+- woss::BellhopCreator : added custom transducer capabilities.
+- woss::Location : default comparison_distance value changed, added support for dinamic vertical beam pattern orientation.
+- WossPosition, WossWpPosition : added support for dynamic vertical beam pattern orientation.
+- UnderwaterMPhyBpsk : some tcl variables renamed. PLEASE SEE SOURCE CODE AND EXAMPLES FOR MORE INFO
+- UwMPhyBpskTransducer, WossMPhyBpsk : added support for woss::Transducer, to properly simulate SPL and energy consumption.
+- added transducer descriptions of BTech, ITC, ITT, RESON.
+- new tcl sample added. 
+- old samples: now channel estimation properly works
+- doxygen basic samples page removed, all the comments are inline within the tcl files.
+
+## v1.1.0 
+
+- databases : data from WOA2009 has been released; these files are fully compatible with the 2005 version.
+- woss::CustomDataContainer : bugs fixed.
+- woss::Location : class for positioning added. 
+- WossPosition : WOSS now expect a WossPosition as Miracle Position class, see updated tcl examples for usage.
+- WossWpPosition : class has been reworked. 
+- woss::WossCreatorContainer: class has been added.
+- woss::WossCreator, woss::BellhopCreator : interfaces expanded, they now handles custom values. 
+for woss::Location objects. In this way transmitter movement is properly handled. 
+- woss::ACToolboxWoss : bugs fixed.
+- woss::BellhopWoss : bugs fixed.
+- woss::TimeReference, woss::TimeReferenceTcl : classes for providing WOSS a time reference.
+- woss::RandomGenerator, woss::RandomGeneratorTcl: classes for providing WOSS a random numbers generators.
+- WossRandomGenerator, WossRandomGeneratorTcl : hooks for NS2 random generators.
+- woss::DefHandler : now can set and return a time reference and a random generator objects.
+- woss::SSP : class has been updated to work with woss::RandomGenerator.
+
+## v1.0.1 
+
+- woss::Coord, woss::CoordZ : latitude, longitude and depth are now double value (instead of woss::PDouble)
+- woss::ResPressureTxtDb, woss::ResTimeArrTxtDb : added a space_sampling feature
+- woss::WossDbManager : the managing of custom enviromental data has been reworked, check doxygen documentation
+       and test_aloha_no_dbs.tcl
+- WossCbrModule : new class added
+
+## v1.0.0
+
+- initial release version

@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -69,10 +62,10 @@ Time::Time(int d, int mth, int y, int h, int m, int s)
   assert( m >= 0 && m <= 59 );
   assert( s >= 0 && s <= 59 );
 
-//    ::std::cout << "Time::Time() d " << d << "; mth " << mth
+//    std::cout << "Time::Time() d " << d << "; mth " << mth
 //                << "; y " << y << "; h " << h
 //                << "; m " << m << "; s " << s
-//                << ::std::endl; 
+//                << std::endl; 
   
   time( &raw_time );
   timeinfo = *( localtime( &raw_time ) );
@@ -86,30 +79,16 @@ Time::Time(int d, int mth, int y, int h, int m, int s)
 
   raw_time = mktime(&timeinfo);
   
-//   ::std::cout << "Time::Time() raw_time " << raw_time << "; tm mon " << timeinfo.tm_mon
+//   std::cout << "Time::Time() raw_time " << raw_time << "; tm mon " << timeinfo.tm_mon
 //               << "; tm mday " << timeinfo.tm_mday << "; tm year " << timeinfo.tm_year
 //               << "; tm hour " << timeinfo.tm_hour << "; tm min " << timeinfo.tm_min
-//               << "; tm sec " << timeinfo.tm_sec << ::std::endl;
-}
-
-
-Time::Time(const Time& time) {
-  timeinfo = time.timeinfo;
-  raw_time = time.raw_time;
+//               << "; tm sec " << timeinfo.tm_sec << std::endl;
 }
 
 
 Time::Time(struct tm* time) {
   timeinfo = *time;
   raw_time = mktime(&timeinfo);
-}
-
-
-Time& Time::operator=( const Time& time ) {
-  if (this == &time) return *this;
-  timeinfo=time.timeinfo;
-  raw_time = time.raw_time;
-  return *this;
 }
 
 
@@ -133,8 +112,10 @@ double woss::operator-( const Time& left, const Time& right ) {
   time_t time_x = mktime( &left.timeinfo );
   time_t time_y = mktime( &right.timeinfo );
  
-  if (time_x > time_y) return( difftime(time_x, time_y) );
-  else return( difftime( time_y, time_x) );
+  if (time_x > time_y) 
+    return( difftime(time_x, time_y) );
+  else 
+    return( difftime( time_y, time_x) );
 }
 
 

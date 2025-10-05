@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   woss-db-manager.h
@@ -40,17 +33,14 @@
 #ifndef WOSS_DB_MANAGER_IMPLEMENT_TCL_H 
 #define WOSS_DB_MANAGER_IMPLEMENT_TCL_H
 
-
 #ifdef WOSS_NS_MIRACLE_SUPPORT
-
 
 #include <woss-db-manager.h>
 #include <tclcl.h>
 
 
 namespace woss {
- 
-  
+
   /**
   * \brief Tcl hooks for WossDbManager class
   *
@@ -59,22 +49,18 @@ namespace woss {
   **/
   class WossDbManagerTcl : public WossDbManager, public TclObject {
 
-    
     public: 
-      
-      
+
     /**
     * Default constructor
     **/
     WossDbManagerTcl();
-    
-     
+
     /**
     * Destructor. It deletes all pointers involved. Derived classes 
     * <b>don't have to do it</b>
     **/ 
-    virtual ~WossDbManagerTcl() { }
-
+    virtual ~WossDbManagerTcl() override = default;
 
     /**
     * TCL command interpreter. It implements the following OTcl methods:
@@ -117,23 +103,16 @@ namespace woss {
     * @return TCL_OK or TCL_ERROR whether the command has been dispatched succesfully or not
     * 
     **/
-    virtual int command( int argc, const char*const* argv );
-    
-    
+    virtual int command( int argc, const char*const* argv ) override;
+
     protected:
-    
-    
+
     double debug_;
-        
-		
-	};
-  
+
+  };
 
 }
 
 #endif // WOSS_NS_MIRACLE_SUPPORT
 
 #endif /* WOSS_DB_MANAGER_IMPLEMENT_TCL_H */
-
- 
- 

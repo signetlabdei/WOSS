@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
-
 /**
  * @file   random-generator-definitions.h
  * @author Federico Guerra
@@ -41,108 +33,96 @@
 #define RANDOM_GENERATOR_DEFINITIONS_H 
 
 
-#include <cstdlib>
-#include <cassert>
-
+#include <memory>
 
 namespace woss {
-  
-  
+
   /**
   * \brief woss::RandomGenerator class
   *
   * Class for random value generation purposes
   **/
   class RandomGenerator {
-  
-  
+
     public:
-      
-    
+
     /**
     * Default RandomGenerator constructor
     * @param s seed
     **/ 
     RandomGenerator( int s = 0 ) : seed(s), initialized(false) { }
+
+    virtual ~RandomGenerator() = default;
+
+    RandomGenerator(const RandomGenerator& copy) = default;
+
+    RandomGenerator(RandomGenerator&& tmp) = default;
     
-    /**
-    * Default destructor
-    **/    
-    virtual ~RandomGenerator() { }
-    
+    RandomGenerator& operator=(const RandomGenerator& copy) = default;
+
+    RandomGenerator& operator=(RandomGenerator&& tmp) = default;
     
     /**
     * RandomGenerator virtual factory method
     * @param copy RandomGenerator to be copied
-    * @return a heap-allocated RandomGenerator object
+    * @return a std::unique_ptr to a heap-allocated RandomGenerator object
     **/
-    virtual RandomGenerator* create( double seed ) { return new RandomGenerator(seed); }
-         
+    virtual std::unique_ptr<RandomGenerator> create( int seed ) const { return std::make_unique<RandomGenerator>(seed); }
+
     /**
     * RandomGenerator virtual factory method
-    * @return a heap-allocated RandomGenerator copy of <b>this</b> instance
-    **/         
-    virtual RandomGenerator* clone() const { return new RandomGenerator(*this); }    
-    
-    
+    * @return std::unique_ptr to a heap-allocated RandomGenerator copy of <b>this</b> instance
+    **/
+    virtual std::unique_ptr<RandomGenerator> clone() const { return std::make_unique<RandomGenerator>(*this); }
+
     /**
     * Checks the validity of RandomGenerator
     * @return <i>true</i> if initialized, <i>false</i> otherwise
     **/
     virtual bool isValid() const { return initialized; }
-    
-    
+
     /**
     * Sets the seed
     * @param s seed
     **/ 
     virtual void setSeed( int s ) { seed = s; }
-    
+
     /**
     * Sets the seed
     * @return the seed
     **/ 
     virtual int getSeed() const { return seed; }
-    
-    
+
     /**
     * Mandatory function to initialize the instance
     **/ 
     virtual void initialize();
-    
-    
+
     /**
     * Gets a random value
     * @return a random value between 0 and 1
-    **/    
+    **/
     virtual double getRand() const;
 
     /**
      * Gets a random integer value
      * @return a random integer
-     **/    
+     **/
     virtual int getRandInt() const;
 
     protected:
-      
-    
+
     /**
     * seed value
-    **/       
-    int seed;
-    
-    
+    **/
+    int seed = 0;
     /**
     * true if initialize() has been called, false otherwise
-    **/     
-    bool initialized;
-    
-    
+    **/
+    bool initialized = false;
+
   };
- 
-  
+
 }
 
-
 #endif /* RANDOM_GENERATOR_DEFINITIONS_H */
-

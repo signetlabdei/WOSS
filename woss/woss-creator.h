@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   woss-creator.h
@@ -40,22 +33,17 @@
 #ifndef WOSS_CREATOR_DEFINITIONS_H
 #define WOSS_CREATOR_DEFINITIONS_H
 
-
-#define WOSS_CREATOR_MAX_FREQ_STEP (1.0e20)
-#define WOSS_CREATOR_ALL_COORDZ CoordZ()
-
-
+#include <string>
+#include <memory>
 #include "woss.h"
 #include "woss-creator-container.h"
 
+static constexpr inline double WOSS_CREATOR_MAX_FREQ_STEP = (1.0e20);
 
 namespace woss {
-  
-   
-  
+
   class WossDbManager;
   class TransducerHandler;
-  
 
   /**
   * \brief Abstract class that provides correctly initialized Woss objects
@@ -64,36 +52,29 @@ namespace woss {
   */
   class WossCreator {
 
-
     protected:
-      
-             
+
     /**
     * SimTime WossCreatorContainer
     */
-    typedef WossCreatorContainer< SimTime > CCSimTime;
-
+    using CCSimTime = WossCreatorContainer< SimTime >;
     /**
     * double WossCreatorContainer
     */    
-    typedef WossCreatorContainer< double > CCDouble;
- 
+    using CCDouble = WossCreatorContainer< double >;
     /**
     * int WossCreatorContainer
-    */    
-    typedef WossCreatorContainer< int > CCInt;
-       
-        
-    public:
+    */
+    using CCInt = WossCreatorContainer< int >;
 
+    public:
 
     /**
     * WossCreator default constructor
     */
     WossCreator();
-    
-    virtual ~WossCreator() { }
 
+    virtual ~WossCreator() = default;
 
     /**
     * Returns a pointer to valid Woss for given parameters
@@ -103,16 +84,15 @@ namespace woss {
     * @param end_freq end frequency [Hz]
     * @returns pointer to properly initialized Woss object
     **/
-    virtual Woss* const createWoss( const CoordZ& tx, const CoordZ& rx, double start_freq, double end_freq ) const = 0;
+    virtual std::unique_ptr<Woss> const createWoss( const CoordZ& tx, const CoordZ& rx, double start_freq, double end_freq ) const = 0;
    
-    
     /**
     * Sets debug flag of every Woss object created
     * @param flag debug flag
     * @return reference to <b>*this</b>
     **/
     WossCreator& setWossDebug( bool flag ) { woss_debug = flag; return *this; }
-    
+
     /**
     * Sets debug flag
     * @param flag debug flag
@@ -132,14 +112,13 @@ namespace woss {
     **/
     bool usingWossDebug() const { return woss_debug; }
 
-
     /**
     * Sets the work pathname
     * @param path valid pathname
     * @return reference to <b>*this</b>
     **/
-    WossCreator& setWrkDirPath( const ::std::string& path ) { work_dir_path = path; return *this; }
-    
+    WossCreator& setWrkDirPath( const std::string& path ) { work_dir_path = path; return *this; }
+
      /**
      * Sets clean work dir flag
      * @param flag debug flag
@@ -151,9 +130,8 @@ namespace woss {
     * Gets the work pathname
     * @returns valid pathname
     **/
-    ::std::string getWrkDirPath() const { return work_dir_path; }
-    
-    
+    std::string getWrkDirPath() const { return work_dir_path; }
+
     /**
     * Sets the frequency step for given transmitter, receiver woss::CoordZ
     * @param f_step valid frequency step [Hz]. If step <= 0 start frequency is used and no steps are done
@@ -162,22 +140,24 @@ namespace woss {
     * @return reference to <b>*this</b>
     **/
     WossCreator& setFrequencyStep( double f_step, const CoordZ& tx, const CoordZ& rx ) { 
-      if ( f_step <= 0.0 ) f_step = WOSS_CREATOR_MAX_FREQ_STEP; 
-      ccfrequency_step.replace(f_step, tx, rx);   
+      if ( f_step <= 0.0 ) 
+        f_step = WOSS_CREATOR_MAX_FREQ_STEP; 
+      ccfrequency_step.replace(f_step, tx, rx);
       return *this; }
- 
+
     /**
     * Sets the frequency step for given transmitter, receiver woss::Location
     * @param f_step valid frequency step [Hz]. If step <= 0 start frequency is used and no steps are done
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return reference to <b>*this</b>
     **/
-    WossCreator& setFrequencyStep( double f_step, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
-      if ( f_step <= 0.0 ) f_step = WOSS_CREATOR_MAX_FREQ_STEP; 
+    WossCreator& setFrequencyStep( double f_step, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
+      if ( f_step <= 0.0 ) 
+        f_step = WOSS_CREATOR_MAX_FREQ_STEP; 
       ccfrequency_step.replace(f_step, tx, rx);   
       return *this; }
-        
+
     /**
     * Returns the frequency step for given transmitter, receiver woss::CoordZ
     * @param tx const reference to a valid woss::CoordZ instance
@@ -189,11 +169,11 @@ namespace woss {
 
     /**
     * Returns the frequency step for given transmitter, receiver woss::Location
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return frequency step in Hz
     **/
-    double getFrequencyStep( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) const { 
+    double getFrequencyStep( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const { 
       return ccfrequency_step.get(tx, rx); }    
 
     /**
@@ -207,14 +187,13 @@ namespace woss {
 
     /**
     * Erases the frequency step for given transmitter, receiver woss::Location
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return reference to <b>*this</b>
     **/
-    WossCreator& eraseFrequencyStep( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    WossCreator& eraseFrequencyStep( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccfrequency_step.erase(tx, rx); return *this; }
 
-    
     /**
     * Sets the time evolution threshold in seconds
     * @param value time evolution threshold in seconds
@@ -228,13 +207,13 @@ namespace woss {
     /**
     * Sets time threshold for time evolution purposes
     * @param value time threshold in seconds
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return reference to <b>*this</b>
-    **/   
-    WossCreator& setEvolutionTimeQuantum( double value, Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    **/
+    WossCreator& setEvolutionTimeQuantum( double value, const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       ccevolution_time_quantum.replace( value, tx, rx ); return *this; } 
-    
+
     /**
     * Returns the time evolution threshold
     * @param tx const reference to a valid woss::CoordZ instance
@@ -246,11 +225,11 @@ namespace woss {
     
     /**
     * Returns the time evolution threshold
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return time evolution threshold in seconds
-    **/   
-    double getEvolutionTimeQuantum( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) const { 
+    **/
+    double getEvolutionTimeQuantum( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) const { 
       return ccevolution_time_quantum.get(tx, rx); } 
       
     /**
@@ -258,40 +237,39 @@ namespace woss {
     * @param tx const reference to a valid woss::CoordZ instance
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return reference to <b>*this</b>
-    **/       
+    **/
     WossCreator& eraseEvolutionTimeQuantum( const CoordZ& tx, const CoordZ& rx ) { 
       ccevolution_time_quantum.erase(tx, rx); return *this; } 
-      
+
     /**
     * Erases the time evolution threshold
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return reference to <b>*this</b>
-    **/  
-    WossCreator& eraseEvolutionTimeQuantum( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    **/
+    WossCreator& eraseEvolutionTimeQuantum( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       ccevolution_time_quantum.erase(tx, rx); return *this; } 
-             
-    
+
     /**
     * Sets the total number of channel simulator's runs 
     * @param runs number of runs
     * @param tx const reference to a valid woss::CoordZ instance
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return reference to <b>*this</b>
-    **/   
+    **/
     WossCreator& setTotalRuns( int runs, const CoordZ& tx, const CoordZ& rx ) {  
       cctotal_runs.replace( runs, tx, rx ); return *this; }
  
     /**
     * Sets the total number of channel simulator's runs 
     * @param runs number of runs
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return reference to <b>*this</b>
     **/   
-    WossCreator& setTotalRuns( int runs, Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) {  
+    WossCreator& setTotalRuns( int runs, const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) {  
       cctotal_runs.replace( runs, tx, rx ); return *this; }
-      
+
     /**
     * Returns the total number of channel simulator's runs 
     * @param tx const reference to a valid woss::CoordZ instance
@@ -303,31 +281,30 @@ namespace woss {
     
     /**
     * Returns the total number of channel simulator's runs 
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return number of runs
-    **/     
-    int getTotalRuns( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) const { 
+    **/
+    int getTotalRuns( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) const { 
       return cctotal_runs.get(tx, rx); }
-      
+
     /**
     * Erases the total number of channel simulator's runs 
     * @param tx const reference to a valid woss::CoordZ instance
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return reference to <b>*this</b>
-    **/       
+    **/
     WossCreator& eraseTotalRuns( const CoordZ& tx, const CoordZ& rx ) {  
       cctotal_runs.erase( tx, rx ); return *this; }
-    
+
     /**
     * Erases the total number of channel simulator's runs 
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return reference to <b>*this</b>
     **/ 
-    WossCreator& eraseTotalRuns( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) {  
+    WossCreator& eraseTotalRuns( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) {  
       cctotal_runs.erase( tx, rx ); return *this; }
-    
 
     /**
     * Sets the SimTime for given transmitter, receiver woss::CoordZ
@@ -342,11 +319,11 @@ namespace woss {
     /**
     * Sets the SimTime for given transmitter, receiver woss::Location
     * @param simtime const reference to a valid SimTime
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return reference to <b>*this</b>
     **/
-    WossCreator& setSimTime( const SimTime& simtime, Location* const tx = CCSimTime::ALL_LOCATIONS, Location* const rx = CCSimTime::ALL_LOCATIONS ) { 
+    WossCreator& setSimTime( const SimTime& simtime, const std::shared_ptr<Location>& tx = CCSimTime::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCSimTime::ALL_LOCATIONS ) { 
       ccsimtime_map.replace(simtime, tx, rx); return *this; }
 
     /**
@@ -357,14 +334,14 @@ namespace woss {
     **/
     SimTime getSimTime( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccsimtime_map.get(tx, rx); }
-  
+
     /**
     * Returns the SimTime for given transmitter, receiver woss::Location
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return SimTime instance
     **/
-    SimTime getSimTime( Location* const tx = CCSimTime::ALL_LOCATIONS, Location* const rx = CCSimTime::ALL_LOCATIONS ) const { 
+    SimTime getSimTime( const std::shared_ptr<Location>& tx = CCSimTime::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCSimTime::ALL_LOCATIONS ) const { 
       return ccsimtime_map.get(tx, rx); }
 
     /**
@@ -374,54 +351,41 @@ namespace woss {
     * @return reference to <b>*this</b>
     **/
     WossCreator& eraseSimTime( const CoordZ& tx, const CoordZ& rx ) { ccsimtime_map.erase(tx, rx); return *this; }
-   
+
     /**
     * Erases the SimTime for given transmitter, receiver woss::Location
-    * @param tx const pointer to a valid woss::Location instance
-    * @param rx const pointer to a valid woss::Location instance 
+    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
+    * @param rx const reference to a std::shared_ptr to a valid receiver Location
     * @return reference to <b>*this</b>
     **/
-    WossCreator& eraseSimTime( Location* const tx = CCSimTime::ALL_LOCATIONS, Location* const rx = CCSimTime::ALL_LOCATIONS ) { 
+    WossCreator& eraseSimTime( const std::shared_ptr<Location>& tx = CCSimTime::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCSimTime::ALL_LOCATIONS ) { 
       ccsimtime_map.erase(tx, rx); return *this; }
 
-
     /**
     * Sets the WossDbManager pointer
-    * @param path const pointer to a const WossDbManager object
+    * @param ptr std::shared_ptr to a WossDbManager object
     * @return reference to <b>*this</b>
     **/
-    WossCreator& setWossDbManager( const WossDbManager* const ptr ) { woss_db_manager = ptr; return *this; }
-
+    WossCreator& setWossDbManager( const std::shared_ptr<WossDbManager>& ptr ) { woss_db_manager = ptr; return *this; }
 
     /**
-    * Sets the WossDbManager pointer
-    * @param path const pointer to a const WossDbManager object
+    * Sets the TransducerHander pointer
+    * @param ptr std::shared_ptr to a TransducerHander object
     * @return reference to <b>*this</b>
     **/
-    WossCreator& setTransducerHandler( const TransducerHandler* const ptr ) { transducer_handler = ptr; return *this; }
-    
-   
-    const Woss& getWossNotValid() const;
-    
+    WossCreator& setTransducerHandler( const std::shared_ptr<TransducerHandler>& ptr ) { transducer_handler = ptr; return *this; }
 
     protected:
-      
+
+    std::shared_ptr<WossDbManager> woss_db_manager;
     
-    static const Woss* woss_not_valid;
-      
-      
-    const WossDbManager* woss_db_manager;
-    
-    
-    const TransducerHandler* transducer_handler;
-    
-    
+    std::shared_ptr<TransducerHandler> transducer_handler;
+
     /**
     * Directory path for temporary files (e.g. channel simulator files)
     **/
-    ::std::string work_dir_path;
-    
-    
+    std::string work_dir_path;
+
     /**
     * Time evolution threshold in seconds
     **/   
@@ -431,18 +395,16 @@ namespace woss {
     * Total number of channel simulator's runs 
     **/
     CCInt cctotal_runs;
-    
+
     /**
     * Frequency step [Hz]
     **/
     CCDouble ccfrequency_step;
-    
-    
+
     /**
     * SimTime containter for user-given transmitter CoordZ
     **/
     CCSimTime ccsimtime_map;
-    
 
     /**
     * Debug flag
@@ -458,27 +420,23 @@ namespace woss {
     * Debug flag for all Woss instances
     **/    
     bool woss_clean_workdir;
-    
-    
+
     /**
     * Initializes given Woss object
-    * @param woss_ptr const pointer to an unitialized Woss
+    * @param woss_ptr reference to an unitialized Woss
     * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
     **/
-    virtual bool initializeWoss( Woss* const woss_ptr ) const = 0;
-  
-    virtual const Woss* createNotValidWoss() const = 0;
-    
+    virtual bool initializeWoss( Woss& woss_ref ) const = 0;
+
     /**
     * Propagates the debug flag
     **/
     virtual void updateDebugFlag();
-    
-  };
 
+  };
 
 }
 
+#endif /* WOSS_CREATOR_DEFINITIONS_H */
 
-#endif /* WOSS_CREATOR_DEFINITIONS_H */ 
 

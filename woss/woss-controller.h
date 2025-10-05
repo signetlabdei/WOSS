@@ -3,7 +3,7 @@
  * Copyright (C) 2009 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   woss-controller.h
@@ -40,20 +33,17 @@
 #ifndef WOSS_CONTROLLER_H
 #define WOSS_CONTROLLER_H
 
-
+#include <memory>
 #include <cassert>
-#include <singleton-definitions.h> 
+#include <singleton-definitions.h>
+#include <transducer-handler.h>
+#include <woss-db-creator.h>
+#include <woss-db-manager.h>
+#include "woss-creator.h"
+#include "woss-manager.h"
 
 
 namespace woss {
-  
-    
-  class WossDbCreator;
-  class WossCreator;
-  class WossDbManager;
-  class WossManager;
-  class TransducerHandler;
-  
 
   /**
   * \brief Class for managing all WOSS classes involved
@@ -63,114 +53,233 @@ namespace woss {
   */
   class WossController {
 
-		
     public:
-    
-      
+
     /**
     * Default constructor
     */
-    WossController();
-    
-    /**
-    * Copy constructor ( no const here, we have to modify the copy )
-    */
-    WossController( WossController& copy ); 
-    
-    /**
-    * Assignment operator  ( no const here, we have to modify the copy )
-    */
-    WossController& operator=( WossController& copy );
-    
-    
-    /**
-    * Destructor
-    */
-    virtual ~WossController();
-      
-    
+    WossController() = default;
+
+    WossController( WossController& copy ) = default;
+
+    WossController& operator=( WossController& copy ) = default;
+
+    virtual ~WossController() = default;
+
     /**
     * Initializes all connections
     */
     bool initialize();
-    
-    
-    WossController& setBathymetryDbCreator( WossDbCreator* const ptr ) { bathymetry_db_creator = ptr; return *this; }
-    
-    WossController& setSedimentDbCreator( WossDbCreator* const ptr ) { sediment_db_creator = ptr; return *this; }
-    
-    WossController& setSSPDbCreator( WossDbCreator* const ptr ) { ssp_db_creator = ptr; return *this; }
-    
-    WossController& setPressureDbCreator( WossDbCreator* const ptr ) { pressure_result_db_creator = ptr; return *this; }
 
-    WossController& setTimeArrDbCreator( WossDbCreator* const ptr ) { timearr_result_db_creator = ptr; return *this; }
-    
-    WossController& setWossCreator( WossCreator* const ptr ) { woss_creator = ptr; return *this; }
-    
-    WossController& setWossDbManager( WossDbManager* const ptr ) { woss_db_manager = ptr; return *this; }
-    
-    WossController& setWossManager( WossManager* const ptr ) { woss_manager = ptr; return *this; }
-    
-    WossController& setTransducerHandler( TransducerHandler* const ptr ) { transducer_handler = ptr; return *this; }
-    
-    void setDebug( bool flag) { debug = flag;}
-    
-    const WossDbCreator* const getBathymetryDbCreator() const { assert(initialized); return bathymetry_db_creator; }
-    
-    const WossDbCreator* const getSedimentDbCreator() const { assert(initialized); return sediment_db_creator; }
-    
-    const WossDbCreator* const getSSPDbCreator() const { assert(initialized); return ssp_db_creator; }
+    /**
+    * Configures the BathymetryDbCreator object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a BathymetryDbCreator instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setBathymetryDbCreator( const std::shared_ptr<WossDbCreator>& ptr ) { bathymetry_db_creator = ptr; return *this; }
 
-    const WossDbCreator* const getPressureDbCreator() const { assert(initialized); return pressure_result_db_creator; }
+    /**
+    * Configures the SedimentDbCreator object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a SedimentDbCreator instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setSedimentDbCreator( const std::shared_ptr<WossDbCreator>& ptr ) { sediment_db_creator = ptr; return *this; }
 
-    const WossDbCreator* const getTimeArrDbCreator() const { assert(initialized); return timearr_result_db_creator; }
-    
-    const WossCreator* const getWossCreator() const { assert(initialized); return woss_creator; }
-    
-    const WossDbManager* const getWossDbManager() const { assert(initialized); return woss_db_manager; }
-    
-    WossManager* const getWossManager() const { assert(initialized); return woss_manager; }
-  
-    TransducerHandler* const getTransducerHandler() const { assert(initialized); return transducer_handler; }
-    
+    /**
+    * Configures the SSPDbCreator object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a SSPDbCreator instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setSSPDbCreator( const std::shared_ptr<WossDbCreator>& ptr ) { ssp_db_creator = ptr; return *this; }
+
+    /**
+    * Configures the PressureDbCreator object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a PressureDbCreator instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setPressureDbCreator( const std::shared_ptr<WossDbCreator>& ptr ) { pressure_result_db_creator = ptr; return *this; }
+
+    /**
+    * Configures the TimeArrDbCreator object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a BathymetryDbCreator instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setTimeArrDbCreator( const std::shared_ptr<WossDbCreator>& ptr ) { timearr_result_db_creator = ptr; return *this; }
+
+    /**
+    * Configures the WossCreator object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a WossCreator instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setWossCreator( const std::shared_ptr<WossCreator>& ptr ) { woss_creator = ptr; return *this; }
+ 
+    /**
+    * Configures the WossDbManager object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a WossDbManager instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setWossDbManager( const std::shared_ptr<WossDbManager>& ptr ) { woss_db_manager = ptr; return *this; }
+
+    /**
+    * Configures the WossManager object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a WossManager instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setWossManager( const std::shared_ptr<WossManager>& ptr ) { woss_manager = ptr; return *this; }
+ 
+    /**
+    * Configures the TransducerHandler object
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a TransducerHandler instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setTransducerHandler( const std::shared_ptr<TransducerHandler>& ptr ) { transducer_handler = ptr; return *this; }
+
+    /**
+    * Configures the debug flag
+    * 
+    * @param ptr a const reference to a std::shared_ptr to a WossManager instance
+    * @returns a reference to <i>*this</i>
+    */
+    WossController& setDebug( bool flag) { debug = flag; return *this; }
+
+    /**
+    * Returns the current BathymetryDbCreator object
+    * 
+    * @returns a std::shared_ptr to a BathymetryDbCreator instance
+    */
+    std::shared_ptr<WossDbCreator> getBathymetryDbCreator() const { assert(initialized); return bathymetry_db_creator; }
+
+    /**
+    * Returns the current SedimentDbCreator object
+    * 
+    * @returns a std::shared_ptr to a SedimentDbCreator instance
+    */
+    std::shared_ptr<WossDbCreator> getSedimentDbCreator() const { assert(initialized); return sediment_db_creator; }
+
+    /**
+    * Returns the current SSPDbCreator object
+    * 
+    * @returns a std::shared_ptr to a SSPDbCreator instance
+    */
+    std::shared_ptr<WossDbCreator> getSSPDbCreator() const { assert(initialized); return ssp_db_creator; }
+
+    /**
+    * Returns the current PressureDbCreator object
+    * 
+    * @returns a std::shared_ptr to a PressureDbCreator instance
+    */
+    std::shared_ptr<WossDbCreator> getPressureDbCreator() const { assert(initialized); return pressure_result_db_creator; }
+
+    /**
+    * Returns the current TimeArrDbCreator object
+    * 
+    * @returns a std::shared_ptr to a TimeArrDbCreator instance
+    */
+    std::shared_ptr<WossDbCreator> getTimeArrDbCreator() const { assert(initialized); return timearr_result_db_creator; }
+
+    /**
+    * Returns the current WossCreator object
+    * 
+    * @returns a std::shared_ptr to a WossCreator instance
+    */
+    std::shared_ptr<WossCreator> getWossCreator() const { assert(initialized); return woss_creator; }
+
+    /**
+    * Returns the current WossDbManager object
+    * 
+    * @returns a std::shared_ptr to a WossDbManager instance
+    */
+    std::shared_ptr<WossDbManager> getWossDbManager() const { assert(initialized); return woss_db_manager; }
+
+    /**
+    * Returns the current WossManager object
+    * 
+    * @returns a std::shared_ptr to a WossManager instance
+    */
+    std::shared_ptr<WossManager> getWossManager() const { assert(initialized); return woss_manager; }
+
+    /**
+    * Returns the current TransducerHandler object
+    * 
+    * @returns a std::shared_ptr to a TransducerHandler instance
+    */
+    std::shared_ptr<TransducerHandler> getTransducerHandler() const { assert(initialized); return transducer_handler; }
+
+    /**
+    * Returns the current debug flag 
+    * 
+    * @returns debug flag
+    */
     bool getDebug() const { return debug; }
-    
+
     protected:
-    
-   
+
     /**
     * Debug flag
     */
-    double debug; 
-    
+    double debug = false; 
+
     /**
     * Initialized flag
     */
-    bool initialized;
-  
-    
-    WossDbCreator* bathymetry_db_creator;
-    
-    WossDbCreator* sediment_db_creator;
-    
-    WossDbCreator* ssp_db_creator;
-    
-    WossDbCreator* pressure_result_db_creator;
-    
-    WossDbCreator* timearr_result_db_creator;
-    
-    WossCreator* woss_creator;
-    
-    WossDbManager* woss_db_manager;
-    
-    WossManager* woss_manager;
-    
-    TransducerHandler* transducer_handler;
-     
-       
+    bool initialized = false;
+
+    /**
+    * std::shared_ptr of the current BathymetryDbCreator
+    */
+    std::shared_ptr<WossDbCreator> bathymetry_db_creator = nullptr;
+
+    /**
+    * std::shared_ptr of the current SedimentDbCreator
+    */
+    std::shared_ptr<WossDbCreator> sediment_db_creator = nullptr;
+
+    /**
+    * std::shared_ptr of the current SSPDbCreator
+    */
+    std::shared_ptr<WossDbCreator> ssp_db_creator = nullptr;
+
+    /**
+    * std::shared_ptr of the current PressureDbCreator
+    */
+    std::shared_ptr<WossDbCreator> pressure_result_db_creator = nullptr;
+
+    /**
+    * std::shared_ptr of the current TimeArrDbCreator
+    */
+    std::shared_ptr<WossDbCreator> timearr_result_db_creator = nullptr;
+
+    /**
+    * std::shared_ptr of the current WossCreator
+    */
+    std::shared_ptr<WossCreator> woss_creator = nullptr;
+
+    /**
+    * std::shared_ptr of the current WossDbManager
+    */
+    std::shared_ptr<WossDbManager> woss_db_manager = nullptr;
+
+    /**
+    * std::shared_ptr of the current WossManager
+    */
+    std::shared_ptr<WossManager> woss_manager = nullptr;
+
+    /**
+    * std::shared_ptr of the current TransducerHandler
+    */
+    std::shared_ptr<TransducerHandler> transducer_handler = nullptr;
+
   };
 
-  
   /**
   * \brief Singleton implementation of WossController class
   *
@@ -178,9 +287,6 @@ namespace woss {
   */
   typedef Singleton< WossController > SWossController;
 
-
 }
 
-
 #endif /* WOSS_CONTROLLER_H */
-

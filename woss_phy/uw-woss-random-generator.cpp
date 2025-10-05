@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
-
 /**
  * @file   uw-woss-random-generator.cpp
  * @author Federico Guerra
@@ -37,44 +29,31 @@
  */
 
 
-#include "uw-woss-random-generator.h"
+#include <uw-woss-random-generator.h>
 #include <iostream>
-
-
-// WossRandomGenerator::WossRandomGenerator() 
-// : RandomGenerator(), 
-//   rng(NULL) 
-// { 
-//   rng = new RNG();
-// }
 
 
 WossRandomGenerator::WossRandomGenerator( int seed ) 
 : RandomGenerator(seed),
-  rng(NULL) 
+  rng(std::make_unique<RNG>()) 
 { 
-  rng = new RNG();
 }
 
-
-WossRandomGenerator::WossRandomGenerator( const WossRandomGenerator& copy ) 
-: RandomGenerator( copy.seed ),
-  rng(NULL)
+WossRandomGenerator::WossRandomGenerator( const WossRandomGenerator& copy )
+: RandomGenerator(copy),
+  rng(std::make_unique<RNG>(*(copy.rng)))
 {
-  initialized = copy.initialized; 
-  rng = new RNG(*copy.rng);
+  initialized = copy.initialized;
 }
-
 
 WossRandomGenerator& WossRandomGenerator::operator=( const WossRandomGenerator& copy ) {
-  if (this == &copy) return *this;
+  if (this == &copy) 
+    return *this;
   seed = copy.seed;
+  rng = std::make_unique<RNG>(*(copy.rng));
   initialized = copy.initialized;
-  if (rng != NULL ) delete rng;
-  rng = new RNG(*copy.rng);
   return *this;
 }
-    
 
 void WossRandomGenerator::initialize() {
   if (!initialized) {
@@ -89,7 +68,7 @@ void WossRandomGenerator::initialize() {
 
 double WossRandomGenerator::getRand() const {
   if (!initialized) {
-    ::std::cerr << "WossRandomGenerator::getRand() WARNING RNG object is not initialized!!" << ::std::endl;
+    std::cerr << "WossRandomGenerator::getRand() WARNING RNG object is not initialized!!" << std::endl;
     exit(1);
   }
   return rng->uniform_double(); 
@@ -98,7 +77,7 @@ double WossRandomGenerator::getRand() const {
 
 int WossRandomGenerator::getRandInt() const {
   if (!initialized) {
-    ::std::cerr << "WossRandomGenerator::getRandInt() WARNING RNG object is not initialized!!" << ::std::endl;
+    std::cerr << "WossRandomGenerator::getRandInt() WARNING RNG object is not initialized!!" << std::endl;
     exit(1);
   }
   return rng->uniform_positive_int(); 
@@ -113,11 +92,6 @@ WossRandomGeneratorTcl::WossRandomGeneratorTcl()
 }
 
 
-WossRandomGenerator::~WossRandomGenerator() {
-  delete rng;
-}
-
-      
 static class WossRandomGeneratorTclClass : public TclClass {
 public:
   WossRandomGeneratorTclClass() : TclClass("WOSS/Definitions/RandomGenerator/NS2") {}
@@ -136,5 +110,3 @@ int WossRandomGeneratorTcl::command(int argc, const char*const* argv) {
   }
   return( TclObject::command(argc, argv) );
 }
-
-

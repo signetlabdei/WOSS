@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -45,7 +38,6 @@
 
 
 namespace woss {
-  
 
   /**
   * \brief WossDbCreator for the UMT CSV bathymetry database
@@ -55,23 +47,38 @@ namespace woss {
   **/
   class BathyUtmCsvDbCreator : public WossDbCreator {
 
-    
     public:
-    
 
     /**
     * Default BathyUtmCsvDbCreator constructor
     **/
     BathyUtmCsvDbCreator();
-    
-    virtual ~BathyUtmCsvDbCreator();
-      
-    
+
+    BathyUtmCsvDbCreator(const BathyUtmCsvDbCreator& copy) = default;
+
+    BathyUtmCsvDbCreator(BathyUtmCsvDbCreator&& tmp) = default;
+
+    virtual ~BathyUtmCsvDbCreator() override = default;
+
+    BathyUtmCsvDbCreator& operator=( const BathyUtmCsvDbCreator& copy ) = default;
+
+    BathyUtmCsvDbCreator& operator=( BathyUtmCsvDbCreator&& tmp ) = default;
+
+    /**
+    * Abstract method. Virtual factory method. 
+    * It is called to clone this WossDbCreator instance. 
+    * The caller will be the <b>owner</b> of created object,
+    * therefore object destruction is his responsibility
+    * @return a std::unique_ptr to a properly initialized WossDbCreator object
+    **/
+    virtual std::unique_ptr<WossDbCreator> clone() const override { return std::make_unique<BathyUtmCsvDbCreator>(*this); }
+
+
     /**
     * Creates and initialize a BathyUtmCsvDb object
-    * @return a pointer to a properly initialized BathyUtmCsvDb object
+    * @return a std::unique_ptr to a properly initialized BathyUtmCsvDb object
     **/
-    virtual WossDb* const createWossDb();
+    virtual std::unique_ptr<WossDb> createWossDb() const override;
 
    /**
     * Sets the char separator used in CSV textual db
@@ -184,7 +191,7 @@ namespace woss {
     * 
     * @return the land approximation flag
     **/
-    bool getLandApproximationFlag() {
+    bool getLandApproximationFlag() const {
       return approx_land_to_sea_surface;
     }
 
@@ -210,16 +217,13 @@ namespace woss {
     
     /**
     * Initializes the pointed object
-    * @param woss_db pointer to a recently created BathyUtmCsvDb
+    * @param woss_db reference to a recently created BathyUtmCsvDb
     * @return <i>true</i> if the method succeed, <i>false</i> otherwise
     **/
-    virtual bool initializeDb( WossDb* const woss_db );
+    virtual bool initializeDb( WossDb& woss_db ) const override;
 
-    
   };
 
 }
 
-
 #endif /* WOSS_BATHYMETRY_UMT_CSV_DB_CREATOR_H */
-

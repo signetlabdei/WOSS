@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   uw-woss-position.cpp
@@ -36,8 +29,8 @@
  * Provides the implementation of WossPosition class 
  */
 
-
-#include "uw-woss-position.h"
+#include <iostream>
+#include <uw-woss-position.h>
 
 
 static class WossPositionClass : public TclClass {
@@ -107,26 +100,26 @@ void WossPosition::setDepth( double val ) {
 
 
 void WossPosition::setAltitude( double val ) { 
-  woss::Location::setDepth( ::std::abs(val) ); 
+  woss::Location::setDepth( std::abs(val) ); 
   altitude_ = val; 
 }
 
 
 void WossPosition::setX( double val ) { 
   x_ = val; 
-  ::std::cerr << "WossPosition::setX() WARNING this function is not supported." << ::std::endl;
+  std::cerr << "WossPosition::setX() WARNING this function is not supported." << std::endl;
 }
 
 
 void WossPosition::setY( double val ) { 
   y_ = val; 
-  ::std::cerr << "WossPosition::setY() WARNING this function is not supported." << ::std::endl; 
+  std::cerr << "WossPosition::setY() WARNING this function is not supported." << std::endl; 
 }
 
 
 void WossPosition::setZ( double val ) { 
   z_ = val; 
-  ::std::cerr << "WossPosition::setZ() WARNING this function is not supported." << ::std::endl; 
+  std::cerr << "WossPosition::setZ() WARNING this function is not supported." << std::endl; 
 }
  
  
@@ -189,9 +182,9 @@ int WossPosition::command(int argc, const char*const* argv) {
   Tcl& tcl = Tcl::instance();
   if (argc == 3) {
     if( strcasecmp(argv[1], "setDepth_") == 0 ) {
-//       ::std::cout << NOW << "  WossWpPosition::command() addLoopPoint lat = " << argv[2] << "; long " << argv[3] 
+//       std::cout << NOW << "  WossWpPosition::command() addLoopPoint lat = " << argv[2] << "; long " << argv[3] 
 //                   << "; depth = " << argv[4] << "; speed = " << argv[5] << "; time to wait = " << argv[6]
-//                   << "; loop to waypoint = " << argv[7] << "; total loops = " << argv[8] << ::std::endl;
+//                   << "; loop to waypoint = " << argv[7] << "; total loops = " << argv[8] << std::endl;
 
       setDepth( atof(argv[2]) ); 
       
@@ -202,7 +195,7 @@ int WossPosition::command(int argc, const char*const* argv) {
   }
   else if (argc == 2) {
     if( strcasecmp(argv[1], "getDepth_") == 0 ) {
-      tcl.resultf("%f", getDepth());           
+      tcl.resultf("%f", getDepth());
       return TCL_OK;
     }
   }

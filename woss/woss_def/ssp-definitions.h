@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -41,212 +34,208 @@
 #define WOSS_SSP_DEFINITIONS_H 
 
 
-#include <cassert>
-#include <cstdlib>
 #include <map>
+#include <memory>
+#include <cmath>
+#include <iostream>
 #include "coordinates-definitions.h"
 #include "pressure-definitions.h"
 #include "custom-precision-double.h"
-#include "definitions-handler.h"
 
 
 namespace woss {
   
-    
   // UNESCO CHEN AND MILLERO EQUATIONS COEFFICIENTS
-  #define cf_C00 (1402.388)
-  #define cf_A02 (7.166e-5)
-  #define cf_C01 (5.03830)
-  #define cf_A03 (2.008e-6)
-  #define cf_C02 (-5.81090e-2)
-  #define cf_A04 (-3.21e-8)
-  #define cf_C03 (3.3432e-4)
-  #define cf_A10 (9.4742e-5)
-  #define cf_C04 (-1.47797e-6)
-  #define cf_A11 (-1.2583e-5)
-  #define cf_C05 (3.1419e-9)
-  #define cf_A12 (-6.4928e-8)
-  #define cf_C10 (0.153563)
-  #define cf_A13 (1.0515e-8)
-  #define cf_C11 (6.8999e-4)
-  #define cf_A14 (-2.0142e-10)
-  #define cf_C12 (-8.1829e-6)
-  #define cf_A20 (-3.9064e-7)
-  #define cf_C13 (1.3632e-7)
-  #define cf_A21 (9.1061e-9)
-  #define cf_C14 (-6.1260e-10)
-  #define cf_A22 (-1.6009e-10)
-  #define cf_C20 (3.1260e-5)
-  #define cf_A23 (7.994e-12)
-  #define cf_C21 (-1.7111e-6)
-  #define cf_A30 (1.100e-10)
-  #define cf_C22 (2.5986e-8)
-  #define cf_A31 (6.651e-12)
-  #define cf_C23 (-2.5353e-10)
-  #define cf_A32 (-3.391e-13)
-  #define cf_C24 (1.0415e-12)
-  #define cf_B00 (-1.922e-2)
-  #define cf_C30 (-9.7729e-9)
-  #define cf_B01 (-4.42e-5)
-  #define cf_C31 (3.8513e-10)
-  #define cf_B10 (7.3637e-5)
-  #define cf_C32 (-2.3654e-12)
-  #define cf_B11 (1.7950e-7)
-  #define cf_A00 (1.389)
-  #define cf_D00 (1.727e-3)
-  #define cf_A01 (-1.262e-2)
-  #define cf_D10 (-7.9836e-6)
+  static constexpr inline double cf_C00 = (1402.388);
+  static constexpr inline double cf_A02 = (7.166e-5);
+  static constexpr inline double cf_C01 = (5.03830);
+  static constexpr inline double cf_A03 = (2.008e-6);
+  static constexpr inline double cf_C02 = (-5.81090e-2);
+  static constexpr inline double cf_A04 = (-3.21e-8);
+  static constexpr inline double cf_C03 = (3.3432e-4);
+  static constexpr inline double cf_A10 = (9.4742e-5);
+  static constexpr inline double cf_C04 = (-1.47797e-6);
+  static constexpr inline double cf_A11 = (-1.2583e-5);
+  static constexpr inline double cf_C05 = (3.1419e-9);
+  static constexpr inline double cf_A12 = (-6.4928e-8);
+  static constexpr inline double cf_C10 = (0.153563);
+  static constexpr inline double cf_A13 = (1.0515e-8);
+  static constexpr inline double cf_C11 = (6.8999e-4);
+  static constexpr inline double cf_A14 = (-2.0142e-10);
+  static constexpr inline double cf_C12 = (-8.1829e-6);
+  static constexpr inline double cf_A20 = (-3.9064e-7);
+  static constexpr inline double cf_C13 = (1.3632e-7);
+  static constexpr inline double cf_A21 = (9.1061e-9);
+  static constexpr inline double cf_C14 = (-6.1260e-10);
+  static constexpr inline double cf_A22 = (-1.6009e-10);
+  static constexpr inline double cf_C20 = (3.1260e-5);
+  static constexpr inline double cf_A23 = (7.994e-12);
+  static constexpr inline double cf_C21 = (-1.7111e-6);
+  static constexpr inline double cf_A30 = (1.100e-10);
+  static constexpr inline double cf_C22 = (2.5986e-8);
+  static constexpr inline double cf_A31 = (6.651e-12);
+  static constexpr inline double cf_C23 = (-2.5353e-10);
+  static constexpr inline double cf_A32 = (-3.391e-13);
+  static constexpr inline double cf_C24 = (1.0415e-12);
+  static constexpr inline double cf_B00 = (-1.922e-2);
+  static constexpr inline double cf_C30 = (-9.7729e-9);
+  static constexpr inline double cf_B01 = (-4.42e-5);
+  static constexpr inline double cf_C31 = (3.8513e-10);
+  static constexpr inline double cf_B10 = (7.3637e-5);
+  static constexpr inline double cf_C32 = (-2.3654e-12);
+  static constexpr inline double cf_B11 = (1.7950e-7);
+  static constexpr inline double cf_A00 = (1.389);
+  static constexpr inline double cf_D00 = (1.727e-3);
+  static constexpr inline double cf_A01 = (-1.262e-2);
+  static constexpr inline double cf_D10 = (-7.9836e-6);
 
   // TEOS-10 constants
-  #define TEO_10_c000  -6.07991438090e-5
-  #define TEO_10_c001  1.99712338438e-5
-  #define TEO_10_c002  -3.39280843110e-6
-  #define TEO_10_c003  4.21246123200e-7
-  #define TEO_10_c004  -6.32363064300e-8
-  #define TEO_10_c005  1.17681023580e-8
-  #define TEO_10_c010  1.85057654290e-5
-  #define TEO_10_c011  -2.34727734620e-6
-  #define TEO_10_c012  -1.09581019659e-6
-  #define TEO_10_c013  1.25816399608e-6
-  #define TEO_10_c020  -1.17166068530e-5
-  #define TEO_10_c021  4.26100574800e-6
-  #define TEO_10_c022  8.60877154770e-7
-  #define TEO_10_c030  7.92796561730e-6
-  #define TEO_10_c031  -9.22650800740e-7
-  #define TEO_10_c040  -3.41021874820e-6
-  #define TEO_10_c041  -1.26705833028e-7
-  #define TEO_10_c050  5.07367668140e-7
-  #define TEO_10_c100  2.42624687470e-5
-  #define TEO_10_c101  -1.16968865968e-6
-  #define TEO_10_c102  1.08930565545e-6
-  #define TEO_10_c103  -4.45885016920e-7
-  #define TEO_10_c110  -9.56770881560e-6
-  #define TEO_10_c111  -1.11398309114e-5
-  #define TEO_10_c112  -8.18870887110e-7
-  #define TEO_10_c120  -2.36783083610e-7
-  #define TEO_10_c121  7.82747741600e-7
-  #define TEO_10_c130  -3.45587736550e-6
-  #define TEO_10_c131  1.55237776184e-8
-  #define TEO_10_c140  1.29567177830e-6
-  #define TEO_10_c200  -3.47924609740e-5
-  #define TEO_10_c201  -9.62445031940e-6
-  #define TEO_10_c202  5.02389113400e-8
-  #define TEO_10_c210  1.11008347650e-5
-  #define TEO_10_c211  1.09241497668e-5
-  #define TEO_10_c220  2.92833462950e-6
-  #define TEO_10_c221  -1.31462208134e-6
-  #define TEO_10_c230  3.16553060780e-7
-  #define TEO_10_c300  3.74707773050e-5
-  #define TEO_10_c301  9.85262139960e-6
-  #define TEO_10_c310  -9.84471178440e-6
-  #define TEO_10_c311  -2.70883712540e-6
-  #define TEO_10_c320  -4.88261392000e-7
-  #define TEO_10_c400  -1.73222186120e-5
-  #define TEO_10_c401  -3.56239494540e-6
-  #define TEO_10_c410  2.59092252600e-6
-  #define TEO_10_c500  3.09274272530e-6
-  #define TEO_10_v000  1.0769995862e-3
-  #define TEO_10_v001  -6.0799143809e-5
-  #define TEO_10_v002  9.9856169219e-6
-  #define TEO_10_v003  -1.1309361437e-6
-  #define TEO_10_v004  1.0531153080e-7
-  #define TEO_10_v005  -1.2647261286e-8
-  #define TEO_10_v006  1.9613503930e-9
-  #define TEO_10_v010  -3.1038981976e-4
-  #define TEO_10_v011  2.4262468747e-5
-  #define TEO_10_v012  -5.8484432984e-7
-  #define TEO_10_v013  3.6310188515e-7
-  #define TEO_10_v014  -1.1147125423e-7
-  #define TEO_10_v020  6.6928067038e-4
-  #define TEO_10_v021  -3.4792460974e-5
-  #define TEO_10_v022  -4.8122251597e-6
-  #define TEO_10_v023  1.6746303780e-8
-  #define TEO_10_v030  -8.5047933937e-4
-  #define TEO_10_v031  3.7470777305e-5
-  #define TEO_10_v032  4.9263106998e-6
-  #define TEO_10_v040  5.8086069943e-4
-  #define TEO_10_v041  -1.7322218612e-5
-  #define TEO_10_v042  -1.7811974727e-6
-  #define TEO_10_v050  -2.1092370507e-4
-  #define TEO_10_v051  3.0927427253e-6
-  #define TEO_10_v060  3.1932457305e-5
-  #define TEO_10_v100  -1.5649734675e-5
-  #define TEO_10_v101  1.8505765429e-5
-  #define TEO_10_v102  -1.1736386731e-6
-  #define TEO_10_v103  -3.6527006553e-7
-  #define TEO_10_v104  3.1454099902e-7
-  #define TEO_10_v110  3.5009599764e-5
-  #define TEO_10_v111  -9.5677088156e-6
-  #define TEO_10_v112  -5.5699154557e-6
-  #define TEO_10_v113  -2.7295696237e-7
-  #define TEO_10_v120  -4.3592678561e-5
-  #define TEO_10_v121  1.1100834765e-5
-  #define TEO_10_v122  5.4620748834e-6
-  #define TEO_10_v130  3.4532461828e-5
-  #define TEO_10_v131  -9.8447117844e-6
-  #define TEO_10_v132  -1.3544185627e-6
-  #define TEO_10_v140  -1.1959409788e-5
-  #define TEO_10_v141  2.5909225260e-6
-  #define TEO_10_v150  1.3864594581e-6
-  #define TEO_10_v200  2.7762106484e-5
-  #define TEO_10_v201  -1.1716606853e-5
-  #define TEO_10_v202  2.1305028740e-6
-  #define TEO_10_v203  2.8695905159e-7
-  #define TEO_10_v210  -3.7435842344e-5
-  #define TEO_10_v211  -2.3678308361e-7
-  #define TEO_10_v212  3.9137387080e-7
-  #define TEO_10_v220  3.5907822760e-5
-  #define TEO_10_v221  2.9283346295e-6
-  #define TEO_10_v222  -6.5731104067e-7
-  #define TEO_10_v230  -1.8698584187e-5
-  #define TEO_10_v231  -4.8826139200e-7
-  #define TEO_10_v240  3.8595339244e-6
-  #define TEO_10_v300  -1.6521159259e-5
-  #define TEO_10_v301  7.9279656173e-6
-  #define TEO_10_v302  -4.6132540037e-7
-  #define TEO_10_v310  2.4141479483e-5
-  #define TEO_10_v311  -3.4558773655e-6
-  #define TEO_10_v312  7.7618888092e-9
-  #define TEO_10_v320  -1.4353633048e-5
-  #define TEO_10_v321  3.1655306078e-7
-  #define TEO_10_v330  2.2863324556e-6
-  #define TEO_10_v400  6.9111322702e-6
-  #define TEO_10_v401  -3.4102187482e-6
-  #define TEO_10_v402  -6.3352916514e-8
-  #define TEO_10_v410  -8.7595873154e-6
-  #define TEO_10_v411  1.2956717783e-6
-  #define TEO_10_v420  4.3703680598e-6
-  #define TEO_10_v500  -8.0539615540e-7
-  #define TEO_10_v501  5.0736766814e-7
-  #define TEO_10_v510  -3.3052758900e-7
-  #define TEO_10_v600  2.0543094268e-7
+  static constexpr inline double TEO_10_c000 = -6.07991438090e-5;
+  static constexpr inline double TEO_10_c001 = 1.99712338438e-5;
+  static constexpr inline double TEO_10_c002 = -3.39280843110e-6;
+  static constexpr inline double TEO_10_c003 = 4.21246123200e-7;
+  static constexpr inline double TEO_10_c004 = -6.32363064300e-8;
+  static constexpr inline double TEO_10_c005 = 1.17681023580e-8;
+  static constexpr inline double TEO_10_c010 = 1.85057654290e-5;
+  static constexpr inline double TEO_10_c011 = -2.34727734620e-6;
+  static constexpr inline double TEO_10_c012 = -1.09581019659e-6;
+  static constexpr inline double TEO_10_c013 = 1.25816399608e-6;
+  static constexpr inline double TEO_10_c020 = -1.17166068530e-5;
+  static constexpr inline double TEO_10_c021 = 4.26100574800e-6;
+  static constexpr inline double TEO_10_c022 = 8.60877154770e-7;
+  static constexpr inline double TEO_10_c030 = 7.92796561730e-6;
+  static constexpr inline double TEO_10_c031 = -9.22650800740e-7;
+  static constexpr inline double TEO_10_c040 = -3.41021874820e-6;
+  static constexpr inline double TEO_10_c041 = -1.26705833028e-7;
+  static constexpr inline double TEO_10_c050 = 5.07367668140e-7;
+  static constexpr inline double TEO_10_c100 = 2.42624687470e-5;
+  static constexpr inline double TEO_10_c101 = -1.16968865968e-6;
+  static constexpr inline double TEO_10_c102 = 1.08930565545e-6;
+  static constexpr inline double TEO_10_c103 = -4.45885016920e-7;
+  static constexpr inline double TEO_10_c110 = -9.56770881560e-6;
+  static constexpr inline double TEO_10_c111 = -1.11398309114e-5;
+  static constexpr inline double TEO_10_c112 = -8.18870887110e-7;
+  static constexpr inline double TEO_10_c120 = -2.36783083610e-7;
+  static constexpr inline double TEO_10_c121 = 7.82747741600e-7;
+  static constexpr inline double TEO_10_c130 = -3.45587736550e-6;
+  static constexpr inline double TEO_10_c131 = 1.55237776184e-8;
+  static constexpr inline double TEO_10_c140 = 1.29567177830e-6;
+  static constexpr inline double TEO_10_c200 = -3.47924609740e-5;
+  static constexpr inline double TEO_10_c201 = -9.62445031940e-6;
+  static constexpr inline double TEO_10_c202 = 5.02389113400e-8;
+  static constexpr inline double TEO_10_c210 = 1.11008347650e-5;
+  static constexpr inline double TEO_10_c211 = 1.09241497668e-5;
+  static constexpr inline double TEO_10_c220 = 2.92833462950e-6;
+  static constexpr inline double TEO_10_c221 = -1.31462208134e-6;
+  static constexpr inline double TEO_10_c230 = 3.16553060780e-7;
+  static constexpr inline double TEO_10_c300 = 3.74707773050e-5;
+  static constexpr inline double TEO_10_c301 = 9.85262139960e-6;
+  static constexpr inline double TEO_10_c310 = -9.84471178440e-6;
+  static constexpr inline double TEO_10_c311 = -2.70883712540e-6;
+  static constexpr inline double TEO_10_c320 = -4.88261392000e-7;
+  static constexpr inline double TEO_10_c400 = -1.73222186120e-5;
+  static constexpr inline double TEO_10_c401 = -3.56239494540e-6;
+  static constexpr inline double TEO_10_c410 = 2.59092252600e-6;
+  static constexpr inline double TEO_10_c500 = 3.09274272530e-6;
+  static constexpr inline double TEO_10_v000 = 1.0769995862e-3;
+  static constexpr inline double TEO_10_v001 = -6.0799143809e-5;
+  static constexpr inline double TEO_10_v002 = 9.9856169219e-6;
+  static constexpr inline double TEO_10_v003 = -1.1309361437e-6;
+  static constexpr inline double TEO_10_v004 = 1.0531153080e-7;
+  static constexpr inline double TEO_10_v005 = -1.2647261286e-8;
+  static constexpr inline double TEO_10_v006 = 1.9613503930e-9;
+  static constexpr inline double TEO_10_v010 = -3.1038981976e-4;
+  static constexpr inline double TEO_10_v011 = 2.4262468747e-5;
+  static constexpr inline double TEO_10_v012 = -5.8484432984e-7;
+  static constexpr inline double TEO_10_v013 = 3.6310188515e-7;
+  static constexpr inline double TEO_10_v014 = -1.1147125423e-7;
+  static constexpr inline double TEO_10_v020 = 6.6928067038e-4;
+  static constexpr inline double TEO_10_v021 = -3.4792460974e-5;
+  static constexpr inline double TEO_10_v022 = -4.8122251597e-6;
+  static constexpr inline double TEO_10_v023 = 1.6746303780e-8;
+  static constexpr inline double TEO_10_v030 = -8.5047933937e-4;
+  static constexpr inline double TEO_10_v031 = 3.7470777305e-5;
+  static constexpr inline double TEO_10_v032 = 4.9263106998e-6;
+  static constexpr inline double TEO_10_v040 = 5.8086069943e-4;
+  static constexpr inline double TEO_10_v041 = -1.7322218612e-5;
+  static constexpr inline double TEO_10_v042 = -1.7811974727e-6;
+  static constexpr inline double TEO_10_v050 = -2.1092370507e-4;
+  static constexpr inline double TEO_10_v051 = 3.0927427253e-6;
+  static constexpr inline double TEO_10_v060 = 3.1932457305e-5;
+  static constexpr inline double TEO_10_v100 = -1.5649734675e-5;
+  static constexpr inline double TEO_10_v101 = 1.8505765429e-5;
+  static constexpr inline double TEO_10_v102 = -1.1736386731e-6;
+  static constexpr inline double TEO_10_v103 = -3.6527006553e-7;
+  static constexpr inline double TEO_10_v104 = 3.1454099902e-7;
+  static constexpr inline double TEO_10_v110 = 3.5009599764e-5;
+  static constexpr inline double TEO_10_v111 = -9.5677088156e-6;
+  static constexpr inline double TEO_10_v112 = -5.5699154557e-6;
+  static constexpr inline double TEO_10_v113 = -2.7295696237e-7;
+  static constexpr inline double TEO_10_v120 = -4.3592678561e-5;
+  static constexpr inline double TEO_10_v121 = 1.1100834765e-5;
+  static constexpr inline double TEO_10_v122 = 5.4620748834e-6;
+  static constexpr inline double TEO_10_v130 = 3.4532461828e-5;
+  static constexpr inline double TEO_10_v131 = -9.8447117844e-6;
+  static constexpr inline double TEO_10_v132 = -1.3544185627e-6;
+  static constexpr inline double TEO_10_v140 = -1.1959409788e-5;
+  static constexpr inline double TEO_10_v141 = 2.5909225260e-6;
+  static constexpr inline double TEO_10_v150 = 1.3864594581e-6;
+  static constexpr inline double TEO_10_v200 = 2.7762106484e-5;
+  static constexpr inline double TEO_10_v201 = -1.1716606853e-5;
+  static constexpr inline double TEO_10_v202 = 2.1305028740e-6;
+  static constexpr inline double TEO_10_v203 = 2.8695905159e-7;
+  static constexpr inline double TEO_10_v210 = -3.7435842344e-5;
+  static constexpr inline double TEO_10_v211 = -2.3678308361e-7;
+  static constexpr inline double TEO_10_v212 = 3.9137387080e-7;
+  static constexpr inline double TEO_10_v220 = 3.5907822760e-5;
+  static constexpr inline double TEO_10_v221 = 2.9283346295e-6;
+  static constexpr inline double TEO_10_v222 = -6.5731104067e-7;
+  static constexpr inline double TEO_10_v230 = -1.8698584187e-5;
+  static constexpr inline double TEO_10_v231 = -4.8826139200e-7;
+  static constexpr inline double TEO_10_v240 = 3.8595339244e-6;
+  static constexpr inline double TEO_10_v300 = -1.6521159259e-5;
+  static constexpr inline double TEO_10_v301 = 7.9279656173e-6;
+  static constexpr inline double TEO_10_v302 = -4.6132540037e-7;
+  static constexpr inline double TEO_10_v310 = 2.4141479483e-5;
+  static constexpr inline double TEO_10_v311 = -3.4558773655e-6;
+  static constexpr inline double TEO_10_v312 = 7.7618888092e-9;
+  static constexpr inline double TEO_10_v320 = -1.4353633048e-5;
+  static constexpr inline double TEO_10_v321 = 3.1655306078e-7;
+  static constexpr inline double TEO_10_v330 = 2.2863324556e-6;
+  static constexpr inline double TEO_10_v400 = 6.9111322702e-6;
+  static constexpr inline double TEO_10_v401 = -3.4102187482e-6;
+  static constexpr inline double TEO_10_v402 = -6.3352916514e-8;
+  static constexpr inline double TEO_10_v410 = -8.7595873154e-6;
+  static constexpr inline double TEO_10_v411 = 1.2956717783e-6;
+  static constexpr inline double TEO_10_v420 = 4.3703680598e-6;
+  static constexpr inline double TEO_10_v500 = -8.0539615540e-7;
+  static constexpr inline double TEO_10_v501 = 5.0736766814e-7;
+  static constexpr inline double TEO_10_v510 = -3.3052758900e-7;
+  static constexpr inline double TEO_10_v600 = 2.0543094268e-7;
 
-  #define TEO_10_gsw_sfac (0.0248826675584615)
-  #define TEO_10_offset  (5.971840214030754e-1)
+  static constexpr inline double TEO_10_gsw_sfac = (0.0248826675584615);
+  static constexpr inline double TEO_10_offset = (5.971840214030754e-1);
 
   /**
   * Multipurpose map that links a depth [m] to a value ( temperature [C°], pressure [bar], salinity [ppu], 
   * or sound speed profile [m/s] )
   **/
-  typedef ::std::map< PDouble, double > DepthMap;
-  typedef DepthMap::const_iterator DConstIter;
-  typedef DepthMap::iterator DIter;
-  typedef DepthMap::reverse_iterator DRIter;
-  typedef DepthMap::const_reverse_iterator DConstRIter;
-
+  using DepthMap = std::map< PDouble, double >;
+  using DConstIter = DepthMap::const_iterator;
+  using DIter = DepthMap::iterator;
+  using DRIter = DepthMap::reverse_iterator;
+  using DConstRIter = DepthMap::const_reverse_iterator;
 
   /**
   * Precision in meters of woss::PDouble objects representing depth of a default created woss::SSP
   * @see woss::SSP
   **/
-  #define SSP_CUSTOM_DEPTH_PRECISION (1.0e-6)
-
+  static constexpr inline double SSP_CUSTOM_DEPTH_PRECISION = (1.0e-6);
   /**
   * Total depth steps of default transformation
   * @see SSP::transform
   **/
-  #define SSP_CUSTOM_DEPTH_STEPS (20.0)
-
+  static constexpr inline double SSP_CUSTOM_DEPTH_STEPS = (20.0);
 
   /**
   * \brief SSP class offers multiple creation and manipulation capabilities for sound speed profile
@@ -257,13 +246,12 @@ namespace woss {
   **/
   class SSP {
 
-    
     public:
 
     /**
      * SSP EQ 
      */
-    enum SSPEqType {
+    enum class SSPEqType {
       SSP_EQ_CHEN_MILLERO = 0, ///< UNESCO Chen & Miller, Wong Zu Eq
       SSP_EQ_TEOS_10 = 1, ///< TEOS-10 Eq (@see reference [10])
       SSP_EQ_TEOS_10_EXACT = 2, ///< TEOS-10 Exact Eq (@see reference [10])
@@ -293,21 +281,18 @@ namespace woss {
     **/  
     SSP( DepthMap& ssp_map, long double depth_precision = SSP_CUSTOM_DEPTH_PRECISION );
 
-    /**
-    * SSP copy constructor
-    * @param copy SSP to be copied
-    **/
-    SSP( const SSP& copy );
+    SSP( const SSP& copy ) = default;
 
-    virtual ~SSP() { }
-    
-    
+    SSP( SSP&& tmp ) = default;
+
+    virtual ~SSP() = default;
+
     /**
     * SSP virtual factory method
     * @param depth_precision precision of PDouble objects representing depth.
-    * @return a heap-created SSP object
+    * @return std::unique_ptr to a heap-created SSP object
     **/  
-    virtual SSP* create( long double depth_precision = SSP_CUSTOM_DEPTH_PRECISION ) const { return new SSP(depth_precision); }
+    virtual std::unique_ptr<SSP> create( long double depth_precision = SSP_CUSTOM_DEPTH_PRECISION ) const { return std::make_unique<SSP>(depth_precision); }
 
     /**
     * SSP virtual factory method
@@ -316,60 +301,49 @@ namespace woss {
     * @param sal_map map linking a PDouble depth [m] (with precision depth_precision) to a salinity [ppu]
     * @param press_map map linking a PDouble depth [m] (with precision depth_precision) to a pressure [bar]
     * @param depth_precision depth precision of given maps [m] 
-    * @return a heap-created SSP object
+    * @return std::unique_ptr to a heap-created SSP object
     **/  
-    virtual SSP* create( DepthMap& ssp_map, DepthMap& temp_map, DepthMap& sal_map, DepthMap& press_map, long double depth_precision = SSP_CUSTOM_DEPTH_PRECISION ) const {
-      return new SSP( ssp_map, temp_map, sal_map, press_map, depth_precision); }
+    virtual std::unique_ptr<SSP> create( DepthMap& ssp_map, DepthMap& temp_map, DepthMap& sal_map, DepthMap& press_map, long double depth_precision = SSP_CUSTOM_DEPTH_PRECISION ) const {
+      return std::make_unique<SSP>( ssp_map, temp_map, sal_map, press_map, depth_precision); }
 
     /**
     * SSP virtual factory method
     * @param ssp_map map linking a PDouble depth [m] (with precision depth_precision) to a sound speed [m/s]
     * @param depth_precision depth precision of given maps [m] 
-    * @return a heap-created SSP object
+    * @return std::unique_ptr to a heap-created SSP object
     **/  
-    virtual SSP* create( DepthMap& ssp_map, long double depth_precision = SSP_CUSTOM_DEPTH_PRECISION ) const {
-      return new SSP( ssp_map, depth_precision); }
+    virtual std::unique_ptr<SSP> create( DepthMap& ssp_map, long double depth_precision = SSP_CUSTOM_DEPTH_PRECISION ) const {
+      return std::make_unique<SSP>( ssp_map, depth_precision); }
 
     /**
     * SSP virtual factory method
-    * @param copy SSP to be copied
-    * @return a heap-created SSP object
+    * @return std::unique_ptr to a heap-created copy of <b>this</b> instance
     **/
-    virtual SSP* create( const SSP& copy ) const { return new SSP( copy ); }
-      
-    /**
-    * SSP virtual factory method
-    * @return a heap-created copy of <b>this</b> instance
-    **/
-    virtual SSP* clone() const { return new SSP(*this); }
-    
-    
+    virtual std::unique_ptr<SSP> clone() const { return std::make_unique<SSP>(*this); }
+
     /**
     * Returns the number of sound speed values stored
     * @return number of sound speed values stored
     **/
     int size() const { return( ssp_map.size() ); }
 
-
     /**
     * Checks if the instance has stored values
     * @return <i>true</i> if condition applies, <i>false</i> otherwise
     **/
     bool empty() const { return ssp_map.empty(); } 
-    
-    
+
     /**
     * Erase all values of sound speed, temperature, pressure and salinity. The object therefore is not valid
     **/
     void clear() { ssp_map.clear(); temperature_map.clear(); pressure_map.clear(); salinity_map.clear(); }
-
 
     /**
     * Returns a const iterator to the beginning of the sound speed map
     * @returns const iterator 
     **/
     DConstIter begin() const { return( ssp_map.begin() ); }
-    
+
     /**
     * Returns a const iterator to the end of the sound speed map
     * @returns const iterator 
@@ -388,7 +362,6 @@ namespace woss {
     **/
     DConstRIter rend() const { return( ssp_map.rend() ); }
 
-
     /**
     * Returns a const iterator to the sound speed value with key >= of <i>depth</i> parameter
     * @param depth const reference to a PDouble depth value
@@ -402,14 +375,13 @@ namespace woss {
     * @returns const iterator to end() if <i>depth</i> is not found
     **/
     DConstIter upper_bound( const PDouble& depth ) const { return( ssp_map.upper_bound(depth) ); }
-    
+
     /**
     * Returns a const iterator to the sound speed value at i-th position 
     * @param i integer should be between 0 and size() 
     * @returns const iterator to end() if position <i>i</i> is not found
     **/
-    DConstIter at( const int i ) const ;
-    
+    DConstIter at( const int i ) const;
 
     /**
     * Returns a const iterator to the begin of the pressure map
@@ -435,7 +407,6 @@ namespace woss {
     **/
     DConstRIter pressure_rend() const { return( pressure_map.rend() ); }
 
-
     /**
     * Returns a const iterator to the pressure value with key >= of <i>depth</i> parameter
     * @param depth const reference to a PDouble depth value
@@ -456,8 +427,7 @@ namespace woss {
     * @returns const iterator to pressure_end() if <i>depth</i> is not found
     **/
     DConstIter pressure_find( const PDouble& depth ) const { return( pressure_map.find(depth) ); }
-    
-    
+
     /**
     * Returns a const iterator to the beginning of the temperature map
     * @returns const reverse iterator 
@@ -482,7 +452,6 @@ namespace woss {
     **/
     DConstRIter temperature_rend() const { return( temperature_map.rend() ); }
 
-
     /**
     * Returns a const iterator to the temperature value with key >= of <i>depth</i> parameter
     * @param depth const reference to a PDouble depth value
@@ -503,7 +472,6 @@ namespace woss {
     * @returns const iterator to temperature_end() if <i>depth</i> is not found
     **/
     DConstIter temperature_find( const PDouble& depth ) const { return( temperature_map.find(depth) ); }
-    
 
     /**
     * Returns a const iterator to the beginning of the salinity map
@@ -529,7 +497,6 @@ namespace woss {
     **/
     DConstRIter salinity_rend() const { return( salinity_map.rend() ); }
 
-
     /**
     * Returns a const iterator to the salinity value with key >= of <i>depth</i> parameter
     * @param depth const reference to a PDouble depth value
@@ -550,8 +517,7 @@ namespace woss {
     * @returns const iterator to salinity_end() if <i>depth</i> is not found
     **/
     DConstIter salinity_find( const PDouble& depth ) const { return( salinity_map.find(depth) ); }
-    
-    
+
     /**
     * Checks the validity of sound speed profile provided
     * @return <i>true</i> if it has at least one value, <i>false</i> otherwise
@@ -569,7 +535,6 @@ namespace woss {
     * @return <i>true</i> if it can, <i>false</i> otherwise
     **/
     virtual bool isRandomizable() const { return( isValid() && !temperature_map.empty() && !pressure_map.empty() && !salinity_map.empty() ); }
-    
 
     /**
     * Transform the sound speed profile. If the current ssp can't be transformed it returns a not valid SSP.
@@ -580,49 +545,47 @@ namespace woss {
     * @param new_min_depth miminum depth [m] of the new SSP
     * @param new_max_depth maximum depth [m] of the new SSP
     * @param total_depth_steps number of depths of the new SSP
-    * @return a <i>new</i> SSP object
+    * @return a std::unique_ptr to a heap allocated woss::SSP object
     **/
-    virtual SSP* transform( const Coord& coordinates, double new_min_depth = -HUGE_VAL, double new_max_depth = HUGE_VAL, int total_depth_steps = SSP_CUSTOM_DEPTH_STEPS ) const;
+    virtual std::unique_ptr<SSP> transform( const Coord& coordinates, double new_min_depth = -HUGE_VAL, double new_max_depth = HUGE_VAL, int total_depth_steps = SSP_CUSTOM_DEPTH_STEPS ) const;
 
     /**
     * It returns a new SSP object, truncated at the input depth. 
     * If the current ssp can't be truncated it returns a not valid SSP.
     * @param max_depth truncation depth [m]
-    * @return a <i>new</i> SSP object
+    * @return a std::unique_ptr to a heap allocated woss::SSP object
     **/
-    virtual SSP* truncate( double max_depth ) const;
+    virtual std::unique_ptr<SSP> truncate( double max_depth ) const;
 
     /**
     * Performs a random perturbation of temperature, salinity, pressure with given ratio
     * Sound speed values are then calculated from this new data
     * @param ratio_incr_value perturbation ratio
-    * @return a <i>new</i> SSP object
+    * @return a std::unique_ptr to a heap allocated woss::SSP object
     **/
-    virtual SSP* fullRandomize( double ratio_incr_value ) const;
+    virtual std::unique_ptr<SSP> fullRandomize( double ratio_incr_value ) const;
     
     /**
     * Performs a random perturbation of sound speed values with given ratio
     * @param ratio_incr_value perturbation ratio
-    * @return a <i>new</i> SSP object
+    * @return a std::unique_ptr to a heap allocated woss::SSP object
     **/
-    virtual SSP* randomize( double ratio_incr_value ) const;
+    virtual std::unique_ptr<SSP> randomize( double ratio_incr_value ) const;
 
-    
     /**
     * Imports values in from the given stream
     * @param stream_in const reference to an istream instance
     * @return true if method was successful, false otherwise
     **/
-    virtual bool import( ::std::istream& stream_in );
-    
+    virtual bool import( std::istream& stream_in );
+
     /**
     * Write values out to the given stream
     * @param stream_out const reference to an ostream instance
     * @return true if method was successful, false otherwise
     **/
-    virtual bool write( ::std::ostream& stream_out ) const;
-    
-    
+    virtual bool write( std::ostream& stream_out ) const;
+
     /**
     * Inserts and doesn't replace a sound speed value at given depth
     * @param depth depth value [m]. The corresponding PDouble will take SSP::depth_precision as precision
@@ -640,7 +603,7 @@ namespace woss {
     * @param ssp_value sound speed value [m/s]
     * @return reference to <b>*this</b>
     **/
-    SSP& insertValue( double depth, double temperature, double salinity, const ::std::complex<double>& pressure, double ssp_value );
+    SSP& insertValue( double depth, double temperature, double salinity, const std::complex<double>& pressure, double ssp_value );
 
     /**
     * Calculates and doesn't replace sound speed from given temperature, pressure and salinity value at depth converted from pressure.
@@ -650,7 +613,7 @@ namespace woss {
     * @param pressure pressure value [bar]
     * @return reference to <b>*this</b>
     **/
-    SSP& insertValue( double temperature, double salinity, const ::std::complex<double>& pressure, const Coord& coordinates = Coord( 0.0, 0.0) );
+    SSP& insertValue( double temperature, double salinity, const std::complex<double>& pressure, const Coord& coordinates = Coord( 0.0, 0.0) );
 
     /**
     * Calculates and doesn't replace sound speed from given temperature, pressure and salinity value at given depth, with pressure converted from depth.
@@ -662,14 +625,12 @@ namespace woss {
     **/
     SSP& insertValue( double depth, double temperature, double salinity, const Coord& coordinates = Coord(0.0, 0.0) );
 
-
     /**
     * Returns a const iterator to the sound speed value with key == of <i>depth</i> parameter
     * @param depth const reference to a PDouble depth value
     * @returns const iterator to end() if <i>depth</i> is not found
     **/
     DConstIter findValue( const double& depth ) const { return( ssp_map.find(depth) ); }
-    
 
     /**
     * Erase the sound speed value with key == of <i>depth</i> parameter
@@ -678,7 +639,6 @@ namespace woss {
     **/
     SSP& eraseValue( const double& depth ) { ssp_map.erase(depth); return *this; }
 
-  
     /**
     * Returns the maximum depth value
     * @returns maximum depth [m]
@@ -693,7 +653,6 @@ namespace woss {
     double getMinDepthValue() const { if ( ssp_map.begin() != ssp_map.end() ) return ssp_map.begin()->first; 
                                       else return 0.0; }
 
-
     /**
     * Returns the maximum sound speed value
     * @returns maximum sound speed [m/s]
@@ -705,7 +664,6 @@ namespace woss {
     * @returns maximum sound speed [m/s]
     **/
     double getMinSSPValue() const { return( min_ssp_value ); }
-    
 
     /**
     * Sets the sound speed profile depth precision for all PDouble depth values. If the given precision is different from
@@ -738,8 +696,14 @@ namespace woss {
     * @param copy const reference to a SSP object to be copied
     * @return SSP reference to <i>this</i>
     **/
-    SSP& operator=( const SSP& x ) ;
+    SSP& operator=( const SSP& x ) = default;
 
+    /**
+    * Move Assignment operator
+    * @param tmp rvalue reference to a SSP object to be copied
+    * @return SSP reference to <i>this</i>
+    **/
+    SSP& operator=( SSP&& tmp ) = default;
 
     /**
     * Equality operator
@@ -756,7 +720,6 @@ namespace woss {
     * @return true if <i>left == right</i>, false otherwise
     **/ 
     friend bool operator!=( const SSP& left, const SSP& right );
-
 
     /**
     * Sum operator
@@ -789,7 +752,6 @@ namespace woss {
     * @return a new const instance holding the operation result  
     **/
     friend const SSP operator/( const SSP& left, const SSP& right );
-    
 
     /**
     * Sum operator
@@ -823,7 +785,6 @@ namespace woss {
     **/
     friend const SSP operator*( const SSP& left, const double right );
 
-
     /**
     * Sum operator
     * @param left left operand const reference
@@ -855,7 +816,6 @@ namespace woss {
     * @return a new const instance holding the operation result  
     **/
     friend const SSP operator*( const double left, const SSP& right );
-    
 
     /**
     * Compound assignment sum operator
@@ -872,7 +832,7 @@ namespace woss {
     * @return <i>left</i> reference after the operation
     **/
     friend SSP& operator-=( SSP& left, const SSP& right );
-    
+
     /**
     * Compound assignment multiplication operator
     * @param left left operand reference
@@ -888,7 +848,6 @@ namespace woss {
     * @return <i>left</i> reference after the operation
     **/
     friend SSP& operator/=( SSP& left, const SSP& right );
-    
 
     /**
     * Compound assignment sum operator
@@ -905,7 +864,7 @@ namespace woss {
     * @return <i>left</i> reference after the operation
     **/
     friend SSP& operator-=( SSP& left, const double right );
-    
+
     /**
     * Compound assignment division operator
     * @param left left operand reference
@@ -922,38 +881,35 @@ namespace woss {
     **/
     friend SSP& operator*=( SSP& left, const double right );
 
-    
     /**
     * << operator
     * @param os left operand ostream reference
     * @param instance right operand const SSP reference
     * @return <i>os</i> reference after the operation
     **/ 
-    friend ::std::ostream& operator<<( ::std::ostream& os, const SSP& instance );
-    
+    friend std::ostream& operator<<( std::ostream& os, const SSP& instance );
+
     /**
     * >> operator
     * @param os left operand ostream reference
     * @param instance right operand const SSP reference
     * @return <i>os</i> reference after the operation
     **/ 
-    friend ::std::ostream& operator>>( ::std::istream& is, const SSP& instance );
-    
-    
+    friend std::ostream& operator>>( std::istream& is, const SSP& instance );
+
     /**
     * Sets debug flag for all instances
     * @param flag debug bool
     **/
     static void setDebug( bool flag ) { debug = flag; }
-        
-    
+
     protected:
 
     /**
     * Stores the SSP eq type that should be used
     **/
     SSPEqType ssp_eq_type;
-    
+
     /**
     * Stores the miminum sound speed value [m/s]
     **/    
@@ -969,12 +925,10 @@ namespace woss {
     **/ 
     long double depth_precision;
 
-    
     /**
     * Stores the common debug flag
     **/ 
     static bool debug;
-       
 
     /**
     * Sound speed values map 
@@ -995,7 +949,8 @@ namespace woss {
     * Temperature values map
     **/ 
     DepthMap temperature_map;
-  
+
+    private:
 
     /**
     * Calculates sound speed from temperature, salinity, pressure with UNESCO Chen and Millero equations and with Wong and Zu
@@ -1004,25 +959,21 @@ namespace woss {
     * @param salinity salinity value [ppu]
     * @param pressure pressure value [bar]
     **/ 
-    virtual double calculateSSP( double temperature, double salinity, double pressure ) const; 
-
-
-    private:
-
+    constexpr double calculateSSP( double temperature, double salinity, double pressure ) const; 
 
     /**
     * Checks if coordinates provided are in canon ocean
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isCanonOcean( const Coord& coordinates ) const { return( coordinates.getLatitude() >= -40.0 && coordinates.getLatitude() <= 60.0 ); }
+    constexpr bool isCanonOcean( const Coord& coordinates ) const { return( coordinates.getLatitude() >= -40.0 && coordinates.getLatitude() <= 60.0 ); }
 
     /**
     * Checks if coordinates provided are in north eastern Atlantic Ocean
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isNEAtlanticOcean( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 30.0 && coordinates.getLatitude() <= 60.0 
+    constexpr bool isNEAtlanticOcean( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 30.0 && coordinates.getLatitude() <= 60.0 
                                                                     && coordinates.getLongitude() >= -43.0 && coordinates.getLongitude() <= -5.0 ); }
 
     /**
@@ -1030,14 +981,14 @@ namespace woss {
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isAntarcticOcean( const Coord& coordinates ) const { return( coordinates.getLatitude() <= -55.0 ); }
+    constexpr bool isAntarcticOcean( const Coord& coordinates ) const { return( coordinates.getLatitude() <= -55.0 ); }
 
     /**
     * Checks if coordinates provided are in Mediterranean Sea
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isMediterraneanSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 30.1 && coordinates.getLatitude() <= 46.0 
+    constexpr bool isMediterraneanSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 30.1 && coordinates.getLatitude() <= 46.0 
                                                                     && coordinates.getLongitude() >= -4.0 && coordinates.getLongitude() <= 37.0 ); }
 
     /**
@@ -1045,7 +996,7 @@ namespace woss {
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isRedSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 12.0 && coordinates.getLatitude() <= 30.0 
+    constexpr bool isRedSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 12.0 && coordinates.getLatitude() <= 30.0 
                                                           && coordinates.getLongitude() >= 32.0 && coordinates.getLongitude() <= 44.0 ); }
 
     /**
@@ -1053,14 +1004,14 @@ namespace woss {
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isArcticOcean( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 65.0 ); }
+    constexpr bool isArcticOcean( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 65.0 ); }
     
     /**
     * Checks if coordinates provided are in Japan Sea
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isJapanSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 33.0 && coordinates.getLatitude() <= 52.0 
+    constexpr bool isJapanSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 33.0 && coordinates.getLatitude() <= 52.0 
                                                             && coordinates.getLongitude() >= 127.0 && coordinates.getLongitude() <= 142.0 ); }
 
     /**
@@ -1068,7 +1019,7 @@ namespace woss {
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isSuluSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 5.0 && coordinates.getLatitude() <= 13.0 
+    constexpr bool isSuluSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 5.0 && coordinates.getLatitude() <= 13.0 
                                                             && coordinates.getLongitude() >= 117.0 && coordinates.getLongitude() <= 123.0 ); }
 
     /**
@@ -1076,7 +1027,7 @@ namespace woss {
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isHalmaheraSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= -2.0 && coordinates.getLatitude() <= 1.0 
+    constexpr bool isHalmaheraSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= -2.0 && coordinates.getLatitude() <= 1.0 
                                                                 && coordinates.getLongitude() >= 127.0 && coordinates.getLongitude() <= 130.0 ); }
 
     /**
@@ -1084,7 +1035,7 @@ namespace woss {
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isCelebesSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 0.0 && coordinates.getLatitude() <= 7.0 
+    constexpr bool isCelebesSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 0.0 && coordinates.getLatitude() <= 7.0 
                                                               && coordinates.getLongitude() >= 115.0 && coordinates.getLongitude() <= 125.0 ); }
 
     /**
@@ -1092,7 +1043,7 @@ namespace woss {
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isBlackSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 41.0 && coordinates.getLatitude() <= 48.0 
+    constexpr bool isBlackSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 41.0 && coordinates.getLatitude() <= 48.0 
                                                             && coordinates.getLongitude() >= 28.0 && coordinates.getLongitude() <= 42.0 ); }
 
     /**
@@ -1100,69 +1051,68 @@ namespace woss {
     * @param coordinates coordinates value 
     * @return <i>true</i> if condition holds, <i>false</i> otherwise
     **/ 
-    bool isBalticSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 53.0 && coordinates.getLatitude() <= 66.0 
+    constexpr bool isBalticSea( const Coord& coordinates ) const { return( coordinates.getLatitude() >= 53.0 && coordinates.getLatitude() <= 66.0 
                                                               && coordinates.getLongitude() >= 20.0 && coordinates.getLongitude() <= 26.0 ); }
 
     /**
     * Equation for pressure from depth conversion ( Leroy and Parthiot )
     * @param z depth [m]
     **/ 
-    double thyh( double z ) const ; 
+    constexpr double thyh( double z ) const; 
 
     /**
     * Equation for pressure from depth conversion ( Leroy and Parthiot )
     * @param lat latitude [decimal degree]
     **/ 
-    double g( double lat ) const ;
+    constexpr double g( double lat ) const;
 
     /**
     * Equation for pressure from depth conversion ( Leroy and Parthiot )
     * @param z depth [m]
     * @param lat latitude [decimal degree]
     **/ 
-    double k( double z, double lat ) const ; 
+    constexpr double k( double z, double lat ) const; 
 
     /**
     * Equation for pressure from depth conversion ( Leroy and Parthiot )
     * @param z depth [m]
     **/ 
-    double hq( double z ) const ;
+    constexpr double hq( double z ) const;
 
     /**
     * Equation for pressure from depth conversion ( Leroy and Parthiot )
     * @param z depth [m]
     * @param lat latitude [decimal degree]
     **/ 
-    double h( double z, double lat ) const ;
+    constexpr double h( double z, double lat ) const;
 
     /**
     * Returns pressure correction for given coordinates and depth ( Leroy and Parthiot )
     * @param coordinates coordinates provided
     * @param depth depth provided [m]
     **/ 
-    double getPressureCorreptions( const Coord& coordinates, double depth ) const ;
-    
+    constexpr double getPressureCorreptions( const Coord& coordinates, double depth ) const;
+
     /**
     * Returns pressure for given coordinates and depth ( Leroy and Parthiot )
     * @param coordinates coordinates provided
     * @param depth depth provided [m]
     * @return pressure [bar]
-    **/  
-    double getPressureFromDepth( const Coord& coordinates, double depth ) const ;
-
+    **/
+    constexpr double getPressureFromDepth( const Coord& coordinates, double depth ) const;
 
     /**
     * Equation for depth from pressure conversion ( Leroy and Parthiot )
     * @param lat latitude [decimal degree]
     **/ 
-    double g_z( double lat ) const ; 
+    constexpr double g_z( double lat ) const; 
 
     /**
     * Returns depth correction for given coordinates and pressure ( Leroy and Parthiot )
     * @param coordinates coordinates provided
     * @param pressure pressure provided [bar]
     **/ 
-    double getDepthCorreptions( const Coord& coordinates, double pressure ) const ;
+    constexpr double getDepthCorreptions( const Coord& coordinates, double pressure ) const;
 
     /**
     * Returns depth for given coordinates and pressure ( Leroy and Parthiot )
@@ -1170,36 +1120,35 @@ namespace woss {
     * @param pressure pressure provided [bar]
     * @return depth [m]
     **/  
-    double getDepthfromPressure( const Coord& coordinates, double pressure ) const ;
-    
+    constexpr double getDepthfromPressure( const Coord& coordinates, double pressure ) const;
 
     /**
     * UNESCO Chen and Millero Equation with Wong and Zu corrections for sound speed calculations
     * @param t temperature provided [C°]
     * @param p pressure provided [bar]
     **/ 
-    double d( double t, double p ) const ;
+    constexpr double d( double t, double p ) const;
 
     /**
     * UNESCO Chen and Millero Equation with Wong and Zu corrections for sound speed calculations
     * @param t temperature provided [C°]
     * @param p pressure provided [bar]
     **/ 
-    double b( double t, double p ) const ;
+    constexpr double b( double t, double p ) const;
 
     /**
     * UNESCO Chen and Millero Equation with Wong and Zu corrections for sound speed calculations
     * @param t temperature provided [C°]
     * @param p pressure provided [bar]
     **/ 
-    double a( double t, double p  ) const ; 
+    constexpr double a( double t, double p  ) const; 
 
     /**
     * UNESCO Chen and Millero Equation with Wong and Zu corrections for sound speed calculations
     * @param t temperature provided [C°]
     * @param p pressure provided [bar]
     **/ 
-    double cw( double t, double p ) const ;
+    constexpr double cw( double t, double p ) const;
 
     /**
     * Seawater specific Gibbs free energy and derivatives up to order 2
@@ -1210,7 +1159,7 @@ namespace woss {
     * @param t temperature [C°]
     * @param p pressure [dbar]
     **/ 
-    double gibbs(int ns, int nt, int np, double sa, double t, double p) const ;
+    constexpr double gibbs(int ns, int nt, int np, double sa, double t, double p) const;
 
   };
 
@@ -1238,17 +1187,17 @@ namespace woss {
   //inline functions
   ////
   inline bool operator==( const SSP& left, const SSP& right ) {
-    if ( &left == &right ) return true; 
+    if ( &left == &right ) 
+      return true; 
     return( left.ssp_map == right.ssp_map && left.temperature_map == right.temperature_map && left.pressure_map == right.pressure_map 
         && left.salinity_map == right.salinity_map );
   }
 
-
   inline bool operator!=( const SSP& left, const SSP& right ) {
-    if ( &left == &right ) return false; 
+    if ( &left == &right ) 
+      return false; 
     return( left.ssp_map != right.ssp_map || left.temperature_map != right.temperature_map || left.pressure_map != right.pressure_map 
         || left.salinity_map == right.salinity_map ); }
-
 
   inline const SSP operator+( const SSP& left, const SSP& right ) {
     SSP ret_val ( left );
@@ -1256,13 +1205,11 @@ namespace woss {
     return ret_val;
   }
 
-
   inline const SSP operator-( const SSP& left, const SSP& right ) {
     SSP ret_val ( left );
     ret_val -= right;
     return ret_val;
   }
-
 
   inline const SSP operator*( const SSP& left, const SSP& right ) {
     SSP ret_val ( left );
@@ -1271,13 +1218,11 @@ namespace woss {
     return ret_val;
   }
 
-
   inline const SSP operator/( const SSP& left, const SSP& right ) {
     SSP ret_val ( left );
     ret_val /= right;
     return ret_val;
   }
-
 
   inline const SSP operator+( const SSP& left, const double right ) {
     SSP ret_val ( left );
@@ -1285,13 +1230,11 @@ namespace woss {
     return ret_val;
   }
 
-
   inline const SSP operator-( const SSP& left, const double right ) {
     SSP ret_val ( left );
     ret_val -= right;
     return ret_val;
   }
-
 
   inline const SSP operator/( const SSP& left, const double right ) {
     SSP ret_val ( left );
@@ -1299,13 +1242,11 @@ namespace woss {
     return ret_val;
   }
 
-
   inline const SSP operator*( const SSP& left, const double right ) {
     SSP ret_val ( left );
     ret_val *= right;
     return ret_val;
   }
-
 
   inline const SSP operator+( const double left, const SSP& right ) {
     SSP ret_val ( right );
@@ -1313,13 +1254,11 @@ namespace woss {
     return ret_val;
   }
 
-
   inline const SSP operator-( const double left, const SSP& right ) {
     SSP ret_val ( right );
     ret_val -= left;
     return ret_val;
   }
-
 
   inline const SSP operator/( const double left, const SSP& right ) {
     SSP ret_val ( right );
@@ -1327,89 +1266,64 @@ namespace woss {
     return ret_val;
   }
 
-
   inline const SSP operator*( const double left, const SSP& right ) {
     SSP ret_val ( right );
     ret_val *= left;
     return ret_val;
   }
 
-
-  inline ::std::ostream& operator<<( ::std::ostream& os, const SSP& instance ) {
-    if ( !instance.write( os ) ) os.setstate( ::std::ios_base::failbit );
+  inline std::ostream& operator<<( std::ostream& os, const SSP& instance ) {
+    if ( !instance.write( os ) ) 
+      os.setstate( std::ios_base::failbit );
     return os;
   }
 
-
-  inline ::std::istream& operator>>( ::std::istream& is, SSP& instance ) {
-    if ( !instance.import( is ) ) is.setstate( ::std::ios_base::failbit );
+  inline std::istream& operator>>( std::istream& is, SSP& instance ) {
+    if ( !instance.import( is ) )
+     is.setstate( std::ios_base::failbit );
     return is;
   }
 
-
-  inline double SSP::thyh( double z ) const {
+  inline constexpr double SSP::thyh( double z ) const {
     return (1.0e-2 * z/(z+100) + 6.2e-6 * z);
   }
 
-
-  inline double SSP::g( double lat ) const {
+  inline constexpr double SSP::g( double lat ) const {
     return( 9.7803*(1.0 + 5.3e-3 * pow(sin(lat),2.0)) ); 
   }
 
-
-  inline double SSP::k( double z, double lat ) const { 
+  inline constexpr double SSP::k( double z, double lat ) const { 
     return( (g(lat) - 2e-5 * z) / (9.80612 - 2e-5 * z) ); 
   }
 
-
-  inline double SSP::hq( double z ) const { 
+  inline constexpr double SSP::hq( double z ) const { 
     return( 1.00818e-2 * z + 2.465e-8 * pow(z,2.0) - 1.25e-13 * pow(z,3.0) + 2.8e-19 * pow(z,4.0) ); 
   }
 
-
-  inline double SSP::h( double z, double lat ) const { 
+  inline constexpr double SSP::h( double z, double lat ) const { 
     return( hq(z) * k(z,lat) ); 
   }
 
-
-  inline double SSP::getPressureFromDepth( const Coord& coordinates, double depth ) const { 
-    // conversion in bar from MPa
-    return( 10.0 * ( h(depth,coordinates.getLatitude()) - thyh(depth) - getPressureCorreptions(coordinates, depth) ) );  
-  }
-
-
-  inline double SSP::g_z( double lat ) const { 
+  inline constexpr double SSP::g_z( double lat ) const { 
     return( 9.780318 * ( 1.0 + 5.2788 * 10e-3 * pow(sin(lat), 2.0) + 2.36 * 10e-5 * pow(sin(lat),4.0) ) ); 
   }
 
-
-  inline double SSP::getDepthfromPressure( const Coord& coordinates, double pressure ) const {
-    // conversion from bar to MPa
-    pressure /= 10.0;
-    return( ( (9.72659e2 * pressure - 2.2512e-1 * pow(pressure, 2.0) + 2.279e-4 * pow(pressure, 3.0) - 1.82e-7 * pow(pressure, 4.0) ) 
-    / ( g_z(coordinates.getLatitude()) + 1.092e-4 * pressure ) ) + getDepthCorreptions(coordinates, pressure)  );
-  }
-
-
-
-  inline double SSP::calculateSSP(double temperature, double salinity, double pressure) const {
-    if (ssp_eq_type == SSP_EQ_CHEN_MILLERO)
+  inline constexpr double SSP::calculateSSP(double temperature, double salinity, double pressure) const {
+    if (ssp_eq_type == SSPEqType::SSP_EQ_CHEN_MILLERO)
     {
       return( cw(temperature, pressure) + a(temperature, pressure)*salinity 
-        + b(temperature, pressure) * ::std::sqrt(salinity*salinity*salinity) 
+        + b(temperature, pressure) * std::sqrt(salinity*salinity*salinity) 
         + d(temperature, pressure) * (salinity*salinity) );
     }
-    else if (ssp_eq_type == SSP_EQ_TEOS_10)
+    else if (ssp_eq_type == SSPEqType::SSP_EQ_TEOS_10)
     {
-      double  v, v_p, xs, ys, z;
-
       pressure *= 10; // formula requires dbar instead of bar
 
-      xs  = ::std::sqrt(TEO_10_gsw_sfac*salinity + TEO_10_offset);
-      ys  = temperature*0.025;
-      z = pressure*1e-4;
+      auto xs = std::sqrt(TEO_10_gsw_sfac*salinity + TEO_10_offset);
+      auto ys = temperature*0.025;
+      auto z = pressure*1e-4;
 
-      v = TEO_10_v000
+      auto v = TEO_10_v000
         + xs*(TEO_10_v010 + xs*(TEO_10_v020 + xs*(TEO_10_v030 + xs*(TEO_10_v040 + xs*(TEO_10_v050
         + TEO_10_v060*xs))))) + ys*(TEO_10_v100 + xs*(TEO_10_v110 + xs*(TEO_10_v120 + xs*(TEO_10_v130 + xs*(TEO_10_v140
         + TEO_10_v150*xs)))) + ys*(TEO_10_v200 + xs*(TEO_10_v210 + xs*(TEO_10_v220 + xs*(TEO_10_v230 + TEO_10_v240*xs)))
@@ -1424,7 +1338,7 @@ namespace woss {
         + TEO_10_v023*xs) + ys*(TEO_10_v103 + TEO_10_v113*xs + TEO_10_v203*ys) + z*(TEO_10_v004 + TEO_10_v014*xs + TEO_10_v104*ys
         + z*(TEO_10_v005 + TEO_10_v006*z)))));
 
-      v_p = TEO_10_c000
+      auto v_p = TEO_10_c000
         + xs*(TEO_10_c100 + xs*(TEO_10_c200 + xs*(TEO_10_c300 + xs*(TEO_10_c400 + TEO_10_c500*xs))))
         + ys*(TEO_10_c010 + xs*(TEO_10_c110 + xs*(TEO_10_c210 + xs*(TEO_10_c310 + TEO_10_c410*xs))) + ys*(TEO_10_c020
         + xs*(TEO_10_c120 + xs*(TEO_10_c220 + TEO_10_c320*xs)) + ys*(TEO_10_c030 + xs*(TEO_10_c130 + TEO_10_c230*xs)
@@ -1434,31 +1348,32 @@ namespace woss {
         + z*( TEO_10_c002 + xs*(TEO_10_c102 + TEO_10_c202*xs) + ys*(TEO_10_c012 + TEO_10_c112*xs + TEO_10_c022*ys)
         + z*(TEO_10_c003 + TEO_10_c103*xs + TEO_10_c013*ys + z*(TEO_10_c004 + TEO_10_c005*z))));
 
-      return (10000.0*::std::sqrt(-v*v/v_p));
+      return (10000.0*std::sqrt(-v*v/v_p));
     }
-    else if (ssp_eq_type == SSP_EQ_TEOS_10_EXACT)
+    else if (ssp_eq_type == SSPEqType::SSP_EQ_TEOS_10_EXACT)
     {
       int n0=0, n1=1, n2=2;
-      double  g_tt, g_tp;
 
       pressure *= 10; // formulas require dbar instead of bar
 
-      g_tt  = gibbs(n0, n2, n0, salinity, temperature, pressure);
-      g_tp  = gibbs(n0, n1, n1, salinity, temperature, pressure);
+      auto g_tt = gibbs(n0, n2, n0, salinity, temperature, pressure);
+      auto g_tp = gibbs(n0, n1, n1, salinity, temperature, pressure);
 
-      return (gibbs(n0, n0, n1, salinity, temperature, pressure) * ::std::sqrt(g_tt/(g_tp*g_tp - g_tt*gibbs(n0, n0, n2, salinity, temperature, pressure))));
+      return (gibbs(n0, n0, n1, salinity, temperature, pressure) * std::sqrt(g_tt/(g_tp*g_tp - g_tt*gibbs(n0, n0, n2, salinity, temperature, pressure))));
     }
     else return -HUGE_VAL;
   }
 
-  inline double SSP::gibbs(int ns, int nt, int np, double sa, double t, double p) const
+  inline constexpr double SSP::gibbs(int ns, int nt, int np, double sa, double t, double p) const
   {
-    double x2, x, y, z, g03, g08, return_value = 0.0;
+    double g03 = 0.0;
+    double g08 = 0.0;
+    double return_value = 0.0;
 
-    x2	= TEO_10_gsw_sfac*sa;
-    x = sqrt(x2);
-    y = t*0.025;
-    z = p*1e-4;
+    auto x2 = TEO_10_gsw_sfac*sa;
+    auto x = sqrt(x2);
+    auto y = t*0.025;
+    auto z = p*1e-4;
 
     if (ns == 0  && nt == 0  && np == 0) {
       g03 = 101.342743139674 + z*(100015.695367145 +
@@ -1523,7 +1438,7 @@ namespace woss {
         g08 = g08 + x2*(5812.81456626732 +
         851.226734946706*y)*log(x);
 
-      return_value	= g03 + g08;
+      return_value = g03 + g08;
     }
     else if (ns == 1  && nt == 0  && np == 0) {
       g08	= 8645.36753595126 + z*(-6620.98308089678 +
@@ -1860,34 +1775,124 @@ namespace woss {
     return (return_value);
   }
 
-  inline double SSP::d(double t, double p) const { 
+  inline constexpr double SSP::d(double t, double p) const { 
     return( cf_D00 + cf_D10*p ); 
   }
 
-
-  inline double SSP::b( double t, double p) const { 
+  inline constexpr double SSP::b( double t, double p) const { 
     return( cf_B00 + cf_B01*t + (cf_B10 + cf_B11*t)*p ); 
   }
 
-
-  inline double SSP::a(double t, double p) const {
+  inline constexpr double SSP::a(double t, double p) const {
     return( (cf_A00 + cf_A01*t + cf_A02*pow(t,2.0) + cf_A03*pow(t,3.0) + cf_A04*pow(t,4.0)) 
     + (cf_A10 + cf_A11*t + cf_A12*pow(t,2.0) + cf_A13*pow(t,3.0) + cf_A14*pow(t,4.0))*p 
     + (cf_A20 + cf_A21*t + cf_A22*pow(t,2.0) + cf_A23*pow(t,3.0))*pow(p,2.0) 
     + (cf_A30 + cf_A31*t + cf_A32*pow(t,2.0))*pow(p,3.0) );
   }
 
-
-  inline double SSP::cw( double t, double p) const {
+  inline constexpr double SSP::cw( double t, double p) const {
     return( (cf_C00 + cf_C01*t + cf_C02*pow(t,2.0) + cf_C03*pow(t,3.0) + cf_C04*pow(t,4.0) + cf_C05*pow(t,5.0)) 
     + (cf_C10 + cf_C11*t + cf_C12*pow(t,2.0) + cf_C13*pow(t,3.0) + cf_C14*pow(t,4.0))*p       
     + (cf_C20 + cf_C21*t + cf_C22*pow(t,2.0) + cf_C23*pow(t,3.0) + cf_C24*pow(t,4.0))*pow(p,2.0)   
     + (cf_C30 + cf_C31*t + cf_C32*pow(t,2.0))*pow(p,3.0) );
   }
 
+
+  constexpr double SSP::getPressureCorreptions( const Coord& coordinates, double depth ) const { 
+    if ( isCanonOcean(coordinates) ) {
+      return ( 1.0e-2 * depth / (depth + 100.0) + 6.2e-6*depth );
+    }
+    else if ( isMediterraneanSea(coordinates) ) {
+      return ( 8.0e-3 * depth / (depth + 1000.0) + 1.6e-6*depth );
+    }
+    else if ( isNEAtlanticOcean(coordinates) ) {
+      return ( -8.5e-6 * depth + 1.4e-9*pow(depth, 2.0) );
+    }
+    else if ( isRedSea(coordinates) ) {
+      return 0.0;
+    }
+    else if ( isJapanSea(coordinates) ) {
+      return ( 7.8e-6*depth );
+    }
+    else if ( isHalmaheraSea(coordinates) ) {
+      return ( 8.0e-3 * depth / (depth + 50.0) + 1.3e-5*depth );
+    }
+    else if ( isSuluSea(coordinates) ) {
+      return ( 1.0e-2 * depth / (depth + 100.0) + 1.6e-5*depth + 1e-9*pow(depth,2.0) );
+    }
+    else if ( isCelebesSea(coordinates) && !isSuluSea(coordinates) ) {
+      return ( 1.2e-2 * depth / (depth + 100.0) + 7.0e-6*depth + 2.5e-10*pow(depth,2.0) );
+    }
+    else if ( isBlackSea(coordinates) ) {
+      return ( 1.13e-4 * depth );
+    }
+    else if ( isBalticSea(coordinates) ) {
+      return ( 1.8e-4 * depth );
+    }
+    else if ( isAntarcticOcean(coordinates) ) {
+      return ( 8.0e-3 * depth / (depth + 1000.0) + 1.6e-6*depth );
+    }
+  //   else if ( isArcticOcean(coordinates) ) {
+  //     return 0.0;
+  //   }
+    else {
+      return 0.0;
+    }
+  }
+  
+  constexpr double SSP::getDepthCorreptions( const Coord& coordinates, double pressure ) const { 
+    if ( isCanonOcean(coordinates) ) {
+      return( pressure / (pressure + 1.0) + 5.7e-2*pressure );
+    }
+    else if ( isMediterraneanSea(coordinates) ) {
+      return(  -7.0e-2*pressure + 2.0e-3*pow(pressure, 2.0) );
+    }
+    else if ( isNEAtlanticOcean(coordinates) ) {
+      return( pressure / (pressure + 2.0) + 3.0e-2*pressure );
+    }
+    else if ( isRedSea(coordinates) ) {
+      return 0.0;
+    }
+    else if ( isJapanSea(coordinates) ) {
+      return( 6.0e-2*pressure );
+    }
+    else if ( isHalmaheraSea(coordinates) ) {
+      return( 0.8*pressure / (pressure + 0.5) + 0.125*pressure );
+    }
+    else if ( isSuluSea(coordinates) ) {
+      return( 0.9*pressure / (pressure + 1.0) + 0.17*pressure + 7.0e-4*pow(pressure,2.0) );
+    }
+    else if ( isCelebesSea(coordinates) && !isSuluSea(coordinates) ) {
+      return( 1.2*pressure / (pressure + 1.0) + 6.7e-2*pressure + 2.2e-4*pow(pressure,2.0) );
+    }
+    else if ( isBlackSea(coordinates) ) {
+      return( 1.1*pressure );
+    }
+    else if ( isBalticSea(coordinates) ) {
+      return( 1.8*pressure );
+    }
+    else if ( isAntarcticOcean(coordinates) ) {
+      return(  4.0e-2*pressure - 2.0e-4*pow(pressure, 2.0) );
+    }
+  //   else if ( isArcticOcean(coordinates) ) {
+  //     return 0.0;
+  //   }
+    else {
+      return 0.0;
+    }
+  }
+
+  inline constexpr double SSP::getPressureFromDepth( const Coord& coordinates, double depth ) const { 
+    // conversion in bar from MPa
+    return( 10.0 * ( h(depth, coordinates.getLatitude()) - thyh(depth) - getPressureCorreptions(coordinates, depth) ) );  
+  }
+  
+  inline constexpr double SSP::getDepthfromPressure( const Coord& coordinates, double pressure ) const {
+    // conversion from bar to MPa
+    pressure /= 10.0;
+    return( ( (9.72659e2 * pressure - 2.2512e-1 * pow(pressure, 2.0) + 2.279e-4 * pow(pressure, 3.0) - 1.82e-7 * pow(pressure, 4.0) ) 
+    / ( g_z(coordinates.getLatitude()) + 1.092e-4 * pressure ) ) + getDepthCorreptions(coordinates, pressure)  );
+  }
 }
 
-
 #endif /* WOSS_SSP_DEFINITIONS_H */ 
-
-

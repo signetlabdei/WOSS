@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,12 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -43,10 +37,8 @@
 
 #include "ac-toolbox-arr-asc-reader.h"
 
-
 namespace woss {
-  
-    
+
   /**
   * \brief Class for reading and manipulating results provided by any acoustic toolbox binary ARR file
   *
@@ -55,31 +47,21 @@ namespace woss {
   */
   class ArrBinResReader : public ResReader {
 
-
     public:
-
-
-    /**
-    * ArrBinResReader default constructor
-    */
-    ArrBinResReader();
 
     /**
     * ArrBinResReader constructor
     * @param woss const pointer to a const Woss object
     */
-    ArrBinResReader( const Woss* const woss );
+    ArrBinResReader( const Woss& woss );
 
-    
-    virtual ~ArrBinResReader();
-
+    virtual ~ArrBinResReader() override = default;
 
     /**
     * Initializes the ArrBinResReader object, reads ARR file, and stores read TimeArr values
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool initialize();
-
+    virtual bool initialize() override;
 
     /**
     * Gets the average Pressure value in given rx range-depth box. Returned Pressure is the coherent sum of the computed 
@@ -90,9 +72,9 @@ namespace woss {
     * @param start_rx_range start receiver range [m]
     * @param end_rx_depth end receiver depth [m]
     * @param end_rx_range end receiver range [m]
-    * @return a valid Pressure value; a not valid Pressure if arr_file hasn't been read yet
+    * @return a std::unique_ptr to a valid Pressure value; a not valid Pressure if arr_file hasn't been read yet
     **/  
-    virtual Pressure* readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range );
+    virtual std::unique_ptr<Pressure> readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) override;
 
     /**
     * Gets a Pressure value for given range, depths. Returned Pressure is the coherent sum of the computed 
@@ -101,10 +83,9 @@ namespace woss {
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
-    * @return a valid Pressure value; a not valid Pressure if arr_file hasn't been read yet
+    * @return a std::unique_ptr to a valid Pressure value; a not valid Pressure if arr_file hasn't been read yet
     **/
-    virtual Pressure* readPressure(double frequency, double tx_depth, double rx_depth, double rx_range ) const; 
-    
+    virtual std::unique_ptr<Pressure> readPressure(double frequency, double tx_depth, double rx_depth, double rx_range ) const override; 
 
     /**
     * Gets a TimeArr value for given range, depths
@@ -112,35 +93,31 @@ namespace woss {
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
-    * @return a valid TimeArr value; a not valid TimeArr if arr_file hasn't been read yet
+    * @return a std::unique_ptr to a valid TimeArr value; a not valid TimeArr if arr_file hasn't been read yet
     **/
-    virtual TimeArr* readTimeArr(double frequency, double tx_depth, double rx_depth, double rx_range ) const;
-    
+    virtual std::unique_ptr<TimeArr> readTimeArr(double frequency, double tx_depth, double rx_depth, double rx_range ) const override;
 
     protected:
-    
-      
+
     /**
     * Boolean associated to the reading of ARR file header
     */
     bool arr_bin_header_collected;
-    
+
     /**
     * Boolean associated to the reading of ARR file data
     */
     bool arr_bin_file_collected;
 
-
     /**
     * Input file stream 
     */
-    ::std::ifstream file_reader;
+    std::ifstream file_reader;
 
     /**
     * Total lines to skip if ARR file header has already been read
     */
-    ::std::streampos skip_header;
-
+    std::streampos skip_header;
 
     /**
     * Struct that holds TimeArr data read from ARR file
@@ -157,8 +134,7 @@ namespace woss {
 
     double last_end_rx_range;
 
-    ::std::complex<double> last_ret_value;
-
+    std::complex<double> last_ret_value;
 
     /**
     * Gets the TimeArr value from ArrData TimeArr array associated to given parameters
@@ -168,8 +144,8 @@ namespace woss {
     * @param rx_range start receiver range [m]
     * @return a valid TimeArr value; a not valid TimeArr if arr_file hasn't been read yet
     **/  
-    TimeArr* accessMap(double frequency, double tx_depth, double rx_depth, double rx_range) const {
-      return( arr_file.arr_values + arr_file.getTimeArrIndex( tx_depth, rx_depth, rx_range ) );
+    const TimeArr& accessMap(double frequency, double tx_depth, double rx_depth, double rx_range) const {
+      return( (arr_file.arr_values[arr_file.getTimeArrIndex( tx_depth, rx_depth, rx_range )] ) );
     }
 
     /**
@@ -182,8 +158,7 @@ namespace woss {
     * @param end_rx_range end receiver range [m]
     * @return a valid Pressure value; a not valid Pressure if arr_file hasn't been read yet
     **/  
-    ::std::complex<double> readMapAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range );
-
+    std::complex<double> readMapAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range );
 
     /**
     * Process the ARR file header
@@ -196,17 +171,9 @@ namespace woss {
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
     bool getArrBinFile();
-    
-    
+
   };
 
-  
 }
 
-
 #endif /* AC_TOOLBOX_ARR_BIN_READER_DEFINITIONS_H */ 
-
-
-
-
-

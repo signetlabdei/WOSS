@@ -3,7 +3,7 @@
  * Copyright (C) 2009 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   sediment-definitions.cpp
@@ -37,10 +30,10 @@
  */
 
 
-#include "sediment-definitions.h"
 #include <sstream>
 #include <iostream>
 #include <cmath>
+#include "sediment-definitions.h"
 
 
 using namespace woss;
@@ -60,7 +53,7 @@ Sediment::Sediment()
 
 }
 
-Sediment::Sediment( const ::std::string& name, double velc, double vels, double dens, double attc, double atts, double bottom ) 
+Sediment::Sediment( const std::string& name, double velc, double vels, double dens, double attc, double atts, double bottom ) 
 : type(name),
   depth(bottom),
   vel_c(velc),
@@ -73,32 +66,8 @@ Sediment::Sediment( const ::std::string& name, double velc, double vels, double 
 }
 
 
-Sediment::Sediment( const Sediment& copy ) {
-  type = copy.type;
-  vel_c = copy.vel_c;
-  vel_s = copy.vel_s;
-  density = copy.density;
-  att_c = copy.att_c;
-  att_s = copy.att_s;
-  depth = copy.depth;
-}
-
-
-Sediment& Sediment::operator=( const Sediment& copy ) {
-  if (this == &copy) return *this;
-  type = copy.type;
-  vel_c = copy.vel_c;
-  vel_s = copy.vel_s;
-  density = copy.density;
-  att_c = copy.att_c;
-  att_s = copy.att_s;
-  depth = copy.depth;
-  return *this;
-}
-
-
-const ::std::string Sediment::getStringValues() const {
-  ::std::stringstream sstream;
+const std::string Sediment::getStringValues() const {
+  std::stringstream sstream;
 
   sstream.str("");
   sstream << vel_c << " " << vel_s << " " << density << " " << att_c << " " << att_s;
@@ -107,7 +76,7 @@ const ::std::string Sediment::getStringValues() const {
 
 
 const Sediment woss::operator/( const double left, const Sediment& right ) {
-  ::std::stringstream sstream;
+  std::stringstream sstream;
 
   sstream.str("");
   sstream << "( " << right.type << " / " << left << " )";
@@ -116,7 +85,7 @@ const Sediment woss::operator/( const double left, const Sediment& right ) {
 
 
 const Sediment woss::operator*( const double left, const Sediment& right ) {
-  ::std::stringstream sstream;
+  std::stringstream sstream;
 
   sstream.str("");
   sstream << "( " << right.type << " * " << left << " )";
@@ -125,7 +94,7 @@ const Sediment woss::operator*( const double left, const Sediment& right ) {
 
 
 const Sediment woss::operator/( const Sediment& left, const double right ) {
-  ::std::stringstream sstream;
+  std::stringstream sstream;
 
   sstream.str("");
   sstream << "( " << left.type << " / " << right << " )";
@@ -134,7 +103,7 @@ const Sediment woss::operator/( const Sediment& left, const double right ) {
 
 
 const Sediment woss::operator*( const Sediment& left, const double right ) {
-  ::std::stringstream sstream;
+  std::stringstream sstream;
 
   sstream.str("");  
   sstream << "( " << left.type << " * " << right << " )";
@@ -192,7 +161,7 @@ Sediment& woss::operator*=( Sediment& left, const Sediment& right ) {
 
 
 Sediment& woss::operator+=( Sediment& left, double right ) {
-  ::std::stringstream sstream;
+  std::stringstream sstream;
 
   sstream.str("");  
   sstream << left.type << " + " << right;
@@ -208,7 +177,7 @@ Sediment& woss::operator+=( Sediment& left, double right ) {
 
 
 Sediment& woss::operator-=( Sediment& left, double right ) {
-  ::std::stringstream sstream;
+  std::stringstream sstream;
 
   sstream.str("");  
   sstream << left.type << " - " << right;
@@ -224,7 +193,7 @@ Sediment& woss::operator-=( Sediment& left, double right ) {
 
 
 Sediment& woss::operator/=( Sediment& left, double right ) {
-  ::std::stringstream sstream;
+  std::stringstream sstream;
 
   sstream.str("");
   sstream << left.type << " / " << right;
@@ -240,9 +209,9 @@ Sediment& woss::operator/=( Sediment& left, double right ) {
 
 
 Sediment& woss::operator*=( Sediment& left, double right ) {
-  ::std::stringstream sstream;
+  std::stringstream sstream;
 
-  sstream.str("");  
+  sstream.str("");
   sstream << left.type << " * " << right;
   
   left.type = sstream.str();
@@ -262,8 +231,9 @@ SedimentGravel::SedimentGravel(double bottom_depth)
 }
 
 
-double SedimentGravel::calculateVelocityS(double vels, double bottom_depth) {
-  if ( bottom_depth <= 0.0 ) return vels;
+double SedimentGravel::calculateVelocityS(double vels, double bottom_depth) const {
+  if ( bottom_depth <= 0.0 ) 
+    return vels;
   return ( vels * pow( bottom_depth, 0.3) ); 
 }
 
@@ -275,8 +245,9 @@ SedimentSilt::SedimentSilt(double bottom_depth)
 }
 
 
-double SedimentSilt::calculateVelocityS(double vels, double bottom_depth) {
-  if ( bottom_depth <= 0.0 ) return vels;
+double SedimentSilt::calculateVelocityS(double vels, double bottom_depth) const {
+  if ( bottom_depth <= 0.0 ) 
+    return vels;
   return ( vels * pow( bottom_depth, 0.3) ); 
 }
 
@@ -288,8 +259,9 @@ SedimentMud::SedimentMud(double bottom_depth)
 }
 
 
-double SedimentMud::calculateVelocityS(double vels, double bottom_depth) {
-  if ( bottom_depth <= 0.0 ) return vels;
+double SedimentMud::calculateVelocityS(double vels, double bottom_depth) const {
+  if ( bottom_depth <= 0.0 ) 
+    return vels;
   return ( vels * pow( bottom_depth, 0.3) ); 
 }
 
@@ -342,4 +314,3 @@ SedimentHardBottom::SedimentHardBottom()
 
 }
 
- 

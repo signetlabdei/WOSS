@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -46,12 +39,6 @@
 #include <woss-manager.h>
 
 
-namespace woss {
-  class TimeArr;
-  class WossManager;
-}
-
-
 class ChannelEstimator;
 
 
@@ -60,33 +47,24 @@ class ChannelEstimator;
  *
  * WossChannelModule extends ChannelModule for channel calculations with WOSS
  */
-class  WossChannelModule : public ChannelModule
-{
+class  WossChannelModule : public ChannelModule {
 
-  
   public:
-  
-    
+
   WossChannelModule();
   
-  virtual ~ WossChannelModule();
-  
-  
-  virtual int command(int argc, const char*const* argv);  
-  
-  
-  virtual void recv(Packet* p, ChSAP* chsap);
-  
-  
+  virtual ~WossChannelModule() override = default;
+
+  virtual int command(int argc, const char*const* argv) override;
+
+  virtual void recv(Packet* p, ChSAP* chsap) override;
+
   protected:
 
-    
-  typedef ::std::vector< ChSAP* > ChSAPVector;
-  
-  
+  using ChSAPVector = std::vector< ChSAP* >;
+
   double getPropDelay( const woss::CoordZ& s, const woss::CoordZ& d);
- 
-   
+
   woss::CoordZPairVect computeCoordZPairVect( ChSAP* dest );
   
   woss::SimFreq computeSimFreq( Packet* p );
@@ -109,19 +87,15 @@ class  WossChannelModule : public ChannelModule
   double channel_eq_attenuation_db;
 
   double channel_max_distance; // [m]
-  
-  
+
   woss::WossManager* woss_manager;
   
   ChannelEstimator* channel_estimator;
-    
-  
+
   Underwater uw;
  
   ChSAPVector chsap_vector;
 
 };
 
-
 #endif /* UW_WOSS_CHANNEL_H */
-

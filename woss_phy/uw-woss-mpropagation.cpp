@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   uw-woss-mpropagation.cpp
@@ -37,22 +30,23 @@
  */
 
 
-#include "uw-woss-position.h"
+#include <uw-woss-position.h>
 #include <mpropagation.h>
 #include <iostream>
+#include <string>
 #include <sstream>
 #include <iomanip>
 #include <cmath>
 #include <rng.h>
-#include "uw-woss-mpropagation.h"
+#include <uw-woss-mpropagation.h>
 #include <woss-manager.h>
 
 
-#define WOSS_MPROP_WRITE_GAIN_MARGIN (4)
+static constexpr inline int WOSS_MPROP_WRITE_GAIN_MARGIN = (4);
 
 
 using namespace woss;
-
+using namespace std;
 
 static class WossMPropagationClass : public TclClass {
 public:
@@ -64,7 +58,7 @@ public:
 
 
 WossMPropagation::WossMPropagation() 
- : woss_manager(NULL),
+ : woss_manager(nullptr),
    write_gain_matrix(false)
 {
 
@@ -78,38 +72,45 @@ int WossMPropagation::command(int argc, const char*const* argv) {
     if(strcasecmp(argv[1], "setwriteStdGainMatrix") == 0) {
       int ret_val = 0;
 
-      if (debug_) cout << NOW << "  WossMPropagation::command() setwriteStdGainMatrix called"  << endl;
+      if (debug_) 
+        cout << NOW << "  WossMPropagation::command() setwriteStdGainMatrix called"  << endl;
 
       std_gain_matrix_name = argv[2] ;
 
       write_gain_matrix = true;
 
-      string command = "rm -f " + std_gain_matrix_name;
-      if (system(NULL)) {
-        ret_val = system(command.c_str());
+      std::string command = "rm -f " + std_gain_matrix_name;
+      if (std::system(nullptr)) {
+        ret_val = std::system(command.c_str());
       }
       command = "touch " + std_gain_matrix_name;
-      if (system(NULL)) {
-        ret_val = system(command.c_str());
+      if (std::system(nullptr)) {
+        ret_val = std::system(command.c_str());
       }
 
-      if (debug_) cout << NOW << "  WossMPropagation::command() setwriteStdGainMatrix ret_val = " << ret_val  << endl;
+      if (debug_) 
+        cout << NOW << "  WossMPropagation::command() setwriteStdGainMatrix ret_val = " << ret_val  << endl;
 
       return TCL_OK;
     }
     if(strcasecmp(argv[1], "setWossManager") == 0) {
-      if (debug_) cout << NOW << "  WossMPropagation::command() setWossManager called"  << endl;
+      if (debug_) 
+        cout << NOW << "  WossMPropagation::command() setWossManager called"  << endl;
       woss_manager = dynamic_cast< woss::WossManager* >( tcl.lookup(argv[2]) );
 
-      if (woss_manager) return TCL_OK;
-      else return TCL_ERROR;
+      if (woss_manager) 
+        return TCL_OK;
+      else 
+        return TCL_ERROR;
     }
   }
   else if (argc == 2) {
     if(strcasecmp(argv[1], "writeStdGainMatrix") == 0) {
-      if (debug_) cout << NOW << "  WossMPropagation::command() writeStdGainMatrix called"  << endl;
+      if (debug_) 
+        cout << NOW << "  WossMPropagation::command() writeStdGainMatrix called"  << endl;
 
-      if (write_gain_matrix == true) writeStdGainMatrix();
+      if (write_gain_matrix == true) 
+        writeStdGainMatrix();
       return TCL_OK;
     }
   }
@@ -122,7 +123,6 @@ double WossMPropagation::getGain(Packet* p) {
 
    // processed by woss_channel
    if (hdr_woss->already_processed == true) {
-
      double gain = pow( abs( hdr_woss->attenuation ), 2.0 );
 
      hdr_MPhy* ph = HDR_MPHY(p);
@@ -143,7 +143,8 @@ double WossMPropagation::getGain(Packet* p) {
       
         double curr_freq = sqrt( curr_f1 * curr_f2 );
         
-        double curr_dist = CoordZ( sp->getLatitude(), sp->getLongitude(), ::std::abs(sp->getAltitude()) ).getCartDistance( CoordZ( rp->getLatitude(), rp->getLongitude(), ::std::abs(rp->getAltitude()) ) ) ;
+        double curr_dist = CoordZ( sp->getLatitude(), sp->getLongitude(), std::abs(sp->getAltitude()) )
+                            .getCartDistance( CoordZ( rp->getLatitude(), rp->getLongitude(), std::abs(rp->getAltitude()) ) ) ;
         //double k = 1.75; // practical spreading
         double std_gain_2 = uw.getAttenuation( curr_dist, curr_freq/1000.0 );
        
@@ -151,11 +152,13 @@ double WossMPropagation::getGain(Packet* p) {
         insertStdGainMatrix(sp, rp, std_gain_2 );
      }
 
-     if(debug_) cout << NOW 
-	                   << "  WossMPropagation::getGain() packet already processed by UwWossChannel, " 
-	                   << "attenuation db = " << 10.0 * abs(log10(gain))
-	                   << endl;
-//      if (debug_) debugWaitForUser();
+     if(debug_) 
+      cout << NOW << "  WossMPropagation::getGain() packet already processed by UwWossChannel, " 
+           << "attenuation db = " << 10.0 * abs(log10(gain))
+           << endl;
+
+//      if (debug_) 
+//        debugWaitForUser();
 
      return(gain);
    }
@@ -165,8 +168,8 @@ double WossMPropagation::getGain(Packet* p) {
 
 
 double WossMPropagation::computeGain(Packet* p)  {
-  if (!woss_manager) {
-    cout << "WossMPropagation::computeGain() ERROR, setWossManager not called!" << endl;
+  if (woss_manager == nullptr) {
+    cerr << "WossMPropagation::computeGain() ERROR, setWossManager not called!" << endl;
     exit(1);
   }
 
@@ -195,11 +198,11 @@ double WossMPropagation::computeGain(Packet* p)  {
 
   double curr_freq = sqrt(curr_f1*curr_f2);
 
-  CoordZ tx_coordz ( sp->getLatitude(), sp->getLongitude(), ::std::abs(sp->getAltitude()) );
-  CoordZ rx_coordz ( rp->getLatitude(), rp->getLongitude(), ::std::abs(rp->getAltitude()) );
+  CoordZ tx_coordz ( sp->getLatitude(), sp->getLongitude(), std::abs(sp->getAltitude()) );
+  CoordZ rx_coordz ( rp->getLatitude(), rp->getLongitude(), std::abs(rp->getAltitude()) );
   double curr_dist = tx_coordz.getCartDistance( rx_coordz ) ;
 
-  Pressure* pressure = woss_manager->getWossPressure( tx_coordz, rx_coordz, curr_freq, curr_freq, NOW );
+  auto pressure = woss_manager->getWossPressure( tx_coordz, rx_coordz, curr_freq, curr_freq, NOW );
 
   if ( write_gain_matrix == true ) {
 //    double k = 1.75; // practical spreading
@@ -216,32 +219,29 @@ double WossMPropagation::computeGain(Packet* p)  {
 
   double gain = pow( pressure->abs(), 2.0 );
 
-  if(debug_) cout << NOW 
-              << "  WossMPropagation::computeGain()" 
-              << " dist = " << curr_dist
-              << "; freq = " << curr_freq
-              << "; atten_db = " << Pressure::getTxLossDb(hdr_woss->attenuation)
-              << "; gain = " << gain
-              << endl;
-
-  delete pressure;
+  if(debug_) 
+    cout << NOW << "  WossMPropagation::computeGain()" 
+         << " dist = " << curr_dist
+         << "; freq = " << curr_freq
+         << "; atten_db = " << Pressure::getTxLossDb(hdr_woss->attenuation)
+         << "; gain = " << gain
+         << endl;
 
   return gain;
 }
 
 void WossMPropagation::writeStdGainMatrix() {
-
   stringstream s_out;
 
   if (std_gain_matrix_name.length() == 0) {
-     cout << NOW << "  WossMPropagation::writeStdGainMatrix() error, command setwriteStdGainMatrix not called" << endl;
+     cerr << NOW << "  WossMPropagation::writeStdGainMatrix() error, command setwriteStdGainMatrix not called" << endl;
      exit(1);
   }
 
   std_gain_out.open(std_gain_matrix_name.c_str());
 
   if ( !std_gain_out ) {
-     cout << NOW << "  WossMPropagation::printStdGainMatrix() error(s) in command setPrintGainMatrix" << endl;
+     cerr << NOW << "  WossMPropagation::printStdGainMatrix() error(s) in command setPrintGainMatrix" << endl;
      exit(1);
   }
 
@@ -251,7 +251,7 @@ void WossMPropagation::writeStdGainMatrix() {
   s_out.str("");
 
   std_gain_out << setw(size) << right << " : " ;
-  for ( GMIter it = std_gain_map.begin(); it != std_gain_map.end(); it++) {
+  for ( auto it = std_gain_map.begin(); it != std_gain_map.end(); it++) {
       s_out << it->first.getLatitude() << ";" << it->first.getLongitude() << ";" << it->first.getDepth();
       string coords = s_out.str();
       s_out.str("");
@@ -260,17 +260,13 @@ void WossMPropagation::writeStdGainMatrix() {
   }
   std_gain_out << endl;
 
-  for ( GMIter it = std_gain_map.begin(); it != std_gain_map.end(); it++) {
+  for ( auto it = std_gain_map.begin(); it != std_gain_map.end(); it++) {
       std_gain_out << it->first.getLatitude() << ";" << it->first.getLongitude() << ";" << it->first.getDepth() << " : " ;
 
-      for ( map< CoordZ, double >::iterator it2 = (it->second).begin(); it2 != (it->second).end(); it2++) {
+      for ( auto it2 = (it->second).begin(); it2 != (it->second).end(); it2++) {
            std_gain_out << setw(size) << left <<  it2->second ;
       }
       std_gain_out << endl;
   }
   std_gain_out.close();
 }
-
-
-
-

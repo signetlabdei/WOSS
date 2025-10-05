@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -43,16 +36,14 @@
 
 #ifdef WOSS_NETCDF_SUPPORT
 
+#include <string>
 #include "woss-db-creator.h"
-#include "sediment-deck41-coord-db.h"
+#include "sediment-deck41-db.h"
 
 
 namespace woss {
-  
-    
-  class SedimDeck41Db;
-  
-  
+
+
   /**
   * \brief DbCreator for NetCDF Deck41 Sediment database
   *
@@ -60,51 +51,65 @@ namespace woss {
   **/
   class SedimDeck41DbCreator : public WossDbCreator {
 
-    
     public:
-    
-      
+
     /**
     * SedimDeck41DbCreator default constructor
     **/
     SedimDeck41DbCreator();
-    
-    virtual ~SedimDeck41DbCreator();
-    
- 
+
+    SedimDeck41DbCreator(const SedimDeck41DbCreator& copy) = default;
+
+    SedimDeck41DbCreator(SedimDeck41DbCreator&& tmp) = default;
+
+    virtual ~SedimDeck41DbCreator() override = default;
+
+    SedimDeck41DbCreator& operator=( const SedimDeck41DbCreator& copy ) = default;
+
+    SedimDeck41DbCreator& operator=( SedimDeck41DbCreator&& tmp ) = default;
+
+    /**
+    * Abstract method. Virtual factory method. 
+    * It is called to clone this WossDbCreator instance. 
+    * The caller will be the <b>owner</b> of created object,
+    * therefore object destruction is his responsibility
+    * @return a std::unique_ptr to a properly initialized WossDbCreator object
+    **/
+    virtual std::unique_ptr<WossDbCreator> clone() const override { return std::make_unique<SedimDeck41DbCreator>(*this); }
+
     /**
     * This method is called to create and initialize a SedimDeck41Db
-    * @return a pointer to a properly initialized SedimDeck41Db object
+    * @return a std::unique_ptr to a properly initialized SedimDeck41Db object
     **/
-    virtual WossDb* const createWossDb();
+    virtual std::unique_ptr<WossDb> createWossDb() const override;
 
 
-    void setDeck41CoordPathName( const ::std::string& name ) { db_coord_name = name; }
+    void setDeck41CoordPathName( const std::string& name ) { db_coord_name = name; }
 
-    void setDeck41MarsdenPathName( const ::std::string& name ) { db_marsden_name = name; }
+    void setDeck41MarsdenPathName( const std::string& name ) { db_marsden_name = name; }
 
-    void setDeck41MarsdenOnePathName( const ::std::string& name ) { db_marsden_one_name = name; }
+    void setDeck41MarsdenOnePathName( const std::string& name ) { db_marsden_one_name = name; }
 
 #if defined (WOSS_NETCDF4_SUPPORT)
     void setDeck41DbType( DECK41DbType db_type ) { deck41_db_type = db_type; }
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 
-    ::std::string getDeck41CoordPathName() const { return db_coord_name; }
+    std::string getDeck41CoordPathName() const { return db_coord_name; }
 
-    ::std::string getDeck41MarsdenPathName() const { return db_marsden_name; }
+    std::string getDeck41MarsdenPathName() const { return db_marsden_name; }
 
-    ::std::string getDeck41MarsdenOnePathName() const { return db_marsden_one_name; }
+    std::string getDeck41MarsdenOnePathName() const { return db_marsden_one_name; }
 
     DECK41DbType getDeck41DbType() const { return deck41_db_type; }
 
 
     protected:
 
-    ::std::string db_coord_name;
+    std::string db_coord_name;
 
-    ::std::string db_marsden_name;
+    std::string db_marsden_name;
 
-    ::std::string db_marsden_one_name;
+    std::string db_marsden_one_name;
 
     /**
      * DECK41 database type
@@ -112,21 +117,20 @@ namespace woss {
     DECK41DbType deck41_db_type;
 
     /**
-    * Initializes the pointed object
-    * @param woss_db pointer to a recently created SedimDeck41Db
+    * Initializes the referenced object
+    * @param woss_db reference to a recently created SedimDeck41Db
     * @return <i>true</i> if the method succeed, <i>false</i> otherwise
-    **/   
-    virtual bool initializeDb( WossDb* woss_db );
+    **/
+    virtual bool initializeDb( WossDb& woss_db ) const override;
 
     /**
-    * Initializes the pointed object
-    * @param woss_db pointer to a recently created SedimDeck41Db
+    * Initializes the referenced object
+    * @param woss_db reference to a recently created SedimDeck41Db
     * @return <i>true</i> if the method succeed, <i>false</i> otherwise
     **/ 
-    bool initializeSedimDb( SedimDeck41Db* const woss_db );
+    bool initializeSedimDb( SedimDeck41Db& woss_db ) const;
   };
 
-  
 }
 
 #endif // WOSS_NETCDF_SUPPORT

@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,12 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -42,14 +36,11 @@
 
 
 #include <string>
-
+#include <memory>
+#include "woss-db.h"
 
 namespace woss {
-  
-    
-  class WossDb;
-  
-  
+
   /**
   * \brief Abstract class that provides the interface of database creator ( Factory object )
   *
@@ -63,69 +54,78 @@ namespace woss {
   **/
   class WossDbCreator {
 
-		
-    public: 
+    public:
 
-      
     /**
     * Default WossDbCreator creator 
-    **/ 
-    WossDbCreator();
-    
-    virtual ~WossDbCreator();
-       
-    
+    **/
+    WossDbCreator() = default;
+
+    WossDbCreator(const WossDbCreator& copy) = default;
+
+    WossDbCreator(WossDbCreator&& tmp) = default;
+
+    virtual ~WossDbCreator() = default;
+
+    WossDbCreator& operator=( const WossDbCreator& copy ) = default;
+
+    //WossDbCreator& operator=( WossDbCreator&& tmp ) = default;
+
     /**
     * Abstract method. It is called to create and initialize a WossDb. The caller will be the <b>owner</b> of created object,
     * therefore object destruction is his responsibility
-    * @return a pointer to a properly initialized WossDb object
+    * @return a std::unique_ptr to a properly initialized WossDb object
     **/
-    virtual WossDb* const createWossDb() = 0;
+    virtual std::unique_ptr<WossDb> createWossDb() const = 0;
+
+    /**
+    * Abstract method. Virtual factory method. 
+    * It is called to clone this WossDbCreator instance. 
+    * The caller will be the <b>owner</b> of created object,
+    * therefore object destruction is his responsibility
+    * @return a std::unique_ptr to a properly initialized WossDbCreator object
+    **/
+    virtual std::unique_ptr<WossDbCreator> clone() const = 0;
     
-                           
+
     WossDbCreator& setDebug( bool flag ) { debug = flag; return *this; }
     
     WossDbCreator& setWossDebug( bool flag ) { woss_db_debug = flag; return *this; }
     
 
-    WossDbCreator& setDbPathName( const ::std::string& name ) { pathname = name; return *this; }
+    WossDbCreator& setDbPathName( const std::string& name ) { pathname = name; return *this; }
 
 
     bool isUsingDebug() const { return debug; }
-    
-    bool isUsingWossDbDebug() const { return woss_db_debug; }
-    
 
-    ::std::string getDbPathName() const { return pathname; }
-    
-                          
-    protected: 
-    
+    bool isUsingWossDbDebug() const { return woss_db_debug; }
+
+    std::string getDbPathName() const { return pathname; }
+
+
+    protected:
 
     /**
     * WossDbCreator debug flag binded in Tcl
     **/
-    bool debug;
+    bool debug = false;
     
     /**
     * WossDb debug flag binded in Tcl. All objects instantiated will have this flag
     **/
-    bool woss_db_debug;
-    
+    bool woss_db_debug = false;
 
     /**
     * Pathname or unique identifier
     **/
-    ::std::string pathname;
-    
+    std::string pathname = "";
     
     /**
-    * Initializes the pointed object
-    * @param woss_db pointer to a recently created WossDb
+    * Initializes the referenced object
+    * @param woss_db reference to a recently created WossDb
     * @return <i>true</i> if the method succeed, <i>false</i> otherwise
     **/
-    virtual bool initializeDb( WossDb* const woss_db ) = 0;
-    
+    virtual bool initializeDb( WossDb& woss_db ) const = 0;
 
   };
   

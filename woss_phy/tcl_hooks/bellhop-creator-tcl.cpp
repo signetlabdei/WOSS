@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   bellhop-creator.cpp
@@ -39,7 +32,7 @@
 
 #ifdef WOSS_NS_MIRACLE_SUPPORT  
 
-
+#include <memory>
 #include "bellhop-creator-tcl.h"
 
 
@@ -84,7 +77,8 @@ BellhopCreatorTcl::BellhopCreatorTcl()
   bind( "bellhop_arr_syntax", &bellhop_arr_syntax_);
   bind( "bellhop_shd_syntax", &bellhop_shd_syntax_); 
   
-  if ( ccfrequency_step.accessAllLocations() <= 0.0 ) ccfrequency_step.accessAllLocations() = WOSS_CREATOR_MAX_FREQ_STEP;
+  if ( ccfrequency_step.accessAllLocations() <= 0.0 ) 
+    ccfrequency_step.accessAllLocations() = WOSS_CREATOR_MAX_FREQ_STEP;
   
   woss_debug = (bool) woss_debug_;
   debug = (bool) debug_;
@@ -100,415 +94,602 @@ int BellhopCreatorTcl::command( int argc, const char*const* argv ) {
 
  if ( argc == 16 ) {
     if(strcasecmp(argv[1], "setSimulationTimes") == 0) {
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
       
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCSimTime::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCSimTime::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {}); // we supply a custom deleter that does nothing since ownership is within TCL object
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCSimTime::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCSimTime::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
       ccsimtime_map.replace( SimTime( Time( atoi(argv[4]), atoi(argv[5]), atoi(argv[6]), atoi(argv[7]), atoi(argv[8]), atoi(argv[9]) ),
                                       Time( atoi(argv[10]), atoi(argv[11]), atoi(argv[12]), atoi(argv[13]), atoi(argv[14]), atoi(argv[15]) ) ), 
-                             tx, rx);
+                             tx_shr, rx_shr);
       
-      if (debug) ::std::cout << "BellhopCreatorTcl::command() setSimulationTimes called, " << "; start day = " << atoi(argv[4]) << "; start month = "
-                             << atoi(argv[5]) << "; start year = " << atoi(argv[6]) << "; start hours = " << atoi(argv[7]) << "; start mins = " 
-                             << atoi(argv[8]) << "; start secs = " << atoi(argv[9]) << "; end day = " << atoi(argv[10]) << "; end month = " 
-                             << atoi(argv[11]) << "; end year = " << atoi(argv[12]) << "; end hours = " << atoi(argv[13]) << "; end mins = "
-                             << atoi(argv[14]) << "; end secs = " << atoi(argv[15]) << ::std::endl;
+      if (debug) 
+        std::cout << "BellhopCreatorTcl::command() setSimulationTimes called, " << "; start day = " << atoi(argv[4]) << "; start month = "
+                    << atoi(argv[5]) << "; start year = " << atoi(argv[6]) << "; start hours = " << atoi(argv[7]) << "; start mins = " 
+                    << atoi(argv[8]) << "; start secs = " << atoi(argv[9]) << "; end day = " << atoi(argv[10]) << "; end month = " 
+                    << atoi(argv[11]) << "; end year = " << atoi(argv[12]) << "; end hours = " << atoi(argv[13]) << "; end mins = "
+                    << atoi(argv[14]) << "; end secs = " << atoi(argv[15]) << std::endl;
 
       return TCL_OK;
-    }    
+    }
   }
   if ( argc == 9 ) {
-      if(strcasecmp(argv[1], "setCustomTransducerType") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
+    if(strcasecmp(argv[1], "setCustomTransducerType") == 0) { 
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
       
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCTransducer::ALL_LOCATIONS;
+      if (!tx ) 
+        tx_shr = CCTransducer::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
 
+  
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCTransducer::ALL_LOCATIONS;     
-
+      if (!rx ) 
+        rx_shr = CCTransducer::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctransducer.replace( CustomTransducer(argv[4], 0.0, atof(argv[5]), atof(argv[6]), atof(argv[7]), atof(argv[8]) ) , tx, rx );
+      cctransducer.replace( CustomTransducer(argv[4], 0.0, atof(argv[5]), atof(argv[6]), atof(argv[7]), atof(argv[8]) ) , tx_shr, rx_shr );
     
       return TCL_OK; 
     }
   }
   else if ( argc == 6 ) {
-
     if(strcasecmp(argv[1], "setCustomAngles") == 0) {  
-      
-      if (debug) ::std::cout << "BellhopCreatorTcl::command() setCustomAngles called "
-                             << "; min angle = " << atof(argv[4]) << "; max_angle = " << atof(argv[5]) 
-                             << ::std::endl;
-           
-      Location* tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if ( tx == NULL ) tx = CCAngles::ALL_LOCATIONS;
- 
-      Location* rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if ( rx == NULL ) rx = CCAngles::ALL_LOCATIONS;
-                 
-      ccangles_map.replace( CustomAngles(atof(argv[4]), atof(argv[5])), tx, rx );
+      if (debug)
+        std::cout << "BellhopCreatorTcl::command() setCustomAngles called "
+                    << "; min angle = " << atof(argv[4]) << "; max_angle = " << atof(argv[5]) 
+                    << std::endl;
+
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
+      tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
+      if (!tx ) 
+        tx_shr = CCAngles::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
+      rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
+      if (!rx ) 
+        rx_shr = CCAngles::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
+
+      ccangles_map.replace( CustomAngles(atof(argv[4]), atof(argv[5])), tx_shr, rx_shr );
 
       return TCL_OK;
     }
   }  
   else if ( argc == 5 ) {
-    
     if(strcasecmp(argv[1], "setBellhopMode") == 0) {
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCString::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCString::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCString::ALL_LOCATIONS;
-      
-      ccbellhop_mode.replace( argv[4], tx, rx );
-      
+      if (!rx ) 
+        rx_shr = CCString::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
+
+      ccbellhop_mode.replace( argv[4], tx_shr, rx_shr );
+
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setBeamOptions") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCString::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCString::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCString::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCString::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccbeam_options.replace( argv[4], tx, rx );
+      ccbeam_options.replace( argv[4], tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setBathymetryType") == 0) { 
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
 
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCString::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCString::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCString::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCString::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccbathymetry_type.replace( argv[4], tx, rx );
+      ccbathymetry_type.replace( argv[4], tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setBathymetryMethod") == 0) { 
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
 
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCString::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCString::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCString::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCString::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccbathymetry_method.replace( argv[4], tx, rx );
+      ccbathymetry_method.replace( argv[4], tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setAltimetryType") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCString::ALL_LOCATIONS;
-      
+      if (!tx ) 
+        tx_shr = CCString::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCString::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCString::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccaltimetry_type.replace( argv[4], tx, rx );
+      ccaltimetry_type.replace( argv[4], tx_shr, rx_shr );
       
       return TCL_OK;
     }    
     else if(strcasecmp(argv[1], "setRangeSteps") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCInt::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCInt::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctotal_range_steps.replace( atoi(argv[4]), tx, rx );
+      cctotal_range_steps.replace( atoi(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setTotalTransmitters") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCInt::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCInt::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctotal_transmitters.replace( atoi(argv[4]), tx, rx );
+      cctotal_transmitters.replace( atoi(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }    
     else if(strcasecmp(argv[1], "setTxMinDepthOffset") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCDouble::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCDouble::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctx_min_depth_offset.replace( atof(argv[4]), tx, rx );
+      cctx_min_depth_offset.replace( atof(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setTxMaxDepthOffset") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCDouble::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCDouble::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctx_max_depth_offset.replace( atof(argv[4]), tx, rx );
+      cctx_max_depth_offset.replace( atof(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     } 
     else if(strcasecmp(argv[1], "setRxTotalDepths") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCInt::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCInt::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctotal_rx_depths.replace( atoi(argv[4]), tx, rx );
+      cctotal_rx_depths.replace( atoi(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }    
     else if(strcasecmp(argv[1], "setRxMinDepthOffset") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCDouble::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCDouble::ALL_LOCATIONS;
-      
-      ccrx_min_depth_offset.replace( atof(argv[4]), tx, rx );
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
+
+      ccrx_min_depth_offset.replace( atof(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     } 
     else if(strcasecmp(argv[1], "setRxMaxDepthOffset") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCDouble::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCDouble::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccrx_max_depth_offset.replace( atof(argv[4]), tx, rx );
-      
+      ccrx_max_depth_offset.replace( atof(argv[4]), tx_shr, rx_shr );
+
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setRxTotalRanges") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCInt::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCInt::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctotal_rx_ranges.replace( atoi(argv[4]), tx, rx );
+      cctotal_rx_ranges.replace( atoi(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setRxMinRangeOffset") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCDouble::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCDouble::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccrx_min_range_offset.replace( atof(argv[4]), tx, rx );
+      ccrx_min_range_offset.replace( atof(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setRxMaxRangeOffset") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCDouble::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCDouble::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccrx_max_range_offset.replace( atof(argv[4]), tx, rx );
+      ccrx_max_range_offset.replace( atof(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setRaysNumber") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCInt::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCInt::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctotal_rays.replace( atoi(argv[4]), tx, rx );
+      cctotal_rays.replace( atoi(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setSSPDepthPrecision") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCDouble::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCDouble::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccssp_depth_precision.replace( atof(argv[4]), tx, rx );
+      ccssp_depth_precision.replace( atof(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }    
     else if(strcasecmp(argv[1], "setNormalizedSSPDepthSteps") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCInt::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCInt::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccnormalized_ssp_depth_steps.replace( atoi(argv[4]), tx, rx );
+      ccnormalized_ssp_depth_steps.replace( atoi(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     } 
     else if(strcasecmp(argv[1], "setBoxDepth") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccbox_depth.replace( atoi(argv[4]), tx, rx );
+      ccbox_depth.replace( atoi(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setBoxRange") == 0) { 
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccbox_range.replace( atoi(argv[4]), tx, rx );
+      ccbox_range.replace( atoi(argv[4]), tx_shr, rx_shr );
       
       return TCL_OK;
     }       
     else if(strcasecmp(argv[1], "setTotalRuns") == 0) {
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCInt::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCInt::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      cctotal_runs.replace( atoi(argv[4]), tx, rx );
+      cctotal_runs.replace( atoi(argv[4]), tx_shr, rx_shr );
       
-      if (debug) ::std::cout << "BellhopCreatorTcl::command() setWorkDirPath called, value = " << argv[4] << ::std::endl;
+      if (debug) std::cout << "BellhopCreatorTcl::command() setWorkDirPath called, value = " << argv[4] << std::endl;
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setEvolutionTimeQuantum") == 0) {
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
-      tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCInt::ALL_LOCATIONS;
- 
-      rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCInt::ALL_LOCATIONS;
-      
-      ccevolution_time_quantum.replace( atof(argv[4]), tx, rx );
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
 
-      if (debug) ::std::cout << "BellhopCreatorTcl::command() setEvolutionTimeQuantum called, value = " << argv[4] << ::std::endl;
+      tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
+      rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
+      
+      ccevolution_time_quantum.replace( atof(argv[4]), tx_shr, rx_shr );
+
+      if (debug) 
+        std::cout << "BellhopCreatorTcl::command() setEvolutionTimeQuantum called, value = " << argv[4] << std::endl;
 
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setFrequencyStep") == 0) {
-      
-      Location* tx = NULL; 
-      Location* rx = NULL; 
-      
+      Location* tx = nullptr;
+      std::shared_ptr<Location> tx_shr;
+      Location* rx = nullptr;
+      std::shared_ptr<Location> rx_shr;
+
       tx = dynamic_cast< Location* >( tcl.lookup(argv[2]) );
-      if (!tx ) tx = CCDouble::ALL_LOCATIONS;
- 
+      if (!tx ) 
+        tx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        tx_shr = std::shared_ptr<Location> (tx, [](Location* ptr) {});
+
       rx = dynamic_cast< Location* >( tcl.lookup(argv[3]) );
-      if (!rx ) rx = CCDouble::ALL_LOCATIONS;
+      if (!rx ) 
+        rx_shr = CCDouble::ALL_LOCATIONS;
+      else
+        rx_shr = std::shared_ptr<Location> (rx, [](Location* ptr) {});
       
-      ccfrequency_step.replace( atoi(argv[4]), tx, rx  );
+      ccfrequency_step.replace( atoi(argv[4]), tx_shr, rx_shr );
       
-      if (debug) ::std::cout << "BellhopCreatorTcl::command() setFrequencyStep called, value = " << argv[4] << ::std::endl;
+      if (debug) 
+        std::cout << "BellhopCreatorTcl::command() setFrequencyStep called, value = " << argv[4] << std::endl;
 
       return TCL_OK;
     }
@@ -518,16 +699,19 @@ int BellhopCreatorTcl::command( int argc, const char*const* argv ) {
       
       work_dir_path = argv[2];
       
-      if (debug) ::std::cout << "BellhopCreatorTcl::command() setWorkDirPath called, work dir path = " << work_dir_path << ::std::endl;
+      if (debug) 
+        std::cout << "BellhopCreatorTcl::command() setWorkDirPath called, work dir path = " << work_dir_path << std::endl;
 
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setBellhopPath") == 0) { 
 
       bellhop_path = argv[2];
-      if (bellhop_path != "" ) bellhop_path += "/";
+      if (bellhop_path != "" ) 
+        bellhop_path += "/";
       
-      if (debug) ::std::cout << "BellhopCreatorTcl::command() setBellhopPath called, path = " << argv[2] << ::std::endl;
+      if (debug) 
+        std::cout << "BellhopCreatorTcl::command() setBellhopPath called, path = " << argv[2] << std::endl;
 
       return TCL_OK;
     }
@@ -535,6 +719,4 @@ int BellhopCreatorTcl::command( int argc, const char*const* argv ) {
   return( TclObject::command(argc,argv) );
 }
 
-
 #endif // WOSS_NS_MIRACLE_SUPPORT
-

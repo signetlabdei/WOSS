@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
-
 /**
  * @file   woss-db.h
  * @author Federico Guerra
@@ -41,39 +33,37 @@
 #define WOSS_DB_H
 
 #include <fstream>
-
+#include <memory>
+#include <utility>
+#include <string>
 #if defined(WOSS_NETCDF4_SUPPORT)
 #include <ncFile.h>
 #elif defined(WOSS_NETCDF_SUPPORT)
 #include <netcdfcpp.h>
 #endif
-
 #include <definitions.h>
 #include <coordinates-definitions.h>
-
+#include <pressure-definitions.h>
+#include <sediment-definitions.h>
+#include <ssp-definitions.h>
+#include <time-arrival-definitions.h>
 
 namespace woss {
     
-
-  class Sediment;
-  class Pressure;
-  class SSP;
-  class TimeArr;
   class Time;
   
   
   /**
   * Optional default pathname of a WossDb. The object created is not valid
   **/
-  #define DB_NAME_NOT_SET "DB_NAME_NOT_SET"
-
+  static constexpr inline const char* DB_NAME_NOT_SET = "DB_NAME_NOT_SET";
 
   /**
   * A pair of strings containing:
   * @param first pathname
   * @param second filename
   **/
-  typedef ::std::pair< ::std::string, ::std::string > PathName; // path , filename
+  using PathName = std::pair< std::string, std::string >; // path , filename
 
 
   /**
@@ -96,22 +86,22 @@ namespace woss {
     * WossDb constructor
     * @param name pathname of database
     **/
-    WossDb( const ::std::string& name ); 
+    WossDb( const std::string& name ); 
 
-    virtual ~WossDb() { }
+    virtual ~WossDb() = default;
 
 
     /**
     * Sets the pathname (or custom network address) of database file
     * @param name pathname database pathname
     **/
-    void setDbName( const ::std::string& pathname ) { db_name = pathname; }
+    void setDbName( const std::string& pathname ) { db_name = pathname; }
 
     /**
     * Gets the pathname (or custom network address) of database file
     * @returns pathname database pathname
     **/
-    ::std::string getDbName() const { return db_name; }
+    std::string getDbName() const { return db_name; }
 
 
     /**
@@ -131,7 +121,7 @@ namespace woss {
     * Checks the validity of WossDb
     * @return <i>true</i> if pathname is valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() { return( db_name.length() > 0 ); }
+    virtual bool isValid() const { return( db_name.length() > 0 ); }
 
 
     /**
@@ -153,31 +143,26 @@ namespace woss {
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
     virtual bool closeConnection() = 0;
-    
-      
+
     protected:
 
-      
     /**
     * Pathname to database. It could be a filesystem pathname, or a network identifier etc...
     **/ 
-    ::std::string db_name;
-
+    std::string db_name;
 
     /**
     * Debug flag
     **/ 
     bool debug;
 
-    
     /**
     * Gets path and database name separated
     * @return PathName value
     * @see PathName
     **/
-    PathName getPathName( const ::std::string& complete_path );
+    PathName getPathName( const std::string& complete_path ) const;
 
-    
   };
 
   ///////////////////////////////////////////////////
@@ -192,43 +177,37 @@ namespace woss {
   **/
   class WossNetcdfDb : public WossDb {
 
-    
     public:
-      
-      
+
     /**
     * WossNetcdfDb constructor
     * @param name pathname of database
     **/
-    WossNetcdfDb( const ::std::string& name );
+    WossNetcdfDb( const std::string& name );
 
-    virtual ~WossNetcdfDb();
+    virtual ~WossNetcdfDb() override;
 
-    
     /**
     * Opens the connection to the NetCDF pathname provided
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool openConnection();
+    virtual bool openConnection() override;
 
-    
     /**
     * Closes the connection to the NetCDF pathname provided
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool closeConnection();
-    
-    
+    virtual bool closeConnection() override;
+
     protected:
-      
 
     /**
     * NcFile pointer to a NetCDF database descriptor. It will be properly initialized by openConnection()
     **/
 #if defined(WOSS_NETCDF4_SUPPORT)
-    netCDF::NcFile* netcdf_db;
+    std::unique_ptr< netCDF::NcFile > netcdf_db = nullptr;
 #else
-    NcFile* netcdf_db;
+    std::unique_ptr< NcFile> netcdf_db = nullptr;
 #endif // defined(WOSS_NETCDF4_SUPPORT)
 
   };
@@ -244,41 +223,35 @@ namespace woss {
   **/
   class WossTextualDb : public WossDb {
 
-    
     public:
-      
+
     /**
     * WossTextualDb constructor
     * @param name pathname of database
     **/
-    WossTextualDb( const ::std::string& name );
+    WossTextualDb( const std::string& name );
 
-    virtual ~WossTextualDb();
+    virtual ~WossTextualDb() override;
 
-    
     /**
     * Opens the connection to the textual file provided
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool openConnection();
-
+    virtual bool openConnection() override;
 
     /**
     * Closes the connection to the textual file provided
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool closeConnection();
+    virtual bool closeConnection() override;
 
-    
     protected:
-
 
     /**
     * fstream object to a textual database. It will be properly initialized by openConnection()
     **/
-    ::std::fstream textual_db;
-    
-    
+    std::fstream textual_db;
+
   };
 
   /////// DATA TYPE INTERFACE /////////////////////////////
@@ -291,14 +264,11 @@ namespace woss {
   **/
   class WossBathymetryDb {
 
-    
     public:
 
-      
-    WossBathymetryDb() { }
+    WossBathymetryDb() = default;
 
-    virtual ~WossBathymetryDb() { }
-
+    virtual ~WossBathymetryDb() = default;
 
     /**
     * Inserts the given woss::Bathymetry value in the database for given coordinates
@@ -313,9 +283,7 @@ namespace woss {
     * @param coords const reference to a valid Coord object
     * @return <i>positive</i> depth value [m] if coordinates are found, <i>HUGE_VAL</i> otherwise
     **/
-    virtual Bathymetry getValue( const Coord& coords ) const = 0;
-
-    
+    virtual Bathymetry getValue( const Coord& coords ) const = 0; 
   };
 
 
@@ -327,14 +295,11 @@ namespace woss {
   **/
   class WossSedimentDb {
 
-    
     public:
-      
 
-    WossSedimentDb() { }
+    WossSedimentDb() = default;
 
-    virtual ~WossSedimentDb() { }
-
+    virtual ~WossSedimentDb() = default;
 
     /**
     * Inserts the given woss::Sediment value in the database for given coordinates
@@ -344,25 +309,23 @@ namespace woss {
     **/
     virtual bool insertValue( const Coord& coordinates, const Sediment& sediment_value ) = 0;
     
-    
     /**
-    * Returns a pointer to a heap-created Sediment value for given coordinates and depth, if present in the database.
+    * Returns a std::unique_ptr to a heap-created Sediment value for given coordinates and depth, if present in the database.
     * <b>User is responsible of pointer's ownership</b>
     * @param coords const reference to a valid CoordZ object
-    * @return <i>valid</i> Sediment if coordinates are found, <i>not valid</i> otherwise
+    * @return std::unique_ptr to a <i>valid</i> Sediment if coordinates are found, <i>not valid</i> otherwise
     **/
-    virtual Sediment* getValue( const CoordZ& coords ) const = 0; 
+    virtual std::unique_ptr<Sediment> getValue( const CoordZ& coords ) const = 0; 
 
     /**
-    * Returns a pointer to a heap-created Sediment value for given coordinates and depth vector, if at least one set of coordinates 
+    * Returns a std::unique_ptr to a heap-created Sediment value for given coordinates and depth vector, if at least one set of coordinates 
     * is present in the database.
     * <b>User is responsible of pointer's ownership</b>
     * @param coordz_vector const reference to a valid CoordZ vector
-    * @return <i>valid</i> Sediment if at least one set of coordinates is found, <i>not valid</i> otherwise
+    * @return std::unique_ptr to a <i>valid</i> Sediment if at least one set of coordinates is found, <i>not valid</i> otherwise
     **/
-    virtual Sediment* getValue( const CoordZVector& coordz_vector ) const = 0; 
-    
-    
+    virtual std::unique_ptr<Sediment> getValue( const CoordZVector& coordz_vector ) const = 0; 
+
   };
 
 
@@ -374,14 +337,11 @@ namespace woss {
   **/
   class WossSSPDb {
 
-    
     public:
 
-      
-    WossSSPDb() { }
+    WossSSPDb() = default;
 
-    virtual ~WossSSPDb() { }
-
+    virtual ~WossSSPDb() = default;
 
     /**
     * Inserts the given woss::SSP value in the database for given coordinates
@@ -392,18 +352,16 @@ namespace woss {
     **/
     virtual bool insertValue( const Coord& coordinates, const Time& time_value, const SSP& ssp_value ) = 0;
     
-    
     /**
-    * Returns a pointer to a heap-created SSP object for given coordinates and date time if both present in the database.
+    * Returns a std::unique_ptr to a heap-created SSP object for given coordinates and date time if both present in the database.
     * <b>User is responsible of pointer's ownership</b>
     * @param coords const reference to a valid Coord object
     * @param time const reference to a valid Time object
     * @param ssp_depth_precision ssp depth precision [m]
-    * @return <i>valid</i> SSP if coordinates and time date are found, <i>not valid</i> otherwise
+    * @return std::unique_ptr to a <i>valid</i> SSP if coordinates and time date are found, <i>not valid</i> otherwise
     **/  
-    virtual SSP* getValue( const Coord& coords, const Time& time, long double ssp_depth_precision ) const = 0;
+    virtual std::unique_ptr<SSP> getValue( const Coord& coords, const Time& time, long double ssp_depth_precision ) const = 0;
 
-    
   };
 
 
@@ -415,26 +373,23 @@ namespace woss {
   **/
   class WossResTimeArrDb {
 
-    
     public:
 
-      
-    WossResTimeArrDb() { }
+    WossResTimeArrDb() = default;
 
-    virtual ~WossResTimeArrDb() { }
+    virtual ~WossResTimeArrDb() = default;
 
     /**
-    * Returns a heap-created TimeArr value for given frequency, transmitter and receiver 
+    * Returns a std::unique_ptr to a heap-created TimeArr value for given frequency, transmitter and receiver 
     * coordinates if present in the database. 
     * <b>User is responsible of pointer's ownership</b>
     * @param coord_tx const reference to a valid CoordZ object
     * @param coord_rx const reference to a valid CoordZ object
     * @param frequency used frequency [hz]
-    * @return <i>valid</i> TimeArr if parameters are found, <i>not valid</i> otherwise
+    * @return std::unique_ptr to a <i>valid</i> TimeArr if parameters are found, <i>not valid</i> otherwise
     **/  
-    virtual TimeArr* getValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value ) const = 0;
+    virtual std::unique_ptr<TimeArr> getValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value ) const = 0;
 
-    
     /**
     * Inserts the given TimeArr value in the database at given frequency, transmitter and receiver coordinates
     * @param coord_tx const reference to a valid CoordZ object
@@ -445,7 +400,6 @@ namespace woss {
     **/
     virtual bool insertValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value, const TimeArr& channel ) = 0;
 
-    
   };
 
 
@@ -457,25 +411,21 @@ namespace woss {
   **/
   class WossResPressDb {
 
-    
     public:
-      
 
-    WossResPressDb() {  }
+    WossResPressDb() = default;
 
-    virtual ~WossResPressDb() { }
-
+    virtual ~WossResPressDb() = default;
 
     /**
-    * Returns a heap-created Pressure value for given frequency, transmitter and receiver coordinates if present in the database.
+    * Returns a std::unique_ptr to a heap-created Pressure value for given frequency, transmitter and receiver coordinates if present in the database.
     * <b>User is responsible of pointer's ownership</b>
     * @param coord_tx const reference to a valid CoordZ object
     * @param coord_rx const reference to a valid CoordZ object
     * @param frequency used frequency [hz]
-    * @return <i>valid</i> TimeArr if parameters are found, <i>not valid</i> otherwise
+    * @return std::unique_ptr to a <i>valid</i> Pressure if parameters are found, <i>not valid</i> otherwise
     **/  
-    virtual Pressure* getValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value ) const = 0;
-
+    virtual std::unique_ptr<Pressure> getValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value ) const = 0;
 
     /**
     * Inserts the given Pressure value in the database at given frequency, transmitter and receiver coordinates
@@ -487,12 +437,8 @@ namespace woss {
     **/
     virtual bool insertValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value,  const Pressure& pressure ) = 0;
 
-
   };
 
 }
 
-
 #endif /* WOSS_DB_H */
-
-

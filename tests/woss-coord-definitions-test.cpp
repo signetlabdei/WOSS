@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2020 Federico Guerra
+ * Copyright (C) 2020 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   woss-definitions-test.cpp
@@ -39,6 +32,7 @@
 
 #include <iostream>
 #include <vector>
+#include <sstream>
 #include "woss-test.h"
 
 using namespace std;
@@ -50,16 +44,15 @@ class WossCoordDefTest : public WossTest {
   
   WossCoordDefTest();
   
-  virtual ~WossCoordDefTest() {}
+  virtual ~WossCoordDefTest() override = default;
 
-  
   private:
 
-  virtual void doConfig();
+  virtual void doConfig() override;
 
-  virtual void doInit();
+  virtual void doInit() override;
 
-  virtual void doRun(); 
+  virtual void doRun() override;
 
 
   void doCoordCartTests(const CoordZ& curr_coord);
@@ -85,11 +78,11 @@ class WossCoordDefTest : public WossTest {
   double end_depth; // meters
   double step_depth; // meters
 
-  std::vector<double> vector_lat;
-  std::vector<double> vector_lon;
-  std::vector<double> vector_dist;
-  std::vector<double> vector_bearing;
-  std::vector<double> vector_depth;
+  vector<double> vector_lat;
+  vector<double> vector_lon;
+  vector<double> vector_dist;
+  vector<double> vector_bearing;
+  vector<double> vector_depth;
 };
 
 WossCoordDefTest::WossCoordDefTest()
@@ -117,10 +110,10 @@ WossCoordDefTest::WossCoordDefTest()
   vector_bearing(),
   vector_depth()
 {
-  //debug = true;
 }
 
 void WossCoordDefTest::doConfig() {
+  //debug = true;
 }
 
 void WossCoordDefTest::doInit() {
@@ -153,7 +146,7 @@ void WossCoordDefTest::doCoordCartTests(const CoordZ& test_coord) {
     }
 
     if (false == test_cart_coord.isValid()) {
-      throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
+      WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_INVALID_PARAM); 
     }
 
     double error_distance = test_cart_coord.getCartDistance(test_coord, type);
@@ -163,7 +156,10 @@ void WossCoordDefTest::doCoordCartTests(const CoordZ& test_coord) {
     }
 
     if (error_distance > cartesian_precision) {
-      throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+      stringstream ss;
+      ss << "er dist(" << error_distance << ") > cart dist(" << cartesian_precision << ")";
+
+      WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str()); 
     }
   }
 }
@@ -175,11 +171,13 @@ void WossCoordDefTest::doBearingTests(const CoordZ& curr_coord, const CoordZ& ne
 
   if (debug) {
     cout << __LINE__ << ": " << "curr_bear: " << curr_bear << "," << curr_bearing_pd << "," << curr_bearing_pd * PDouble(180.0 / M_PI) 
-        << "; test_bearing: " << test_bearing << "," <<  test_bearing_pd << "," << test_bearing_pd * PDouble(180.0 / M_PI) << endl;
+         << "; test_bearing: " << test_bearing << "," <<  test_bearing_pd << "," << test_bearing_pd * PDouble(180.0 / M_PI) << endl;
   }
 
   if (test_bearing_pd != curr_bearing_pd) {
-    throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+    stringstream ss;
+    ss << "test br(" << test_bearing_pd << ") != curr br(" << curr_bearing_pd << ")";
+    WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
   }
 
   double test_distance = curr_coord.getGreatCircleDistance( new_coord );
@@ -188,11 +186,13 @@ void WossCoordDefTest::doBearingTests(const CoordZ& curr_coord, const CoordZ& ne
 
   if (debug) {
     cout << __LINE__ << ": " << "curr_distance: " << curr_distance << "," << curr_distance_pd
-        << "; test_distance: " << test_distance << "," << test_distance_pd << endl;
+         << "; test_distance: " << test_distance << "," << test_distance_pd << endl;
   }
 
   if (test_distance_pd != curr_distance_pd) {
-    throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+    stringstream ss;
+    ss << "test dst(" << test_distance_pd << ") != curr dst(" << curr_distance_pd << ")";
+    WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
   }
   
   double cart_distance = curr_coord.getCartDistance( new_coord );
@@ -200,53 +200,49 @@ void WossCoordDefTest::doBearingTests(const CoordZ& curr_coord, const CoordZ& ne
 
   if (debug) {
     cout << __LINE__ << ": " << "curr_distance: " << curr_distance << "," << curr_distance_pd
-        << "; cart_distance: " << cart_distance << "," << cart_distance_pd << endl;
+         << "; cart_distance: " << cart_distance << "," << cart_distance_pd << endl;
   }
 
   if (curr_distance_pd != cart_distance_pd) {
-    throw WOSS_EXCEPTION(WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+    stringstream ss;
+    ss << "cur dst(" << curr_distance_pd << ") != cart dst(" << cart_distance_pd << ")";
+    WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
   }
 }
 
 void WossCoordDefTest::doRun() {
 
   for (double i = start_lon; i <= end_lon; i += step_lon) {
-    vector_lon.push_back(i);
+    vector_lon.emplace_back(i);
   }
 
   for (double i = start_lat; i <= end_lat; i += step_lat) {
-    vector_lat.push_back(i);
+    vector_lat.emplace_back(i);
   }
 
   for (double i = start_bearing; i < end_bearing; i += step_bearing) {
-    vector_bearing.push_back(i * M_PI / 180.0);
+    vector_bearing.emplace_back(i * M_PI / 180.0);
   }
 
   for (double i = start_distance; i <= end_distance; i += step_distance) {
-    vector_dist.push_back(i);
+    vector_dist.emplace_back(i);
   }
 
   for (double i = start_depth; i <= end_depth; i += step_depth) {
-    vector_depth.push_back(i);
+    vector_depth.emplace_back(i);
   }
 
-  for (vector<double>::iterator it = vector_lon.begin(); it != vector_lon.end(); ++it) {
-    double curr_lon = *it;
-
+  for (auto curr_lon : vector_lon) {
     if (debug) {
       cout << __LINE__ << ": " << "curr_lon: " << curr_lon << endl;
     }
 
-    for (vector<double>::iterator it2 = vector_lat.begin(); it2 != vector_lat.end(); ++it2) {
-      double curr_lat = *it2;
-
+    for (auto curr_lat : vector_lat) {
       if (debug) {
         cout << __LINE__ << ": " << "curr_lat: " << curr_lat << endl;
       }
 
-      for (vector<double>::iterator it = vector_depth.begin(); it != vector_depth.end(); ++it) {
-        double curr_depth = *it;
-
+      for (auto curr_depth : vector_depth) {
         if (debug) {
           cout << __LINE__ << ": " << "curr_depth: " << curr_depth << endl;
         }
@@ -257,22 +253,18 @@ void WossCoordDefTest::doRun() {
         }
 
         if (false == curr_coord.isValid()) {
-          throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
+          WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_INVALID_PARAM); 
         }
 
         // Do geographical coordinates to Cartesian Coordinates tests
         doCoordCartTests(curr_coord);
 
-        for (vector<double>::iterator it3 = vector_bearing.begin(); it3 != vector_bearing.end(); ++it3) {
-          double curr_bear = *it3;
-
+        for (auto curr_bear : vector_bearing) {
           if (debug) {
             cout << __LINE__ << ": " << "curr_bear: " << curr_bear << ", " << curr_bear * 180.0 / M_PI << endl;
           }
 
-          for (vector<double>::iterator it4 = vector_dist.begin(); it4 != vector_dist.end(); ++it4) {
-            double curr_distance = *it4;
-
+          for (auto curr_distance : vector_dist) {
             if (debug) {
               cout << __LINE__ << ": " << "curr_distance: " << curr_distance << endl;
             }
@@ -284,7 +276,7 @@ void WossCoordDefTest::doRun() {
             }
 
             if (false == new_coord.isValid()) {
-              throw WOSS_EXCEPTION(WOSS_ERROR_INVALID_PARAM); 
+              WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_INVALID_PARAM); 
             }
 
             // Do geographical coordinates to Cartesian Coordinates tests
@@ -302,9 +294,9 @@ void WossCoordDefTest::doRun() {
 
 int main(int argc, char* argv [])
 {
-  WossCoordDefTest* woss_def_test = new WossCoordDefTest();
+  auto woss_def_test = make_unique<WossCoordDefTest>();
+
   woss_def_test->run();
-  delete woss_def_test;
 
   return 0;
 }

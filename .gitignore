@@ -3,6 +3,7 @@
 *.log
 *.out
 *.csv
+*~
 .vscode*
 ***/Makefile.in
 ***/aclocal.m4
@@ -35,8 +36,9 @@
 ***/*.trs
 ***/.clang-format
 ***/*.dirstamp
-***/doc/
-woss_phy/woss-phy-embeddedtcl.cc
-woss/WossWOADbCreator
-woss/WossDeck41DbCreator
-tests/*bin
+***/doc/html
+***/doc/latex
+***/woss_phy/woss-phy-embeddedtcl.cc
+***/woss/WossWOADbCreator
+***/woss/WossDeck41DbCreator
+***/tests/*bin

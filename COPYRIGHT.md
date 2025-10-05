@@ -1,9 +1,16 @@
+# Copyright Terms
+
+## WOSS
+
+WOSS has been release under GPLv2 license.
+
+```
 WOSS - World Ocean Simulation System -
 
-Copyright (C) 2009 Federico Guerra 
+Copyright (C) 2009 2025 Federico Guerra 
 and regents of SIGNET lab, University of Padova 
 
-Author: Federico Guerra - federico@guerra-tlc.com
+Author: Federico Guerra - WOSS@guerra-tlc.com
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 2 as
@@ -17,14 +24,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+```
 
---------------------------------------------------------------------------
---------------------------------------------------------------------------
+## NS-Miracle
 
 The source files containing NS-Miracle code refer to this revised BSD 
 and GPL compatible copyright:
 
- 
+``` 
 Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
 All rights reserved.
 
@@ -52,13 +59,14 @@ OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
 WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
  
-----------------------------------------------------------------------------
-----------------------------------------------------------------------------
+### NetCDF
 
 The source files containing NetCDF code refer to this BSD-like and
 GPL compatible copyright:
 
+```
 Copyright 1993-2008 University Corporation for Atmospheric Research/Unidata
 
 Portions of this software were developed by the Unidata Program at the 
@@ -90,13 +98,13 @@ INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
 FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
 NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
 WITH THE ACCESS, USE OR PERFORMANCE OF THIS SOFTWARE.
+```
 
-----------------------------------------------------------------------------
-----------------------------------------------------------------------------
+### Bellhop
 
 Bellhop program is published under the following copyright:
 
-
+```
 Copyright (C) 2009  Michael B. Porter
 
 This program is free software: you can redistribute it and/or modify
@@ -111,15 +119,15 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+```
 
-----------------------------------------------------------------------------
-----------------------------------------------------------------------------
+### TEOS-10
 
 TEOS-10 SSP formula code has been taken from has been taken from 
 Gibbs SeaWater (GSW) Oceanographic Toolbox, which has published under the 
 folllowing copyright:
 
-
+```
 Copyright (c) 2011, SCOR/IAPSO WG127 (Scientific Committee on Oceanic Research/
 International Association for the Physical Sciences of the Oceans, Working Group 127).
 
@@ -151,4 +159,4 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 
 The software is available from http://www.TEOS-10.org
-
+```

@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -41,34 +34,34 @@
 #define WOSS_BELLHOP_CREATOR_DEFINITIONS_H
 
 
+#include <memory>
+#include <ostream>
+#include "woss-creator-container.h"
 #include "woss-creator.h"
 #include "bellhop-woss.h"
 
 
 namespace woss {
-  
-    
+
   /**
   * \brief Bellhop min max angles
   *
   * Struct that stores Bellhop minimum and maximum ray launching angle
   **/
   struct CustomAngles {
-  
-    
+
     /**
     * Default constructor
     * @param min minimum angle [signed degrees]
     * @param max maximum angle [signed degrees]
     **/
     CustomAngles( double min = double(), double max = double() ) : min_angle(min), max_angle(max) { }
-   
-   
+
     friend std::ostream& operator<<( std::ostream& os, const CustomAngles& instance ) {
       os << "min angle = " << instance.min_angle << "; max_angle = " << instance.max_angle;
       return os;
-    }   
-    
+    }
+
     /**
     * minimum angle [signed degrees]
     **/
@@ -78,11 +71,9 @@ namespace woss {
     * maximum angle [signed degrees]
     **/    
     double max_angle;
-   
-    
+
   };
 
-    
   /**
   * \brief class that provides correctly initialized BellhopWoss objects
   *
@@ -90,7 +81,6 @@ namespace woss {
   */
   class BellhopCreator : public WossCreator {
 
-    
     public:
 
     /**
@@ -98,8 +88,7 @@ namespace woss {
     */
     BellhopCreator();
     
-    virtual ~BellhopCreator() { }
-    
+    virtual ~BellhopCreator() override = default;
 
     /**
     * Returns a pointer to valid BellhopWoss for given parameters
@@ -107,26 +96,24 @@ namespace woss {
     * @param rx const reference to a valid CoordZ object ( receiver )
     * @param start_freq start frequency [Hz]
     * @param end_freq end frequency [Hz]
-    * @returns pointer to properly initialized BellhopWoss object
+    * @returns a std::unique_ptr to a properly initialized woss::Woss object
     **/
-    virtual BellhopWoss* const createWoss( const CoordZ& tx, const CoordZ& rx, double start_frequency, double end_frequency ) const;
-    
-    
+    virtual std::unique_ptr<Woss> const createWoss( const CoordZ& tx, const CoordZ& rx, double start_frequency, double end_frequency ) const override;
+
     /**
     * Sets the Thorpe attenuation flag for all bellhop instances
     * @param flag boolean flag
     * @return reference to <b>*this</b>
     */
     BellhopCreator& setThorpeAttFlag( bool flag ) { use_thorpe_att = flag; return *this; }
-    
+
     /**
     * Gets the Thorpe attenuation flag for all bellhop instances
     * @return boolean flag
     */
-    bool getThorpeAttFlag() { return use_thorpe_att; }
-    
-    
-  /**
+    bool getThorpeAttFlag() const { return use_thorpe_att; }
+
+    /**
     * Sets the total range steps of bellhop simulation for given transmitter, receiver woss::CoordZ
     * @param steps total range steps
     * @param tx const reference to a valid woss::CoordZ instance
@@ -143,7 +130,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setTotalRangeSteps( int steps, Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& setTotalRangeSteps( int steps, const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_range_steps.replace(steps, tx, rx); return *this; }
 
     /**
@@ -161,7 +148,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseTotalRangeSteps( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseTotalRangeSteps( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_range_steps.erase(tx, rx); return *this; }
 
     /**
@@ -170,7 +157,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance
     * @return int value
     */
-    double getTotalRangeSteps( const CoordZ& tx, const CoordZ& rx ) { 
+    double getTotalRangeSteps( const CoordZ& tx, const CoordZ& rx ) const { 
       return cctotal_range_steps.get(tx, rx); }
 
     /**
@@ -179,10 +166,9 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return int value
     */
-    double getTotalRangeSteps( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    double getTotalRangeSteps( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) const { 
       return cctotal_range_steps.get(tx, rx); }
-      
-    
+
     /**
     * Sets mimimum depth offset [m] for given transmitter, receiver woss::CoordZ
     * @param offset 0 <= depth offset <= 0 [m]
@@ -200,7 +186,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setTxMinDepthOffset( double offset, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& setTxMinDepthOffset( double offset, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       cctx_min_depth_offset.replace(offset, tx, rx); return *this; }
 
     /**
@@ -218,7 +204,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseTxMinDepthOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseTxMinDepthOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       cctx_min_depth_offset.erase(tx, rx); return *this; }
 
     /**
@@ -227,7 +213,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance
     * @return value in meters
     */
-    double getTxMinDepthOffset( const CoordZ& tx, const CoordZ& rx ) { 
+    double getTxMinDepthOffset( const CoordZ& tx, const CoordZ& rx ) const { 
       return cctx_min_depth_offset.get(tx, rx); }
 
     /**
@@ -236,9 +222,8 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return value in meters
     */
-    double getTxMinDepthOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    double getTxMinDepthOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const { 
       return cctx_min_depth_offset.get(tx, rx); }
-      
 
     /**
     * Sets the transmitter maximum depth offset [m] for given transmitter, receiver woss::CoordZ
@@ -257,7 +242,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setTxMaxDepthOffset( double offset, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& setTxMaxDepthOffset( double offset, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       cctx_max_depth_offset.replace(offset, tx, rx); return *this; }
 
     /**
@@ -275,7 +260,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseTxMaxDepthOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseTxMaxDepthOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       cctx_max_depth_offset.erase(tx, rx); return *this; }
 
     /**
@@ -284,7 +269,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance
     * @return value in meters
     */
-    double getTxMaxDepthOffset( const CoordZ& tx, const CoordZ& rx ) { 
+    double getTxMaxDepthOffset( const CoordZ& tx, const CoordZ& rx ) const { 
       return cctx_max_depth_offset.get(tx, rx); }
 
     /**
@@ -293,9 +278,8 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return value in meters
     */
-    double getTxMaxDepthOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    double getTxMaxDepthOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const { 
       return cctx_max_depth_offset.get(tx, rx); }
-
 
     /**
     * Sets the number of transmitters for given transmitter, receiver woss::CoordZ
@@ -314,7 +298,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setTotalTransmitters( int sources, Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& setTotalTransmitters( int sources, const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_transmitters.replace(sources, tx, rx); return *this; }
 
     /**
@@ -332,7 +316,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseTotalTransmitters( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseTotalTransmitters( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_transmitters.erase(tx, rx); return *this; }
 
     /**
@@ -341,7 +325,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance
     * @return total number of transmitter sources
     */
-    int getTotalTransmitters( const CoordZ& tx, const CoordZ& rx ) { 
+    int getTotalTransmitters( const CoordZ& tx, const CoordZ& rx ) const { 
       return cctotal_transmitters.get(tx, rx); }
 
     /**
@@ -350,7 +334,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance
     * @return total number of transmitter sources
     */
-    int getTotalTransmitters( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    int getTotalTransmitters( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) const { 
       return cctotal_transmitters.get(tx, rx); }
 
 
@@ -371,7 +355,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setRxMinDepthOffset( double offset, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& setRxMinDepthOffset( double offset, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccrx_min_depth_offset.replace(offset, tx, rx); return *this; }
 
     /**
@@ -389,7 +373,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseRxMinDepthOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseRxMinDepthOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccrx_min_depth_offset.erase(tx, rx); return *this; }
 
     /**
@@ -398,7 +382,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance    
     * @return value in meters
     */
-    double getRxMinDepthOffset( const CoordZ& tx, const CoordZ& rx ) { 
+    double getRxMinDepthOffset( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccrx_min_depth_offset.get(tx, rx); }
 
     /**
@@ -407,7 +391,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return value in meters
     */
-    double getRxMinDepthOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    double getRxMinDepthOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const { 
       return ccrx_min_depth_offset.get(tx, rx); }
 
 
@@ -428,7 +412,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setRxMaxDepthOffset( double offset, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& setRxMaxDepthOffset( double offset, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccrx_max_depth_offset.replace(offset, tx, rx); return *this; }
 
     /**
@@ -446,7 +430,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseRxMaxDepthOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseRxMaxDepthOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccrx_max_depth_offset.erase(tx, rx); return *this; }
 
     /**
@@ -455,7 +439,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance    
     * @return value in meters
     */
-    double getRxMaxDepthOffset( const CoordZ& tx, const CoordZ& rx ) { 
+    double getRxMaxDepthOffset( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccrx_max_depth_offset.get(tx, rx); }
 
     /**
@@ -465,9 +449,8 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return value in meters
     */
-    double getRxMaxDepthOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    double getRxMaxDepthOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const { 
       return ccrx_max_depth_offset.get(tx, rx); }
-
 
     /**
     * Sets the receiver mimimum range offset [m] for given transmitter, receiver woss::CoordZ
@@ -486,7 +469,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */   
-    BellhopCreator& setRxMinRangeOffset( double offset, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& setRxMinRangeOffset( double offset, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccrx_min_range_offset.replace(offset, tx, rx); return *this; }
 
     /**
@@ -504,7 +487,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */   
-    BellhopCreator& eraseRxMinRangeOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseRxMinRangeOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccrx_min_range_offset.erase(tx, rx); return *this; }
 
     /**
@@ -513,7 +496,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance    
     * @return value in meters
     */   
-    double getRxMinRangeOffset( const CoordZ& tx, const CoordZ& rx ) { 
+    double getRxMinRangeOffset( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccrx_min_range_offset.get(tx, rx); }
 
     /**
@@ -522,10 +505,9 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return value in meters
     */   
-    double getRxMinRangeOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    double getRxMinRangeOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const { 
       return ccrx_min_range_offset.get(tx, rx); }       
-    
-    
+
     /**
     * Sets the receiver maximum depth offset [m] for given transmitter, receiver woss::CoordZ
     * @param offset -total_distance <= range offset <= total_distance [m]
@@ -543,7 +525,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setRxMaxRangeOffset( double offset, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& setRxMaxRangeOffset( double offset, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccrx_max_range_offset.replace(offset, tx, rx); return *this; }
 
     /**
@@ -561,7 +543,7 @@ namespace woss {
     * @param tx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseRxMaxRangeOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseRxMaxRangeOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccrx_max_range_offset.erase(tx, rx); return *this; }
 
     /**
@@ -570,7 +552,7 @@ namespace woss {
     * @param tx const reference to a valid woss::CoordZ instance    
     * @return value in meters
     */   
-    double getRxMaxRangeOffset( const CoordZ& tx, const CoordZ& rx ) { 
+    double getRxMaxRangeOffset( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccrx_max_range_offset.get(tx, rx); }
 
     /**
@@ -579,10 +561,9 @@ namespace woss {
     * @param tx const pointer to a valid woss::Location instance    
     * @return value in meters
     */
-    double getRxMaxRangeOffset( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    double getRxMaxRangeOffset( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const { 
       return ccrx_max_range_offset.get(tx, rx); }       
-    
-    
+
     /**
     * Sets the number of receiver depths for given transmitter, receiver woss::CoordZ
     * @param number number of receiver depths
@@ -600,7 +581,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setRxTotalDepths( int number, Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& setRxTotalDepths( int number, const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_rx_depths.replace(number, tx, rx); return *this; }
 
     /**
@@ -618,7 +599,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseRxTotalDepths( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseRxTotalDepths( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_rx_depths.erase(tx, rx); return *this; }
 
     /**
@@ -627,7 +608,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return number of receiver depths
     */
-    int getRxTotalDepths( const CoordZ& tx, const CoordZ& rx ) { 
+    int getRxTotalDepths( const CoordZ& tx, const CoordZ& rx ) const { 
       return cctotal_rx_depths.get(tx, rx); }
 
     /**
@@ -636,10 +617,9 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return number of receiver depths
     */
-    int getRxTotalDepths( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    int getRxTotalDepths( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) const { 
       return cctotal_rx_depths.get(tx, rx); }   
-      
-      
+
     /**
     * Sets the number of receiver ranges for given transmitter, receiver woss::CoordZ
     * @param number number of receiver ranges
@@ -657,7 +637,7 @@ namespace woss {
     * @param rx const reference to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setRxTotalRanges( int number, Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& setRxTotalRanges( int number, const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_rx_ranges.replace(number, tx, rx); return *this; }
 
     /**
@@ -675,7 +655,7 @@ namespace woss {
     * @param rx const reference to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseRxTotalRanges( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseRxTotalRanges( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_rx_ranges.erase(tx, rx); return *this; }
 
     /**
@@ -684,7 +664,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return number of receiver ranges
     */
-    int getRxTotalRanges( const CoordZ& tx, const CoordZ& rx ) { 
+    int getRxTotalRanges( const CoordZ& tx, const CoordZ& rx ) const { 
       return cctotal_rx_ranges.get(tx, rx); }
 
     /**
@@ -693,9 +673,8 @@ namespace woss {
     * @param rx const reference to a valid woss::Location instance 
     * @return number of receiver ranges
     */
-    int getRxTotalRanges( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    int getRxTotalRanges( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) const { 
       return cctotal_rx_ranges.get(tx, rx); }  
-      
 
     /**
     * Sets the number of launched rays for given transmitter, receiver woss::CoordZ
@@ -714,7 +693,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setRaysNumber( int number, Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& setRaysNumber( int number, const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_rays.replace(number, tx, rx); return *this; }
 
     /**
@@ -732,7 +711,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseRaysNumber( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseRaysNumber( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       cctotal_rays.erase(tx, rx); return *this; }
 
     /**
@@ -741,7 +720,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return number of launched rays
     */
-    int getRaysNumber( const CoordZ& tx, const CoordZ& rx ) { 
+    int getRaysNumber( const CoordZ& tx, const CoordZ& rx ) const { 
       return cctotal_rays.get(tx, rx); }
 
     /**
@@ -750,22 +729,21 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return number of launched rays
     */
-    int getRaysNumber( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    int getRaysNumber( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) const { 
       return cctotal_rays.get(tx, rx); }  
-
 
     /**
     * Sets the path of bellhop program
     * @param path filesystem path
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setBellhopPath( const ::std::string& path ) { bellhop_path = path; return *this; }
+    BellhopCreator& setBellhopPath( const std::string& path ) { bellhop_path = path; return *this; }
 
     /**
     * Gets the path of bellhop program
     * @return path string
     */
-    ::std::string getBellhopPath() { return bellhop_path; }
+    std::string getBellhopPath() const { return bellhop_path; }
 
     /**
     * Sets the .arr file syntax to be used during file parsing
@@ -779,7 +757,7 @@ namespace woss {
     * Gets the .arr file syntax
     * @return bellhop_arr_syntax
     */
-    BellhopArrSyntax getBellhopArrSyntax() { return bellhop_arr_syntax; }
+    BellhopArrSyntax getBellhopArrSyntax() const { return bellhop_arr_syntax; }
 
     /**
     * Sets the .shd file syntax to be used during file parsing
@@ -793,7 +771,7 @@ namespace woss {
     * Gets the .shd file syntax
     * @return bellhop_shd_syntax
     */
-    BellhopShdSyntax getBellhopShdSyntax() { return bellhop_shd_syntax; }
+    BellhopShdSyntax getBellhopShdSyntax() const { return bellhop_shd_syntax; }
 
     /**
     * Sets the beam option string for given transmitter, receiver woss::CoordZ. 
@@ -803,7 +781,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setBeamOptions( const ::std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
+    BellhopCreator& setBeamOptions( const std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
       ccbeam_options.replace(options, tx, rx); return *this; }
 
     /**
@@ -814,7 +792,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setBeamOptions( const ::std::string& options, Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& setBeamOptions( const std::string& options, const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccbeam_options.replace(options, tx, rx); return *this; }
 
     /**
@@ -832,7 +810,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseBeamOptions( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseBeamOptions( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccbeam_options.erase(tx, rx); return *this; }
 
     /**
@@ -841,7 +819,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return beam options
     */
-    ::std::string getBeamOptions( const CoordZ& tx, const CoordZ& rx ) { 
+    std::string getBeamOptions( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccbeam_options.get(tx, rx); }
 
     /**
@@ -850,9 +828,8 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return beam options
     */
-    ::std::string getBeamOptions( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    std::string getBeamOptions( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) const { 
       return ccbeam_options.get(tx, rx); }  
-      
 
     /**
     * Sets the Bellhop run mode string for given transmitter, receiver woss::CoordZ. 
@@ -862,7 +839,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setBhMode( const ::std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
+    BellhopCreator& setBhMode( const std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
       ccbellhop_mode.replace(options, tx, rx); return *this; }
 
     /**
@@ -873,7 +850,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setBhMode( const ::std::string& options, Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& setBhMode( const std::string& options, const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccbellhop_mode.replace(options, tx, rx); return *this; }
 
     /**
@@ -891,7 +868,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseBhMode( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseBhMode( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccbellhop_mode.erase(tx, rx); return *this; }
 
     /**
@@ -900,7 +877,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return Bellhop run mode
     */
-    ::std::string getBhMode( const CoordZ& tx, const CoordZ& rx ) { 
+    std::string getBhMode( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccbellhop_mode.get(tx, rx); }
 
     /**
@@ -909,9 +886,8 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return Bellhop run mode
     */
-    ::std::string getBhMode( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    std::string getBhMode( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) const { 
       return ccbellhop_mode.get(tx, rx); } 
-
 
     /**
     * Sets the bathymetry type ( L, C ) for given transmitter, receiver woss::CoordZ. 
@@ -921,7 +897,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return reference to <b>*this</b>
     */   
-    BellhopCreator& setBathymetryType( const ::std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
+    BellhopCreator& setBathymetryType( const std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
       ccbathymetry_type.replace(options, tx, rx); return *this; }
 
     /**
@@ -932,7 +908,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setBathymetryType( const ::std::string& options, Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& setBathymetryType( const std::string& options, const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccbathymetry_type.replace(options, tx, rx); return *this; }
 
     /**
@@ -950,7 +926,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseBathymetryType( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseBathymetryType( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccbathymetry_type.erase(tx, rx); return *this; }
 
     /**
@@ -959,7 +935,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return bathymetry type
     */   
-    ::std::string getBathymetryType( const CoordZ& tx, const CoordZ& rx ) { 
+    std::string getBathymetryType( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccbathymetry_type.get(tx, rx); }
 
     /**
@@ -968,7 +944,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return  bathymetry type
     */
-    ::std::string getBathymetryType( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    std::string getBathymetryType( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) const { 
       return ccbathymetry_type.get(tx, rx); }    
 
     /**
@@ -979,7 +955,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return reference to <b>*this</b>
     */   
-    BellhopCreator& setBathymetryMethod( const ::std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
+    BellhopCreator& setBathymetryMethod( const std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
       ccbathymetry_method.replace(options, tx, rx); return *this; }
 
     /**
@@ -990,7 +966,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setBathymetryMethod( const ::std::string& options, Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& setBathymetryMethod( const std::string& options, const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccbathymetry_method.replace(options, tx, rx); return *this; }
 
     /**
@@ -1008,7 +984,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseBathymetryMethod( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseBathymetryMethod( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccbathymetry_method.erase(tx, rx); return *this; }
 
     /**
@@ -1017,7 +993,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return bathymetry type
     */   
-    ::std::string getBathymetryMethod( const CoordZ& tx, const CoordZ& rx ) { 
+    std::string getBathymetryMethod( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccbathymetry_method.get(tx, rx); }
 
     /**
@@ -1026,7 +1002,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return  bathymetry type
     */
-    ::std::string getBathymetryMethod( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    std::string getBathymetryMethod( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) const { 
       return ccbathymetry_method.get(tx, rx); }   
 
     /**
@@ -1037,7 +1013,7 @@ namespace woss {
     * @param rx const reference to a valid woss::CoordZ instance 
     * @return reference to <b>*this</b>
     */   
-    BellhopCreator& setAltimetryType( const ::std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
+    BellhopCreator& setAltimetryType( const std::string& options, const CoordZ& tx, const CoordZ& rx ) { 
       ccaltimetry_type.replace(options, tx, rx); return *this; }
     
     /**
@@ -1048,7 +1024,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance 
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setAltimetryType( const ::std::string& options, Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& setAltimetryType( const std::string& options, const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccaltimetry_type.replace(options, tx, rx); return *this; }
       
     /**
@@ -1066,7 +1042,7 @@ namespace woss {
       * @param rx const pointer to a valid woss::Location instance 
       * @return reference to <b>*this</b>
       */
-    BellhopCreator& eraseAltimetryType( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseAltimetryType( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) { 
       ccaltimetry_type.erase(tx, rx); return *this; }
         
     /**
@@ -1074,19 +1050,18 @@ namespace woss {
       * @param tx const reference to a valid woss::CoordZ instance
       * @param rx const reference to a valid woss::CoordZ instance 
       * @return altimetry type
-      */   
-    ::std::string getAltimetryType( const CoordZ& tx, const CoordZ& rx ) { 
+      */
+    std::string getAltimetryType( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccaltimetry_type.get(tx, rx); }
-      
+
     /**
      * Sets the altimetry type ( L, C ) for given transmitter, receiver woss::Location
       * @param tx const pointer to a valid woss::Location instance
       * @param rx const pointer to a valid woss::Location instance 
       * @return  altimetry type
       */
-    ::std::string getAltimetryType( Location* const tx = CCString::ALL_LOCATIONS, Location* const rx = CCString::ALL_LOCATIONS ) { 
+    std::string getAltimetryType( const std::shared_ptr<Location>& tx = CCString::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCString::ALL_LOCATIONS ) const { 
       return ccaltimetry_type.get(tx, rx); }    
-
 
     /**
     * Sets the CustomAngles for given transmitter CoordZ, receiver woss::CoordZ
@@ -1105,9 +1080,9 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance  
     * @return reference to <b>*this</b>
     **/
-    BellhopCreator& setAngles( const CustomAngles& angles, Location* const tx = CCAngles::ALL_LOCATIONS, Location* const rx = CCAngles::ALL_LOCATIONS ) { 
+    BellhopCreator& setAngles( const CustomAngles& angles, const std::shared_ptr<Location>& tx = CCAngles::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCAngles::ALL_LOCATIONS ) { 
       ccangles_map.replace(angles, tx, rx); return *this; }    
-   
+
     /**
     * Returns the CustomAngles for given transmitter CoordZ, receiver woss::CoordZ
     * @param tx const reference to a valid woss::CoordZ instance
@@ -1122,9 +1097,9 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance  
     * @return a valid CustomAngles
     **/
-    CustomAngles getAngles( Location* const tx = CCAngles::ALL_LOCATIONS, Location* const rx = CCAngles::ALL_LOCATIONS ) const { 
+    CustomAngles getAngles( const std::shared_ptr<Location>& tx = CCAngles::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCAngles::ALL_LOCATIONS ) const { 
       return ccangles_map.get(tx, rx); }
-          
+
     /**
     * Erases the CustomAngles for given transmitter CoordZ, receiver woss::CoordZ
     * @param tx const reference to a valid woss::CoordZ instance
@@ -1132,132 +1107,130 @@ namespace woss {
     * @return reference to <b>*this</b>
     **/
     BellhopCreator& eraseAngles( const CoordZ& tx, const CoordZ& rx ) { ccangles_map.erase(tx, rx); return *this; }
-    
+
     /**
     * Erases the CustomAngles for given transmitter CoordZ, receiver woss::Location
     * @param tx const pointer to a valid woss::Location instance
     * @param rx const pointer to a valid woss::Location instance  
     * @return reference to <b>*this</b>
     **/    
-    BellhopCreator& eraseAngles( Location* const tx = CCAngles::ALL_LOCATIONS, Location* const rx = CCAngles::ALL_LOCATIONS ) {
+    BellhopCreator& eraseAngles( const std::shared_ptr<Location>& tx = CCAngles::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCAngles::ALL_LOCATIONS ) {
       ccangles_map.erase(tx, rx); return *this;
-    }  
-    
-	/**
-	* Sets the maximum Bellhop ray depth [m] for given transmitter, receiver woss::CoordZ
-	* @param box_depth [m]
-	* @param tx const reference to a valid woss::CoordZ instance
-	* @param rx const reference to a valid woss::CoordZ instance
-	* @return reference to <b>*this</b>
-	*/
-	BellhopCreator& setBoxDepth( double box_depth, const CoordZ& tx, const CoordZ& rx ) {
-	  ccbox_depth.replace(box_depth, tx, rx); return *this; }
+    }
 
     /**
-      * Sets the maximum Bellhop ray depth [m] for given transmitter, receiver woss::Location
-      * @param box_depth [m]
-      * @param tx const pointer to a valid woss::Location instance
-      * @param rx const pointer to a valid woss::Location instance
-      * @return value in meters
-      */
-      BellhopCreator& setBoxDepth( double box_depth, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) {
-        ccbox_depth.replace(box_depth, tx, rx); return *this; }
+    * Sets the maximum Bellhop ray depth [m] for given transmitter, receiver woss::CoordZ
+    * @param box_depth [m]
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @param rx const reference to a valid woss::CoordZ instance
+    * @return reference to <b>*this</b>
+    */
+    BellhopCreator& setBoxDepth( double box_depth, const CoordZ& tx, const CoordZ& rx ) {
+      ccbox_depth.replace(box_depth, tx, rx); return *this; }
 
-
-      /**
-      * Erases the maximum box depth [m] for given transmitter, receiver woss::CoordZ
-      * @param tx const reference to a valid woss::CoordZ instance
-      * @param tx const reference to a valid woss::CoordZ instance
-      * @return reference to <b>*this</b>
-      */
-      BellhopCreator& eraseBoxDepth( const CoordZ& tx, const CoordZ& rx ) {
-        ccbox_depth.erase(tx, rx); return *this; }
-
-	  /**
-	  * Erases the receiver box depth [m] for given transmitter, receiver woss::Location
-	  * @param tx const pointer to a valid woss::Location instance
-	  * @param rx const pointer to a valid woss::Location instance
-	  * @return reference to <b>*this</b>
-	  */
-	  BellhopCreator& eraseBoxDepth( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) {
-		ccbox_depth.erase(tx, rx); return *this; }
-
-      /**
-      * Returns the maximum box depth [m] for given transmitter, receiver woss::CoordZ
-      * @param tx const reference to a valid woss::CoordZ instance
-      * @param tx const reference to a valid woss::CoordZ instance
-      * @return value in meters
-      */
-      double getBoxDepth( const CoordZ& tx, const CoordZ& rx ) {
-        return ccbox_depth.get(tx, rx); }
-
-      /**
-      * Returns the maximum box depth [m] for given transmitter, receiver woss::Location
-      * @param tx const pointer to a valid woss::Location instance
-      * @param tx const pointer to a valid woss::Location instance
-      * @return value in meters
-      */
-      double getBoxDepth( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) {
-        return ccbox_depth.get(tx, rx); }
-
-      /**
-      	* Sets the maximum Bellhop ray range [m] for given transmitter, receiver woss::CoordZ
-      	* @param box_depth [m]
-      	* @param tx const reference to a valid woss::CoordZ instance
-      	* @param rx const reference to a valid woss::CoordZ instance
-      	* @return reference to <b>*this</b>
-      	*/
-      	BellhopCreator& setBoxRange( double box_range, const CoordZ& tx, const CoordZ& rx ) {
-      	  ccbox_range.replace(box_range, tx, rx); return *this; }
-
-	  /**
-		* Sets the maximum Bellhop ray depth [m] for given transmitter, receiver woss::Location
-		* @param box_depth [m]
-		* @param tx const pointer to a valid woss::Location instance
-		* @param rx const pointer to a valid woss::Location instance
-		* @return value in meters
-		*/
-		BellhopCreator& setBoxRange( double box_range, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) {
-		  ccbox_range.replace(box_range, tx, rx); return *this; }
-
-
-		/**
-		* Erases the maximum box depth [m] for given transmitter, receiver woss::CoordZ
-		* @param tx const reference to a valid woss::CoordZ instance
-		* @param tx const reference to a valid woss::CoordZ instance
-		* @return reference to <b>*this</b>
-		*/
-		BellhopCreator& eraseBoxRange( const CoordZ& tx, const CoordZ& rx ) {
-		  ccbox_range.erase(tx, rx); return *this; }
-
-	  /**
-	  * Erases the receiver box depth [m] for given transmitter, receiver woss::Location
-	  * @param tx const pointer to a valid woss::Location instance
-	  * @param rx const pointer to a valid woss::Location instance
-	  * @return reference to <b>*this</b>
-	  */
-	  BellhopCreator& eraseBoxRange( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) {
-		ccbox_range.erase(tx, rx); return *this; }
-
-		/**
-		* Returns the maximum box depth [m] for given transmitter, receiver woss::CoordZ
-		* @param tx const reference to a valid woss::CoordZ instance
-		* @param tx const reference to a valid woss::CoordZ instance
-		* @return value in meters
-		*/
-		double getBoxRange( const CoordZ& tx, const CoordZ& rx ) {
-		  return ccbox_range.get(tx, rx); }
-
-		/**
-		* Returns the maximum box depth [m] for given transmitter, receiver woss::Location
-		* @param tx const pointer to a valid woss::Location instance
-		* @param tx const pointer to a valid woss::Location instance
-		* @return value in meters
-		*/
-		double getBoxRange( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) {
-		  return ccbox_range.get(tx, rx); }
-    
   /**
+    * Sets the maximum Bellhop ray depth [m] for given transmitter, receiver woss::Location
+    * @param box_depth [m]
+    * @param tx const pointer to a valid woss::Location instance
+    * @param rx const pointer to a valid woss::Location instance
+    * @return value in meters
+    */
+    BellhopCreator& setBoxDepth( double box_depth, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) {
+      ccbox_depth.replace(box_depth, tx, rx); return *this; }
+
+    /**
+    * Erases the maximum box depth [m] for given transmitter, receiver woss::CoordZ
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @return reference to <b>*this</b>
+    */
+    BellhopCreator& eraseBoxDepth( const CoordZ& tx, const CoordZ& rx ) {
+      ccbox_depth.erase(tx, rx); return *this; }
+
+    /**
+    * Erases the receiver box depth [m] for given transmitter, receiver woss::Location
+    * @param tx const pointer to a valid woss::Location instance
+    * @param rx const pointer to a valid woss::Location instance
+    * @return reference to <b>*this</b>
+    */
+    BellhopCreator& eraseBoxDepth( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) {
+      ccbox_depth.erase(tx, rx); return *this; }
+
+    /**
+    * Returns the maximum box depth [m] for given transmitter, receiver woss::CoordZ
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @return value in meters
+    */
+    double getBoxDepth( const CoordZ& tx, const CoordZ& rx ) const {
+      return ccbox_depth.get(tx, rx); }
+
+    /**
+    * Returns the maximum box depth [m] for given transmitter, receiver woss::Location
+    * @param tx const pointer to a valid woss::Location instance
+    * @param tx const pointer to a valid woss::Location instance
+    * @return value in meters
+    */
+    double getBoxDepth( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const {
+      return ccbox_depth.get(tx, rx); }
+
+    /**
+    * Sets the maximum Bellhop ray range [m] for given transmitter, receiver woss::CoordZ
+    * @param box_depth [m]
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @param rx const reference to a valid woss::CoordZ instance
+    * @return reference to <b>*this</b>
+    */
+    BellhopCreator& setBoxRange( double box_range, const CoordZ& tx, const CoordZ& rx ) {
+      ccbox_range.replace(box_range, tx, rx); return *this; }
+
+    /**
+    * Sets the maximum Bellhop ray depth [m] for given transmitter, receiver woss::Location
+    * @param box_depth [m]
+    * @param tx const pointer to a valid woss::Location instance
+    * @param rx const pointer to a valid woss::Location instance
+    * @return value in meters
+    */
+    BellhopCreator& setBoxRange( double box_range, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) {
+      ccbox_range.replace(box_range, tx, rx); return *this; }
+
+    /**
+    * Erases the maximum box depth [m] for given transmitter, receiver woss::CoordZ
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @return reference to <b>*this</b>
+    */
+    BellhopCreator& eraseBoxRange( const CoordZ& tx, const CoordZ& rx ) {
+      ccbox_range.erase(tx, rx); return *this; }
+
+    /**
+    * Erases the receiver box depth [m] for given transmitter, receiver woss::Location
+    * @param tx const pointer to a valid woss::Location instance
+    * @param rx const pointer to a valid woss::Location instance
+    * @return reference to <b>*this</b>
+    */
+    BellhopCreator& eraseBoxRange( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) {
+    ccbox_range.erase(tx, rx); return *this; }
+
+    /**
+    * Returns the maximum box depth [m] for given transmitter, receiver woss::CoordZ
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @param tx const reference to a valid woss::CoordZ instance
+    * @return value in meters
+    */
+    double getBoxRange( const CoordZ& tx, const CoordZ& rx ) const {
+      return ccbox_range.get(tx, rx); }
+
+    /**
+    * Returns the maximum box depth [m] for given transmitter, receiver woss::Location
+    * @param tx const pointer to a valid woss::Location instance
+    * @param tx const pointer to a valid woss::Location instance
+    * @return value in meters
+    */
+    double getBoxRange( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const {
+      return ccbox_range.get(tx, rx); }
+
+    /**
     * Sets the SSP depth precision [m] for given transmitter, receiver woss::CoordZ
     * @param ssp_precision depth_precision [m]
     * @param tx const reference to a valid woss::CoordZ instance
@@ -1274,7 +1247,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setSspDepthPrecision( double ssp_precision, Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& setSspDepthPrecision( double ssp_precision, const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccssp_depth_precision.replace(ssp_precision, tx, rx); return *this; }
 
     /**
@@ -1292,7 +1265,7 @@ namespace woss {
     * @param tx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseSspDepthPrecision( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseSspDepthPrecision( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) { 
       ccssp_depth_precision.erase(tx, rx); return *this; }
 
     /**
@@ -1301,7 +1274,7 @@ namespace woss {
     * @param tx const reference to a valid woss::CoordZ instance    
     * @return value in meters
     */   
-    double getSspDepthPrecision( const CoordZ& tx, const CoordZ& rx ) { 
+    double getSspDepthPrecision( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccssp_depth_precision.get(tx, rx); }
 
     /**
@@ -1310,11 +1283,10 @@ namespace woss {
     * @param tx const pointer to a valid woss::Location instance    
     * @return value in meters
     */
-    double getSspDepthPrecision( Location* const tx = CCDouble::ALL_LOCATIONS, Location* const rx = CCDouble::ALL_LOCATIONS ) { 
+    double getSspDepthPrecision( const std::shared_ptr<Location>& tx = CCDouble::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCDouble::ALL_LOCATIONS ) const { 
       return ccssp_depth_precision.get(tx, rx); }       
-        
-    
-  /**
+
+    /**
     * Sets the SSP depth steps for given transmitter, receiver woss::CoordZ
     * @param ssp_depth_steps depth steps
     * @param tx const reference to a valid woss::CoordZ instance
@@ -1331,7 +1303,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& setSspDepthSteps( int ssp_depth_steps, Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& setSspDepthSteps( int ssp_depth_steps, const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       ccnormalized_ssp_depth_steps.replace(ssp_depth_steps, tx, rx); return *this; }
 
     /**
@@ -1349,7 +1321,7 @@ namespace woss {
     * @param tx const pointer to a valid woss::Location instance    
     * @return reference to <b>*this</b>
     */
-    BellhopCreator& eraseSspDepthSteps( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    BellhopCreator& eraseSspDepthSteps( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) { 
       ccnormalized_ssp_depth_steps.erase(tx, rx); return *this; }
 
     /**
@@ -1358,7 +1330,7 @@ namespace woss {
     * @param tx const reference to a valid woss::CoordZ instance    
     * @return integer value
     */   
-    int getSspDepthSteps( const CoordZ& tx, const CoordZ& rx ) { 
+    int getSspDepthSteps( const CoordZ& tx, const CoordZ& rx ) const { 
       return ccnormalized_ssp_depth_steps.get(tx, rx); }
 
     /**
@@ -1367,10 +1339,9 @@ namespace woss {
     * @param tx const pointer to a valid woss::Location instance    
     * @return integer value
     */
-    int getSspDepthSteps( Location* const tx = CCInt::ALL_LOCATIONS, Location* const rx = CCInt::ALL_LOCATIONS ) { 
+    int getSspDepthSteps( const std::shared_ptr<Location>& tx = CCInt::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCInt::ALL_LOCATIONS ) const { 
       return ccnormalized_ssp_depth_steps.get(tx, rx); }      
-    
-    
+
     /**
     * Sets the woss::Transducer for given transmitter woss::CoordZ, receiver woss::CoordZ
     * @param angles const reference to a valid woss::Transducer
@@ -1388,7 +1359,7 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance  
     * @return reference to <b>*this</b>
     **/
-    BellhopCreator& setCustomTransducer( const CustomTransducer& type, Location* const tx = CCTransducer::ALL_LOCATIONS, Location* const rx = CCTransducer::ALL_LOCATIONS ) { 
+    BellhopCreator& setCustomTransducer( const CustomTransducer& type, const std::shared_ptr<Location>& tx = CCTransducer::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCTransducer::ALL_LOCATIONS ) { 
       cctransducer.replace(type, tx, rx); return *this; }    
    
     /**
@@ -1406,9 +1377,9 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance  
     * @return a valid woss::Transducer
     **/
-    CustomTransducer getCustomTransducer( Location* const tx = CCTransducer::ALL_LOCATIONS, Location* const rx = CCTransducer::ALL_LOCATIONS ) const { 
+    CustomTransducer getCustomTransducer( const std::shared_ptr<Location>& tx = CCTransducer::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCTransducer::ALL_LOCATIONS ) const { 
       return cctransducer.get(tx, rx); }
-          
+
     /**
     * Erases the woss::Transducer for given transmitter woss::CoordZ, receiver woss::CoordZ
     * @param tx const reference to a valid woss::CoordZ instance
@@ -1423,34 +1394,31 @@ namespace woss {
     * @param rx const pointer to a valid woss::Location instance  
     * @return reference to <b>*this</b>
     **/    
-    BellhopCreator& eraseCustomTransducer( Location* const tx = CCTransducer::ALL_LOCATIONS, Location* const rx = CCTransducer::ALL_LOCATIONS ) {
+    BellhopCreator& eraseCustomTransducer( const std::shared_ptr<Location>& tx = CCTransducer::ALL_LOCATIONS, const std::shared_ptr<Location>& rx = CCTransducer::ALL_LOCATIONS ) {
       cctransducer.erase(tx, rx); return *this;
-    }      
-    
+    }
 
     /**
     * CustomAngles container. A map that links a valid CoordZ (transmitter) with its CustomAngles
     */
-    typedef WossCreatorContainer< CustomAngles > CCAngles;
+    using CCAngles = WossCreatorContainer< CustomAngles >;
     
-    typedef WossCreatorContainer< CustomTransducer > CCTransducer;
+    using CCTransducer = WossCreatorContainer< CustomTransducer >;
 
-    typedef WossCreatorContainer< ::std::string > CCString;
-        
-		
+    using CCString = WossCreatorContainer< std::string >;
+
     protected:
-    
+
     /**
      * flag that control bellhop's thorpe calculation
      */
     bool use_thorpe_att;
-    
-      
+
     /**
     * Pathname of Bellhop program
     **/
-    ::std::string bellhop_path;
-    
+    std::string bellhop_path;
+
     /**
      * Bellhop .arr file syntax to be used during parsing, factory value = invalid
      */
@@ -1485,20 +1453,17 @@ namespace woss {
      * Altimetry type ( L, C )
      **/
     CCString ccaltimetry_type;
-    
-    
+
     /**
     * CustomAngles containter for user-given transmitter CoordZ
     **/
     CCAngles ccangles_map;
-    
-    
+
     /**
     * Number ot range steps
     **/
     CCInt cctotal_range_steps;
-  
-    
+
     /**
     * Number of transmitter
     **/  
@@ -1514,7 +1479,6 @@ namespace woss {
     **/ 
     CCDouble cctx_max_depth_offset;
 
-
     /**
     * Number of receiver depths
     **/  
@@ -1529,7 +1493,6 @@ namespace woss {
     * Receiver maximum depth offset [m]
     **/
     CCDouble ccrx_max_depth_offset;
-
 
     /**
     * Number of receiver ranges.
@@ -1549,12 +1512,10 @@ namespace woss {
     **/
     CCDouble ccrx_max_range_offset;
 
-
     /**
     * Number of launched rays
     **/ 
     CCInt cctotal_rays;
-    
 
     /**
     * SSP depth precision [m]
@@ -1565,12 +1526,12 @@ namespace woss {
     * Depth steps of all SSP involved
     **/ 
     CCInt ccnormalized_ssp_depth_steps;
-    
+
     /**
     * Transmitter beam pattern
     **/    
     CCTransducer cctransducer;
-    
+
     /**
     * Maximum Bellhop ray depth [m]
     **/
@@ -1580,31 +1541,26 @@ namespace woss {
     * Maximum Bellhop ray range [m]
     **/
     CCDouble ccbox_range;
-    
-    /**
-    * Initializes given BellhopWoss object
-    * @param woss_ptr const pointer to an unitialized BellhopWoss
-    * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
-    **/
-    virtual bool initializeWoss( Woss* const woss_ptr ) const ;
 
     /**
     * Initializes given BellhopWoss object
-    * @param woss_ptr const pointer to an unitialized BellhopWoss
+    * @param woss_ref ref to an unitialized BellhopWoss
     * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
     **/
-    bool initializeBhWoss( BellhopWoss* const woss_ptr ) const ;
-        
+    virtual bool initializeWoss( Woss& woss_ref ) const override;
 
-    virtual const BellhopWoss* createNotValidWoss() const;
+    /**
+    * Initializes given BellhopWoss object
+    * @param woss_ref ref to an unitialized BellhopWoss
+    * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
+    **/
+    bool initializeBhWoss( BellhopWoss& woss_ref ) const;
 
-    virtual void updateDebugFlag();
-    
+    virtual void updateDebugFlag() override;
+
   };
 
-  
 }
-
 
 #endif /* WOSS_BELLHOP_CREATOR_DEFINITIONS_H */
 

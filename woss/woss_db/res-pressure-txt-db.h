@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -66,23 +59,23 @@ namespace woss {
     * ResPressureTxtDb constructor
     * @param name pathname of database
     **/
-    ResPressureTxtDb( const ::std::string& name );
+    ResPressureTxtDb( const std::string& name );
 
-    virtual ~ResPressureTxtDb() { }
+    virtual ~ResPressureTxtDb() override = default;
 
 
     /**
     * Closes the connection to the text file provided
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool closeConnection();
+    virtual bool closeConnection() override;
 
 
     /**
     * Post openConnection() actions
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool finalizeConnection();
+    virtual bool finalizeConnection() override;
 
 
     /**
@@ -93,9 +86,9 @@ namespace woss {
     * @param coord_rx const reference to a valid CoordZ object
     * @param frequency used frequency [hz]
     * @param time_value const reference to a valid Time object
-    * @return <i>valid</i> Pressure if parameters are found, <i>not valid</i> otherwise
+    * @return <i>valid</i> std::unique_ptr with a valid Pressure if parameters are found, <i>not valid</i> otherwise
     **/  
-    virtual Pressure* getValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value ) const;
+    virtual std::unique_ptr<Pressure> getValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value ) const override;
 
 
     /**
@@ -106,7 +99,7 @@ namespace woss {
     * @param time_value const reference to a valid Time object
     * @param pressure computed Pressure
     **/
-    virtual bool insertValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value, const Pressure& pressure );
+    virtual bool insertValue( const CoordZ& coord_tx, const CoordZ& coord_rx, const double frequency, const Time& time_value, const Pressure& pressure ) override;
 
 
     static void setSpaceSampling( double value ) { space_sampling = value; }
@@ -115,35 +108,36 @@ namespace woss {
     
     
     protected:
-  
-      
-    typedef ::std::map< time_t, ::std::complex< double > > TimeMap;
-    typedef TimeMap::iterator TMIter;
-    typedef TimeMap::const_iterator TMCIter;
-    typedef TimeMap::reverse_iterator TMRIter;
+
+
+    using TimeMap = std::map< time_t, std::complex< double > >;
+    using TMIter = TimeMap::iterator;
+    using TMCIter = TimeMap::const_iterator;
+    using TMRIter = TimeMap::reverse_iterator;
     
-    typedef ::std::map< PDouble, TimeMap > FreqMap;
-    typedef FreqMap::iterator FMIter;
-    typedef FreqMap::reverse_iterator FMRIter;
+    using FreqMap = std::map< PDouble, TimeMap >;
+    using FMIter = FreqMap::iterator;
+    using FMCIter = FreqMap::const_iterator;
+    using FMRIter = FreqMap::reverse_iterator;
     
-    typedef ::std::map< CoordZ, FreqMap, CoordComparator< ResPressureTxtDb, CoordZ > > RxMap;
-    typedef RxMap::iterator RxMIter;
-    typedef RxMap::reverse_iterator RxMRIter;
+    using RxMap = std::map< CoordZ, FreqMap, CoordComparator< ResPressureTxtDb, CoordZ > >;
+    using RxMIter = RxMap::iterator;
+    using RxCIter = RxMap::const_iterator;
+    using RxMRIter = RxMap::reverse_iterator;
        
     /**
     * Multidimensional map that links a transmitter CoordZ to a receiver CoordZ to a frequency PDouble value 
     * and finally to a Pressure value
     **/
-    typedef ::std::map< CoordZ, RxMap, CoordComparator< ResPressureTxtDb, CoordZ > > PressureMatrix;
-    typedef PressureMatrix::iterator PMIter;
-    typedef PressureMatrix::const_iterator PMCIter;
-    typedef PressureMatrix::reverse_iterator PMRIter;
-    typedef PressureMatrix::const_reverse_iterator PMCRIter;
+    using PressureMatrix = std::map< CoordZ, RxMap, CoordComparator< ResPressureTxtDb, CoordZ > >;
+    using PMIter = PressureMatrix::iterator;
+    using PMCIter = PressureMatrix::const_iterator;
+    using PMRIter = PressureMatrix::reverse_iterator;
+    using PMCRIter = PressureMatrix::const_reverse_iterator;
   
   
     static double space_sampling;
-    
-    
+
     /**
     * PressureMatrix map for storing imported and user inserted Pressure values
     **/
@@ -187,7 +181,7 @@ namespace woss {
     * @param time_value const reference to a valid time_value
     * @return valid Pressure if parameters are found, not valid otherwise
     **/
-    ::std::complex<double> readMap( const CoordZ& tx, const CoordZ& rx, const double frequency, const Time& time_value ) const;
+    std::complex<double> readMap( const CoordZ& tx, const CoordZ& rx, const double frequency, const Time& time_value ) const;
 
     
   };

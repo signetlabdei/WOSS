@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   res-pressure-bin-db-creator-tcl.h
@@ -40,17 +33,13 @@
 #ifndef WOSS_RES_PRESSURE_BIN_DB_CREATOR_TCL_H 
 #define WOSS_RES_PRESSURE_BIN_DB_CREATOR_TCL_H
 
-
 #ifdef WOSS_NS_MIRACLE_SUPPORT
-
 
 #include <tclcl.h>
 #include <res-pressure-bin-db-creator.h>
 
-
 namespace woss {
-  
-    
+
   /**
   * \brief DbCreator for binary Pressure database
   *
@@ -58,17 +47,14 @@ namespace woss {
   **/
   class ResPressureBinDbCreatorTcl : public ResPressureBinDbCreator, public TclObject {
 
-    
     public:
-    
 
     /**
     * ResPressureBinDbCreator default constructor
     **/
     ResPressureBinDbCreatorTcl();
     
-    virtual ~ResPressureBinDbCreatorTcl() { }
-    
+    virtual ~ResPressureBinDbCreatorTcl() override = default;
 
   /**
     * TCL command interpreter. It implements the following OTcl methods:
@@ -86,24 +72,18 @@ namespace woss {
     * @return TCL_OK or TCL_ERROR whether the command has been dispatched succesfully or no
     * 
     **/
-    virtual int command(int argc, const char*const* argv);
-        
+    virtual int command(int argc, const char*const* argv) override;
 
     protected:
     
-      
     double debug_;
     
     double woss_db_debug_;
       
   };
 
-  
 }
-
 
 #endif // WOSS_NS_MIRACLE_SUPPORT
 
-
 #endif /* WOSS_RES_PRESSURE_BIN_DB_CREATOR_TCL_H */
-

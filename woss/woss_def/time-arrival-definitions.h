@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,14 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   time-arrival-definitions.h
@@ -44,34 +36,30 @@
 #include <cassert>
 #include <climits>
 #include <map>
+#include <memory>
 #include "pressure-definitions.h"
 #include "custom-precision-double.h"
 
 
 namespace woss {
-  
-    
+
   /**
   * Map that links a PDouble delay [s] to a complex Pressure
   **/ 
-  typedef std::map < PDouble , std::complex<double> > TimeArrMap; 
-  typedef TimeArrMap::iterator TimeArrIt;
-  typedef TimeArrMap::const_iterator TimeArrCIt;
-  typedef TimeArrMap::reverse_iterator TimeArrRIt;
-  typedef TimeArrMap::const_reverse_iterator TimeArrCRIt;
-
+  using TimeArrMap = std::map < PDouble , std::complex<double> >; 
+  using TimeArrIt = TimeArrMap::iterator;
+  using TimeArrCIt = TimeArrMap::const_iterator;
+  using TimeArrRIt = TimeArrMap::reverse_iterator;
+  using TimeArrCRIt = TimeArrMap::const_reverse_iterator;
 
   /**
   * Delay precision for default constructed objects [s]
   **/ 
-  #define TIMEARR_CUSTOM_DELAY_PRECISION (1.0e-7)
-
-
+  static constexpr inline double TIMEARR_CUSTOM_DELAY_PRECISION = (1.0e-7);
   /**
-  * Illegal delay value for Pressure to TimeArr conversion
+  * Not valid delay value for Pressure to TimeArr conversion
   **/ 
-  #define TIMEARR_PRESSURE_CONVERSION_DELAY (-INT_MAX)
-
+  static constexpr inline int TIMEARR_PRESSURE_CONVERSION_DELAY = (-INT_MAX);
 
   /**
   * \brief Channel power delay profile class
@@ -81,10 +69,8 @@ namespace woss {
   **/ 
   class TimeArr {
 
-    
     public:
 
-      
     /**
     * Default TimeArr constructor
     * @param custom_delay_prec delay precision [s]
@@ -104,16 +90,13 @@ namespace woss {
     * @param delay delay value [s]
     * @param custom_delay_prec delay precision [s]
     **/ 
-    TimeArr( const Pressure& pressure, double delay = TIMEARR_PRESSURE_CONVERSION_DELAY, long double custom_delay_prec = TIMEARR_CUSTOM_DELAY_PRECISION );
-    
-    /**
-    * TimeArr copy constructor
-    * @param copy TimeArr to be copied
-    **/
-    TimeArr( const TimeArr& copy );
+    explicit TimeArr( const Pressure& pressure, double delay = TIMEARR_PRESSURE_CONVERSION_DELAY, long double custom_delay_prec = TIMEARR_CUSTOM_DELAY_PRECISION );
 
-    virtual ~TimeArr() { }
+    TimeArr( const TimeArr& copy ) = default;
 
+    TimeArr( TimeArr&& tmp ) = default;
+
+    virtual ~TimeArr() = default;
 
     /**
     * complex\<double\> operator for implicit casting
@@ -121,66 +104,57 @@ namespace woss {
     **/
     virtual operator std::complex<double>() const;
     
-    
     /**
     * TimeArr virtual factory method
     * @param custom_delay_prec delay precision [s]
-    * @return a heap-created TimeArr object
+    * @return a std::unique_ptr to a heap allocated woss::TimeArr object
     **/ 
-    virtual TimeArr* create( long double custom_delay_prec = TIMEARR_CUSTOM_DELAY_PRECISION ) const { return new TimeArr(custom_delay_prec); }
+    virtual std::unique_ptr<TimeArr> create( long double custom_delay_prec = TIMEARR_CUSTOM_DELAY_PRECISION ) const { return std::make_unique<TimeArr>(custom_delay_prec); }
 
     /**
     * TimeArr virtual factory method
     * @param map custom time arrival map
     * @param custom_delay_prec delay precision [s]
-    * @return a heap-created TimeArr object
+    * @return a std::unique_ptr to a heap allocated woss::TimeArr object
     **/ 
-    virtual TimeArr* create( TimeArrMap& map, long double custom_delay_prec = TIMEARR_CUSTOM_DELAY_PRECISION ) const {
-      return new TimeArr( map, custom_delay_prec); }
+    virtual std::unique_ptr<TimeArr> create( TimeArrMap& map, long double custom_delay_prec = TIMEARR_CUSTOM_DELAY_PRECISION ) const {
+      return std::make_unique<TimeArr>( map, custom_delay_prec); }
 
     /**
     * TimeArr virtual factory method
     * @param pressure Pressure value
     * @param delay delay value [s]
     * @param custom_delay_prec delay precision [s]
-    * @return a heap-created TimeArr object
+    * @return a std::unique_ptr to a heap allocated woss::TimeArr object
     **/ 
-    virtual TimeArr* create( const Pressure& pressure, double delay = TIMEARR_PRESSURE_CONVERSION_DELAY, long double custom_delay_prec = TIMEARR_CUSTOM_DELAY_PRECISION ) const {
-      return new TimeArr(pressure, delay, custom_delay_prec ); } 
+    virtual std::unique_ptr<TimeArr> create( const Pressure& pressure, double delay = TIMEARR_PRESSURE_CONVERSION_DELAY, long double custom_delay_prec = TIMEARR_CUSTOM_DELAY_PRECISION ) const {
+      return std::make_unique<TimeArr>(pressure, delay, custom_delay_prec ); } 
     
     /**
     * TimeArr virtual factory method
-    * @param copy TimeArr to be copied
-    * @return a heap-created TimeArr object
+    * @return a std::unique_ptr to a heap-created copy of <b>this</b> instance
     **/
-    virtual TimeArr* create( const TimeArr& copy ) const { return new TimeArr( copy ); }
-    
-    /**
-    * TimeArr virtual factory method
-    * @return a heap-created copy of <b>this</b> instance
-    **/
-    virtual TimeArr* clone() const { return new TimeArr(*this); }
+    virtual std::unique_ptr<TimeArr> clone() const { return std::make_unique<TimeArr>(*this); }
   
     /**
     * TimeArr virtual factory method
     * @param array_size size of array
-    * @return a heap-created array of size array_size
+    * @return a std::unique_ptr to a heap-created array of size array_size
     **/
-    virtual TimeArr* createArray( unsigned int array_size ) const { return new TimeArr[array_size]; }
+    virtual std::unique_ptr<TimeArr[]> createArray( unsigned int array_size ) const { return std::make_unique<TimeArr[]>(array_size); }
     
     /**
     * Creates an instance not valid
     * @return a new instance not valid ( e.g. delay 0.0 = (+inf, +inf) )
     **/
     static TimeArrMap& createNotValid();
-    
+
     /**
     * Creates an impulsive instance
     * @return a new impulsive instance ( e.g. delay 0.0 = (+1.0, 0.0 ) )
     **/
     static TimeArrMap& createImpulse();
 
-		
     /**
     * Inserts and replace a Pressure value at given delay
     * @param delay delay value [s]
@@ -195,49 +169,46 @@ namespace woss {
     * @param pressure Pressure value
     **/
     void sumValue( double delay, const Pressure& pressure );
-    
-    
+
     /**
     * Returns a const iterator to the Pressure with key == <i>delay</i> parameter
     * @param delay delay value [s]
     * @returns const iterator to end() if <i>delay</i> is not found
     **/
     TimeArrCIt findValue( double delay ) const { return( time_arr_map.find(delay) ); }
-    
-    
+
     /**
     * Erase the Pressure value with key == <i>delay</i> parameter
     * @param delay delay value [s]
     * @return reference to <b>*this</b>
     **/
     TimeArr& eraseValue( double delay ) { time_arr_map.erase(delay); return *this; }
-    
-    
+
     /**
     * Sample the TimeArr with sample-time <i>delay</i>. Pressure of the new TimeArr are the coherent sum of previous 
     * object with equal sampled delay.
     * @param delay delay value [s]
-    * @returns a new TimeArr object
+    * @return a std::unique_ptr to a heap allocated woss::TimeArr object
     **/
-    virtual TimeArr* coherentSumSample( double time_delay );
-    
+    virtual std::unique_ptr<TimeArr> coherentSumSample( double time_delay ) const;
+
     /**
     * Sample the TimeArr with sample-time <i>delay</i>. Pressure of the new TimeArr are the incoherent sum of previous 
     * object with equal sampled delay.
     * @param delay delay value [s]
-    * @returns a new TimeArr object
+    * @return a std::unique_ptr to a heap allocated woss::TimeArr object
     **/
-    virtual TimeArr* incoherentSumSample( double time_delay );
- 
+    virtual std::unique_ptr<TimeArr> incoherentSumSample( double time_delay ) const;
+
     /**
     * Crops the TimeArr between given time values and returns a new heap-allocated object. 
 		* The new object will have time values in [time_start, time_end)
     * @param time_start start time value [s]
 		* @param time_end end time value [s]
-    * @returns a new TimeArr object
+    * @return a std::unique_ptr to a heap allocated woss::TimeArr object
     **/
-    virtual TimeArr* crop( double time_start, double time_end );		
-    
+    virtual std::unique_ptr<TimeArr> crop( double time_start, double time_end ) const;
+
     /**
     * Check the Pressure value of each delay. If amplitude is >= 1, it replaces with a new Pressure with same phase and 
     * new amplitude given by the Thorp absorption process at given frequency and along given distance
@@ -246,8 +217,7 @@ namespace woss {
     * @return <i>true</i> if correction was applied, <i>false</i> otherwise
     **/
     virtual bool checkPressureAttenuation( double distance, double frequency );
-    
-    
+
     /**
     * Returns a const iterator to the beginning of the time arrival map
     * @returns const iterator 
@@ -271,7 +241,7 @@ namespace woss {
     * @returns const iterator 
     **/
     TimeArrCRIt rend() const { return time_arr_map.rend(); }
-    
+
     /**
     * Returns a const iterator to the Pressure value at i-th position 
     * @param i integer should be between 0 and size() 
@@ -283,8 +253,8 @@ namespace woss {
     * Returns a const iterator to the Pressure that has txLoss >= threshold_db 
     * @param i threshold in db re upa 
     * @returns const iterator to end() if position <i>i</i> is not found
-    **/		
-		TimeArrCIt lowerBoundTxLoss( double threshold_db ) const;
+    **/
+    TimeArrCIt lowerBoundTxLoss( double threshold_db ) const;
 
     /**
     * Returns the number of Pressure stored
@@ -298,13 +268,11 @@ namespace woss {
     **/
     bool empty() const { return time_arr_map.empty(); } 
 
-
     /**
     * Erase all values of Pressure
     **/
     void clear() { time_arr_map.clear(); }
-    
-    
+
     /**
     * Sets the delay precision for all PDouble delay values. If the given precision is different from
     * current value, the profile will be modified accordingly
@@ -313,14 +281,12 @@ namespace woss {
     **/  
     TimeArr& setDelayPrecision( long double precision );
 
-    
     /**
     * Sets debug flag for all instances
     * @param flag debug bool
     **/
     static void setDebug( bool flag ) { debug = flag; }
 
-  
     /**
     * Returns the maximum delay value
     * @returns maximum delay [s]
@@ -332,35 +298,28 @@ namespace woss {
     * @returns maximum delay [s]
     **/
     double getMinDelayValue() const { return( time_arr_map.begin()->first ); }
-    
+
     /**
     * Returns the delay precision
     * @returns delay precision [s]
     **/
     long double getDelayPrecision() const { return delay_precision; }
-    
-    
+
     /**
     * Checks the validity of TimeArr
     * @return <i>true</i> if it has at least one value, <i>false</i> otherwise
     **/
     virtual bool isValid() const; 
-    
-    
+
     /**
     * Checks if the TimeArr was constructed from a Pressure value, therefore not carrying a valid delay information
     * @return <i>true</i> if it has at least one value, <i>false</i> otherwise
     **/
     virtual bool isConvertedFromPressure() const { return( time_arr_map.size() == 1 && ( time_arr_map.begin()->first == PDouble(TIMEARR_PRESSURE_CONVERSION_DELAY) ) ); }
 
+    TimeArr& operator=( const TimeArr& copy ) = default;
 
-  /**
-    * Assignment operator
-    * @param copy const reference to a TimeArr object to be copied
-    * @return TimeArr reference to <i>this</i>
-    **/ 
-    TimeArr& operator=( const TimeArr& copy ) ;
-
+    TimeArr& operator=( TimeArr&& tmp ) = default;
 
     /**
     * Equality operator
@@ -368,7 +327,7 @@ namespace woss {
     * @param right right operand const reference
     * @return true if <i>left == right</i>, false otherwise
     **/  
-    friend bool operator==( const TimeArr& left, const TimeArr& right ) ;
+    friend bool operator==( const TimeArr& left, const TimeArr& right );
 
     /**
     * Inequality operator
@@ -377,7 +336,6 @@ namespace woss {
     * @return true if <i>left != right</i>, false otherwise
     **/  
     friend bool operator!=( const TimeArr& left, const TimeArr& right );
-
 
     /**
     * Sum operator
@@ -395,13 +353,12 @@ namespace woss {
     **/  
     friend const TimeArr operator-( const TimeArr& left, const TimeArr& right );
 
-    
     /**
     * Sum operator
     * @param left left operand const reference
     * @param right right operand const reference
     * @return a new const instance holding the operation result  
-    **/  
+    **/
     friend const TimeArr operator+( const TimeArr& left, const double right );
 
     /**
@@ -409,7 +366,7 @@ namespace woss {
     * @param left left operand const reference
     * @param right right operand const reference
     * @return a new const instance holding the operation result  
-    **/  
+    **/
     friend const TimeArr operator-( const TimeArr& left, const double right );  
 
     /**
@@ -417,7 +374,7 @@ namespace woss {
     * @param left left operand const reference
     * @param right right operand const reference
     * @return a new const instance holding the operation result  
-    **/  
+    **/
     friend const TimeArr operator/( const TimeArr& left, const double right );
 
     /**
@@ -425,10 +382,9 @@ namespace woss {
     * @param left left operand const reference
     * @param right right operand const reference
     * @return a new const instance holding the operation result  
-    **/  
+    **/
     friend const TimeArr operator*( const TimeArr& left, const double right );
 
-    
     /**
     * Sum operator
     * @param left left operand const reference
@@ -442,7 +398,7 @@ namespace woss {
     * @param left left operand const reference
     * @param right right operand const reference
     * @return a new const instance holding the operation result  
-    **/  
+    **/
     friend const TimeArr operator-( const double left, const TimeArr& right );  
 
     /**
@@ -450,7 +406,7 @@ namespace woss {
     * @param left left operand const reference
     * @param right right operand const reference
     * @return a new const instance holding the operation result  
-    **/  
+    **/
     friend const TimeArr operator/( const double left, const TimeArr& right );
 
     /**
@@ -458,9 +414,8 @@ namespace woss {
     * @param left left operand const reference
     * @param right right operand const reference
     * @return a new const instance holding the operation result  
-    **/  
+    **/
     friend const TimeArr operator*( const double left, const TimeArr& right );  
-    
 
     /**
     * Compound assignment sum operator
@@ -478,7 +433,6 @@ namespace woss {
     **/
     friend TimeArr& operator-=( TimeArr& left, const TimeArr& right );
 
-    
     /**
     * Compound assignment sum operator
     * @param left left operand reference
@@ -494,7 +448,7 @@ namespace woss {
     * @return <i>left</i> reference after the operation
     **/
     friend TimeArr& operator-=( TimeArr& left, double right );
-    
+
     /**
     * Compound assignment division operator
     * @param left left operand reference
@@ -510,7 +464,6 @@ namespace woss {
     * @return <i>left</i> reference after the operation
     **/
     friend TimeArr& operator*=( TimeArr& left, double right );
-  
 
     /**
     * << operator
@@ -520,28 +473,23 @@ namespace woss {
     **/ 
     friend std::ostream& operator<<( std::ostream& os, const TimeArr& instance );
 
-      
     protected:
 
-      
     /**
     * Debug flag
     **/
     static bool debug;
-    
-    
+
     /**
     * Stores the precision of all PDouble delay instances [s]
     **/ 
     long double delay_precision;
 
-    
     /**
-    * Pressure values map 
+    * TimArr values map 
     **/ 
     TimeArrMap time_arr_map;
-    
-    
+
   };
 
   //non-inline operator declarations
@@ -549,7 +497,6 @@ namespace woss {
   const TimeArr operator+( const TimeArr& left, const TimeArr& right ); 
 
   const TimeArr operator-( const TimeArr& left, const TimeArr& right ); 
-    
 
   const TimeArr operator+( const TimeArr& left, const double right ); 
 
@@ -558,7 +505,6 @@ namespace woss {
   const TimeArr operator/( const TimeArr& left, const double right ); 
 
   const TimeArr operator*( const TimeArr& left, const double right ); 
-    
 
   const TimeArr operator+( const double left, const TimeArr& right ); 
 
@@ -568,11 +514,9 @@ namespace woss {
 
   const TimeArr operator*( const double left, const TimeArr& right ); 
 
-
   TimeArr& operator+=( TimeArr& left, const TimeArr& right ); 
 
   TimeArr& operator-=( TimeArr& left, const TimeArr& right ); 
-
 
   TimeArr& operator+=( TimeArr& left, double right );
 
@@ -582,7 +526,6 @@ namespace woss {
 
   TimeArr& operator*=( TimeArr& left, double right );
 
- 
   //////////
   //inline functions
   inline TimeArrMap& TimeArr::createNotValid() {
@@ -592,7 +535,6 @@ namespace woss {
     return time_arr_map;
   }
 
-
   inline TimeArrMap& TimeArr::createImpulse() {
     static TimeArrMap time_arr_map;
     time_arr_map.clear();
@@ -600,26 +542,25 @@ namespace woss {
     return time_arr_map;
   }
 
-
   inline TimeArr& TimeArr::insertValue( double delay, const Pressure& pressure ) { 
     assert( pressure.isValid() ); 
     assert( delay >= 0.0 );
     
-    time_arr_map.insert( std::make_pair( delay, pressure ) ); 
+    time_arr_map.emplace( std::make_pair( delay, pressure ) ); 
     
     return *this;
   }
-
 
   inline void TimeArr::sumValue( double delay, const Pressure& pressure ) {
     assert( pressure.isValid() ); 
     assert( delay >= 0.0 );
     
     TimeArrIt it = time_arr_map.find( delay );
-    if ( it == time_arr_map.end() ) time_arr_map.insert( std::make_pair( delay, pressure ) );
-    else it->second += std::complex<double>( pressure ); 
+    if ( it == time_arr_map.end() ) 
+      time_arr_map.emplace( std::make_pair( delay, pressure ) );
+    else 
+      it->second += std::complex<double>( pressure ); 
   }
-
 
   inline std::ostream& operator<<( std::ostream& os, const TimeArr& instance ) {
     os << "size = " << instance.time_arr_map.size() << "; min time_arr = " << instance.time_arr_map.begin()->first 
@@ -629,22 +570,19 @@ namespace woss {
     return os;
   }
 
-
   inline bool operator==( const TimeArr& left, const TimeArr& right ) { 
-    if ( &left == &right ) return true; 
+    if ( &left == &right ) 
+      return true; 
     return( left.time_arr_map == right.time_arr_map );
   }
 
-
   inline bool operator!=( const TimeArr& left, const TimeArr& right ) { 
-    if ( &left == &right ) return false; 
+    if ( &left == &right ) 
+      return false; 
     return( left.time_arr_map != right.time_arr_map );
   }
 
 }
 
-
 #endif /* TIME_ARRIVAL_DEFINITIONS_H */
 
-
- 

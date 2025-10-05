@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -42,14 +35,14 @@
 
 
 #include <string>
+#include <pressure-definitions.h>
+#include <time-arrival-definitions.h>
+#include <memory>
 
 
 namespace woss {
-  
-    
+
   class Woss;
-  class Pressure;
-  class TimeArr;
 
   /**
   * \brief Abstract class for channel simulator result files processing
@@ -58,22 +51,15 @@ namespace woss {
   */
   class ResReader {
 
-    
     public:
 
-
-    /**
-    * ResReader default constructor
-    */
-    ResReader();
-
-    /**
+   /**
     * ResReader constructor
     * @param woss const pointer to a const Woss object
     */
-    ResReader( const Woss* const woss );
+    ResReader( const Woss& woss );
 
-    virtual ~ResReader() { }
+    virtual ~ResReader() = default;
 
     /**
     * Initializes the ResReader object
@@ -81,7 +67,6 @@ namespace woss {
     **/
     virtual bool initialize() = 0;
 
-    
     /**
     * Gets the average Pressure value in given rx range-depth box
     * @param frequency frequency [hZ]
@@ -90,81 +75,63 @@ namespace woss {
     * @param start_rx_range start receiver range [m]
     * @param end_rx_depth end receiver depth [m]
     * @param end_rx_range end receiver range [m]
-    * @return a valid Pressure value 
+    * @return a std::unique_ptr to a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
     **/
-    virtual Pressure* readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) = 0;
+    virtual std::unique_ptr<Pressure> readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) = 0;
 
     /**
-    * Gets a Pressure value for given range, depths
+    * Gets a Pressure value of given range, depths
     * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
-    * @return a valid Pressure value 
+    * @return a std::unique_ptr to a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
     **/
-    virtual Pressure* readPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
-    
-    
+    virtual std::unique_ptr<Pressure> readPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
+
     /**
     * Gets a TimeArr value for given range, depths
     * @param frequency frequency [hZ]
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
-    * @return a valid Pressure value 
+    * @return a std::unique_ptr to a valid TimeArr value; a not valid TimeArr if arr_file hasn't been read yet
     **/
-    virtual TimeArr* readTimeArr(double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
-
-    
-    /**
-    * Sets the Woss pointer
-    * @param woss const pointer to a const Woss object
-    * @return reference to <b>*this</b>
-    **/
-    ResReader& setWossPtr( const Woss* const woss ) { woss_ptr = woss; return *this; }
+    virtual std::unique_ptr<TimeArr> readTimeArr(double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
 
     /**
     * Gets the Woss pointer
     * @returns const pointer to linked Woss object
     **/
-    const Woss* const getWossPtr() { return woss_ptr; }
-    
-    
+    const Woss& getWossRef() const { return woss_ref; }
+
     /**
     * Sets the file(s) pathname
     * @param name const reference to a valid pathname
     * @return reference to <b>*this</b>
     **/
-    ResReader& setFileName( const ::std::string& name ) { file_name = name; return *this; }
+    ResReader& setFileName( const std::string& name ) { file_name = name; return *this; }
 
     /**
     * Gets the file(s) pathname
     * @returns string pathname
     **/
-    ::std::string getFileName() { return file_name; }
-    
+    std::string getFileName() const { return file_name; }
 
     protected:
 
-      
     /**
     * Const pointer to Woss owner
     **/
-    const Woss* woss_ptr;
+    const Woss& woss_ref;
 
-    
     /**
     * File(s) pathname
     **/
-    ::std::string file_name;
+    std::string file_name;
 
-    
   };
 
-  
 }
 
-
 #endif /* WOSS_RES_READER_DEFINITIONS_H */
-
-

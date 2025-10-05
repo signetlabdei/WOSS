@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   altimetry-definitions-tcl.cpp
@@ -36,7 +29,7 @@
  * Implementations and library for woss::Altimetry Tcl class
  */
 
-
+#ifdef WOSS_NS_MIRACLE_SUPPORT
 
 #include "altimetry-definitions-tcl.h"
 
@@ -44,7 +37,6 @@
 using namespace woss;
 
 
-#ifdef WOSS_NS_MIRACLE_SUPPORT
 static class AltimetryClass : public TclClass {
 public:
   AltimetryClass() : TclClass("WOSS/Definitions/Altimetry/Flat") {}
@@ -71,7 +63,8 @@ AltimetryTcl::AltimetryTcl()
   bind("total_range_steps", &total_range_steps);
   bind("depth", &depth);
   
-//   if ( evolution_time_quantum < 0 ) evolution_time_quantum = HUGE_VAL;
+//   if ( evolution_time_quantum < 0 ) 
+//      evolution_time_quantum = HUGE_VAL;
 }
 
 int AltimetryTcl::command( int argc, const char*const* argv ) {
@@ -83,7 +76,8 @@ int AltimetryTcl::command( int argc, const char*const* argv ) {
       bool tmp_debug = tmp_int > 0 ? true : false;
       woss::Altimetry::setDebug(tmp_debug);
 
-      if (debug) ::std::cout << "AltimetryTcl::command() setDebug called = " << tmp_debug << ::std::endl;
+      if (debug) 
+        std::cout << "AltimetryTcl::command() setDebug called = " << tmp_debug << std::endl;
 
       return TCL_OK;
     }
@@ -101,7 +95,8 @@ AltimBretschneiderTcl::AltimBretschneiderTcl()
   bind("characteristic_height",&char_height);
   bind("average_period",&average_period);
   
-//   if ( evolution_time_quantum < 0 ) evolution_time_quantum = HUGE_VAL;
+//   if ( evolution_time_quantum < 0 ) 
+//     evolution_time_quantum = HUGE_VAL;
 }
 
 int AltimBretschneiderTcl::command( int argc, const char*const* argv ) {
@@ -113,11 +108,13 @@ int AltimBretschneiderTcl::command( int argc, const char*const* argv ) {
       bool tmp_debug = tmp_int > 0 ? true : false;
       woss::Altimetry::setDebug(tmp_debug);
 
-      if (debug) ::std::cout << "AltimBretschneiderTcl::command() setDebug called = " << tmp_debug << ::std::endl;
+      if (debug) 
+        std::cout << "AltimBretschneiderTcl::command() setDebug called = " << tmp_debug << std::endl;
 
       return TCL_OK;
     }
   }
   return TclObject::command(argc, argv);
 }
+
 #endif // WOSS_NS_MIRACLE_SUPPORT

@@ -1,9 +1,9 @@
 # WOSS - World Ocean Simulation System -
 # 
-# Copyright (C) 2009 Federico Guerra 
+# Copyright (C) 2009 2025 Federico Guerra 
 # and regents of the SIGNET lab, University of Padova
 # 
-# Author: Federico Guerra - federico@guerra-tlc.com
+# Author: Federico Guerra - WOSS@guerra-tlc.com
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,13 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-# This software has been developed by Federico Guerra
-# and SIGNET lab, University of Padova, 
-# in collaboration with the NATO Centre for Maritime Research 
-# and Experimentation (http://www.cmre.nato.int ; 
-# E-mail: pao@cmre.nato.int), 
-# whose support is gratefully acknowledged.
 
 # BPSK + ALOHA_ADV sample
 
@@ -95,7 +88,7 @@ set opt(cltracefilename) "/dev/null"
 set opt(cltracefile) [open $opt(cltracefilename) w]
 
 set opt(db_path)        "insert_db_path_here"
-#set opt(db_path)        "/home/fedwar/ns/ocean_database/dbs/"
+#set opt(db_path)        "/home/fedwar/ns/ocean_databases/dbs/"
 
 set opt(db_res_path)    "./"
 
@@ -117,17 +110,19 @@ set altimetry_creator   [new "WOSS/Definitions/Altimetry/Flat"]
 #set altimetry_creator   [new "WOSS/Definitions/Altimetry/Bretschneider"]
 set rand_generator      [new "WOSS/Definitions/RandomGenerator/NS2"]
 #set rand_generator      [new "WOSS/Definitions/RandomGenerator/C"]
+set location_generator  [new "WOSS/Position"]
 $rand_generator initialize
 
 set def_handler [new "WOSS/Definitions/Handler"]
-$def_handler setSSPCreator         $ssp_creator
-$def_handler setSedimentCreator    $sediment_creator
-$def_handler setPressureCreator    $pressure_creator
-$def_handler setTimeArrCreator     $time_arr_creator
-$def_handler setTransducerCreator  $transducer_creator
-$def_handler setTimeReference      $time_reference
-$def_handler setRandomGenerator    $rand_generator
-$def_handler setAltimetryCreator   $altimetry_creator
+$def_handler setSSPCreator                $ssp_creator
+$def_handler setSedimentCreator           $sediment_creator
+$def_handler setPressureCreator           $pressure_creator
+$def_handler setTimeArrCreator            $time_arr_creator
+$def_handler setTransducerCreator         $transducer_creator
+$def_handler setTimeReferenceCreator      $time_reference
+$def_handler setRandomGeneratorCreator    $rand_generator
+$def_handler setAltimetryCreator          $altimetry_creator
+$def_handler setLocationCreator           $location_generator
 
 WOSS/Creator/Database/Textual/Results/TimeArr set debug           0
 WOSS/Creator/Database/Textual/Results/TimeArr set woss_db_debug   0
@@ -209,7 +204,7 @@ WOSS/Creator/Bellhop set bellhop_arr_syntax           2
 WOSS/Creator/Bellhop set evolution_time_quantum      -1.0
 WOSS/Creator/Bellhop set total_runs                   1
 WOSS/Creator/Bellhop set frequency_step               0.0
-WOSS/Creator/Bellhop set total_range_steps            3000.0 ;#number of steps between rx and tx
+WOSS/Creator/Bellhop set total_range_steps            3000.0
 WOSS/Creator/Bellhop set tx_min_depth_offset          0.0
 WOSS/Creator/Bellhop set tx_max_depth_offset          0.0
 WOSS/Creator/Bellhop set total_transmitters           1
@@ -250,6 +245,7 @@ WOSS/Manager/Simple/MultiThread set is_time_evolution_active -1.0
 WOSS/Manager/Simple/MultiThread set space_sampling            0.0
 set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
 $woss_manager setConcurrentThreads 0
+#$woss_manager setThreadPoolUsage   1
 
 WOSS/Utilities set debug 0
 set woss_utilities [new "WOSS/Utilities"]
@@ -544,7 +540,7 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 ###############################
 
 proc finish {} {
-    global ns opt cbr mac propagation cbr_sink mac_sink phy_data phy_data_sink channel db_manager propagation
+    global ns opt cbr mac propagation cbr_sink mac_sink phy_data phy_data_sink channel db_manager woss_manager propagation
 
     $db_manager closeAllConnections
 
@@ -573,6 +569,11 @@ proc finish {} {
 
     $ns flush-trace
     close $opt(tracefile)
+
+    puts "Delete WOSS objects to force file operations"
+    $db_manager closeAllConnections
+    delete $db_manager
+    delete $woss_manager
 }
 
 ###################

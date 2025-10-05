@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   uw-woss-channel.cpp
@@ -40,30 +33,30 @@
 #include <iostream>
 #include <iomanip>
 #include <mphy.h>
-#include "uw-woss-channel.h"
-#include "uw-woss-pkt-hdr.h"
+#include <uw-woss-channel.h>
+#include <uw-woss-pkt-hdr.h>
 #include <definitions-handler.h>
 #include <time-arrival-definitions.h>
-#include "uw-woss-channel-estimator.h"
-#include "uw-woss-clmsg-channel-estimation.h"
-#include "uw-woss-position.h"
+#include <uw-woss-channel-estimator.h>
+#include <uw-woss-clmsg-channel-estimation.h>
+#include <uw-woss-position.h>
 
 
 using namespace woss;
-
+using namespace std;
 
 static class WossChannelModuleClass : public TclClass {
-public:
-	WossChannelModuleClass() : TclClass("WOSS/Module/Channel") {}
-	TclObject* create(int, const char*const*) {
-	    return (new WossChannelModule());
-        }
+  public:
+  WossChannelModuleClass() : TclClass("WOSS/Module/Channel") {}
+  TclObject* create(int, const char*const*) {
+    return (new WossChannelModule());
+  }
 } class_WossChannelModule_module;
 
 
 WossChannelModule::WossChannelModule() 
-: woss_manager(NULL),
-  channel_estimator(NULL)
+: woss_manager(nullptr),
+  channel_estimator(nullptr)
 {
   bind("channel_symbol_resolution_", &channel_symbol_resolution);
   bind("channel_eq_time_", &channel_eq_time);
@@ -74,16 +67,15 @@ WossChannelModule::WossChannelModule()
   bind("practical_spreading_", &uw.practical_spreading);
   bind("prop_speed_", &uw.prop_speed);
 
-//   if (channel_eq_snr_threshold_db < 0) channel_eq_snr_threshold_db = 0;
-  if (channel_eq_time < 0.0 ) channel_eq_time = HUGE_VAL;
-  if (channel_max_distance < 0.0) channel_max_distance = HUGE_VAL;
+//   if (channel_eq_snr_threshold_db < 0) 
+//     channel_eq_snr_threshold_db = 0;
+  if (channel_eq_time < 0.0 ) 
+    channel_eq_time = HUGE_VAL;
+  if (channel_max_distance < 0.0) 
+    channel_max_distance = HUGE_VAL;
 
-//   if (channel_symbol_resolution < 0 ) channel_symbol_resolution = HUGE_VAL;
-}
-
-
-WossChannelModule::~WossChannelModule() {
-  
+//   if (channel_symbol_resolution < 0 ) 
+//    channel_symbol_resolution = HUGE_VAL;
 }
 
 
@@ -92,28 +84,34 @@ int WossChannelModule::command(int argc, const char*const* argv) {
 
  if (argc==3) {
     if(strcasecmp(argv[1], "setWossManager") == 0) {
-      if (debug_) cout << NOW << "  WossChannelModule::command() setWossManager called"  << endl;
+      if (debug_) 
+        cout << NOW << "  WossChannelModule::command() setWossManager called"  << endl;
       woss_manager = dynamic_cast< WossManager* >( tcl.lookup(argv[2]) );
 
-      if (woss_manager) return TCL_OK;
-      else return TCL_ERROR;
+      if (woss_manager) 
+        return TCL_OK;
+      else 
+        return TCL_ERROR;
     }
     else if(strcasecmp(argv[1], "setChannelEstimator") == 0) {
-      if (debug_) cout << NOW << "  WossChannelModule::command() setChannelEstimator called"  << endl;
+      if (debug_) 
+        cout << NOW << "  WossChannelModule::command() setChannelEstimator called"  << endl;
       channel_estimator = dynamic_cast< ChannelEstimator* >( tcl.lookup(argv[2]) );
 
-      if (channel_estimator) return TCL_OK;
-      else return TCL_ERROR;
+      if (channel_estimator) 
+        return TCL_OK;
+      else 
+        return TCL_ERROR;
     }
-  }  
-  
+  }
+
   return ChannelModule::command(argc, argv);
 }
 
 
 void WossChannelModule::recv(Packet* p, ChSAP* chsap) {
   if (!woss_manager) {
-     cout << NOW << "  WossChannelModule::recv() ERROR, setWossManager not called!" << endl;
+     cerr << NOW << "  WossChannelModule::recv() ERROR, setWossManager not called!" << endl;
      exit(1);
   }
   
@@ -121,21 +119,24 @@ void WossChannelModule::recv(Packet* p, ChSAP* chsap) {
   hdr_MPhy* ph = HDR_MPHY(p);
 	
   cmh->direction() = hdr_cmn::UP;
-     
+
   chsap_vector.clear();
   chsap_vector.reserve(getChSAPnum());
-  
-	double noiseSPDdBperHz = uw.getNoise(ph->srcSpectralMask->getFreq()/1000.0);
-  double noisepow_db = 10.0 * ::std::log10(ph->srcSpectralMask->getBandwidth() * ::std::pow(10, noiseSPDdBperHz/10.0));
-	channel_eq_attenuation_db = -(channel_eq_snr_threshold_db - 10.0*log10(ph->Pt) + noisepow_db);
-	if ( channel_eq_attenuation_db < 0 ) channel_eq_attenuation_db = 0;
-	
-	if (debug_) cout << NOW << "  WossChannelModule::recv() freq " << ph->srcSpectralMask->getBandwidth()
-		               << "; bw " << ph->srcSpectralMask->getBandwidth() << "; Pt db " << 10.0*log10(ph->Pt)
-									 << "; noisespd_per hz " << noiseSPDdBperHz
-		               << "; noise_pow_db "<< noisepow_db
-		               << "; channel_att_eq_db " <<  channel_eq_attenuation_db << endl;
-	
+
+  double noiseSPDdBperHz = uw.getNoise(ph->srcSpectralMask->getFreq()/1000.0);
+  double noisepow_db = 10.0 * std::log10(ph->srcSpectralMask->getBandwidth() * std::pow(10, noiseSPDdBperHz/10.0));
+  channel_eq_attenuation_db = -(channel_eq_snr_threshold_db - 10.0*log10(ph->Pt) + noisepow_db);
+
+  if ( channel_eq_attenuation_db < 0 ) 
+    channel_eq_attenuation_db = 0;
+
+  if (debug_) 
+    cout << NOW << "  WossChannelModule::recv() freq " << ph->srcSpectralMask->getBandwidth()
+         << "; bw " << ph->srcSpectralMask->getBandwidth() << "; Pt db " << 10.0*log10(ph->Pt)
+         << "; noisespd_per hz " << noiseSPDdBperHz
+         << "; noise_pow_db "<< noisepow_db
+         << "; channel_att_eq_db " <<  channel_eq_attenuation_db << endl;
+
   CoordZPairVect coordinates = computeCoordZPairVect( chsap );
   
   SimFreq sim_freq = computeSimFreq( p );
@@ -170,13 +171,15 @@ woss::CoordZPairVect WossChannelModule::computeCoordZPairVect( ChSAP* chsap ) {
       
   ChSAP* dest;
   
-  if (debug_) cout << NOW << " WossChannelModule::computeCoordZPairVect() " << endl;
+  if (debug_) 
+    cout << NOW << " WossChannelModule::computeCoordZPairVect() " << endl;
 
   for (int i=0; i < getChSAPnum(); i++) {
     dest = (ChSAP*)getChSAP(i);
           
     if (chsap == dest) { // it's the source node -> skip it
-      if ( debug_ ) cout << "    tx ChSAP num = " << i << "; coordz = " << tx_coordz << endl;
+      if ( debug_ ) 
+        cout << "    tx ChSAP num = " << i << "; tx coordz = " << tx_coordz << endl;
 
       continue;
     }
@@ -196,9 +199,12 @@ woss::CoordZPairVect WossChannelModule::computeCoordZPairVect( ChSAP* chsap ) {
     // check distance first
     if (tx_coordz.getGreatCircleDistance(rx_coordz) <= channel_max_distance) {
       chsap_vector.push_back(dest);
-      ret_value.push_back( ::std::make_pair( tx_coordz, rx_coordz ) );
+      ret_value.emplace_back( std::make_pair( tx_coordz, rx_coordz ) );
     }
-  } 
+  }
+  if ( debug_ ) 
+    cout << NOW << " WossChannelModule::computeCoordZPairVect() size = " << ret_value.size() << endl;
+
   return ret_value;
 }
 
@@ -216,7 +222,7 @@ woss::SimFreq WossChannelModule::computeSimFreq( Packet* p ) {
 
   double curr_freq = sqrt( curr_f1 * curr_f2 );
   
-  return( ::std::make_pair( curr_freq, curr_freq ) );
+  return( std::make_pair( curr_freq, curr_freq ) );
 }
 
 
@@ -226,92 +232,95 @@ woss::TimeArrVector WossChannelModule::computeTimeArrVector( const CoordZPairVec
 
 
 void WossChannelModule::checkTimeArrVector( const CoordZPairVect& coords, TimeArrVector& channels ) { 
-  TimeArr* coherent_sampled_channel = NULL;
-  TimeArr* incoherent_sampled_channel = NULL;
-	TimeArr* cropped_channel_equaliz = NULL;
-	TimeArr* cropped_channel_after_equaliz = NULL;
-	TimeArr* final_channel = NULL;
-	
+  std::unique_ptr<TimeArr> coherent_sampled_channel;
+  std::unique_ptr<TimeArr> incoherent_sampled_channel;
+  std::unique_ptr<TimeArr> cropped_channel_equaliz;
+  std::unique_ptr<TimeArr> cropped_channel_after_equaliz;
+  std::unique_ptr<TimeArr> final_channel;
+
   for( int i = 0; i < (int)channels.size(); i++ ) {
     if ( channels[i]->isConvertedFromPressure() ) {
-      std::complex<double> value = channels[i]->begin()->second;
+      auto value = channels[i]->begin()->second;
       channels[i]->clear();
       channels[i]->insertValue( getPropDelay( coords[i].first, coords[i].second ), value ); 
     }
     
-    if ( channels[i]->size() == 1 ) continue;
+    if ( channels[i]->size() == 1 ) 
+      continue;
     
     if ( channel_symbol_resolution > 0.0 ) {
       coherent_sampled_channel = channels[i]->coherentSumSample( channel_symbol_resolution );  
     }
     else {
-			coherent_sampled_channel = channels[i];
-			channels[i] = NULL;
+			coherent_sampled_channel = std::move(channels[i]);
+			channels[i] = nullptr;
 		}
 
-    if (debug_) cout << NOW << "  WossChannelModule::checkTimeArrVector() symbol sampled response :" 
-                     << *coherent_sampled_channel << endl;			
+    if (debug_) 
+      cout << NOW << "  WossChannelModule::checkTimeArrVector() symbol sampled response :" 
+           << *coherent_sampled_channel << endl;
 
     TimeArrCIt tap_iter;
-    if ( channel_eq_attenuation_db > 0 ) tap_iter = coherent_sampled_channel->lowerBoundTxLoss(channel_eq_attenuation_db);
-    else tap_iter = coherent_sampled_channel->begin();
+    if ( channel_eq_attenuation_db > 0 ) 
+      tap_iter = coherent_sampled_channel->lowerBoundTxLoss(channel_eq_attenuation_db);
+    else 
+      tap_iter = coherent_sampled_channel->begin();
 
     if ( channel_eq_time != HUGE_VAL && channel_eq_time != 0 ) {
       cropped_channel_equaliz = coherent_sampled_channel->crop(tap_iter->first, ( (double) tap_iter->first + channel_eq_time) );
       cropped_channel_after_equaliz = coherent_sampled_channel->crop( ( (double) tap_iter->first + channel_eq_time) , HUGE_VAL);	
     }
     else {
-      cropped_channel_equaliz = coherent_sampled_channel;
-      cropped_channel_after_equaliz = coherent_sampled_channel->create(TimeArr::createNotValid());
-      coherent_sampled_channel = NULL;
+      cropped_channel_equaliz = std::move(coherent_sampled_channel);
+      cropped_channel_after_equaliz = cropped_channel_equaliz->create(TimeArr::createNotValid());
+      coherent_sampled_channel = nullptr;
     } 
  
     if (debug_ && cropped_channel_equaliz->isValid() ) 
       cout << NOW << "  WossChannelModule::checkTimeArrVector() cropped channel for eq :" 
-           << *cropped_channel_equaliz << endl;	
+           << *cropped_channel_equaliz << endl;
 
     if (debug_ && cropped_channel_after_equaliz->isValid() ) 
       cout << NOW << "  WossChannelModule::checkTimeArrVector() cropped channel after t_eq :" 
-           << *cropped_channel_after_equaliz << endl;	 
+           << *cropped_channel_after_equaliz << endl;
 
     if ( channel_eq_time != 0 ) {
       if ( cropped_channel_equaliz->isValid() ) {
-        incoherent_sampled_channel = cropped_channel_equaliz->incoherentSumSample( channel_eq_time );	
+        incoherent_sampled_channel = cropped_channel_equaliz->incoherentSumSample( channel_eq_time ); 
 
-        if (debug_) cout << NOW << "  WossChannelModule::checkTimeArrVector() incoher channel after eq :" 
-                         << *incoherent_sampled_channel << endl;			
+        if (debug_) 
+          cout << NOW << "  WossChannelModule::checkTimeArrVector() incoher channel after eq :" 
+               << *incoherent_sampled_channel << endl;
 
-        if ( cropped_channel_after_equaliz->isValid() ) 
-          final_channel = (*incoherent_sampled_channel + *cropped_channel_after_equaliz).clone();
+        if ( cropped_channel_after_equaliz->isValid() ) {
+          *incoherent_sampled_channel += *cropped_channel_after_equaliz;
+          final_channel = incoherent_sampled_channel->clone();
+        }
         else {
-          final_channel = incoherent_sampled_channel;
-          incoherent_sampled_channel = NULL;
+          final_channel = std::move(incoherent_sampled_channel);
+          incoherent_sampled_channel = nullptr;
         }
       }
       else {
-        final_channel = cropped_channel_after_equaliz;
-        cropped_channel_after_equaliz = NULL;
-        incoherent_sampled_channel = NULL;				
+        final_channel = std::move(cropped_channel_after_equaliz);
+        cropped_channel_after_equaliz = nullptr;
+        incoherent_sampled_channel = nullptr;
       }
     }
     else {
-      incoherent_sampled_channel = cropped_channel_equaliz;
-      cropped_channel_equaliz = NULL;
+      incoherent_sampled_channel = std::move(cropped_channel_equaliz);
+      cropped_channel_equaliz = nullptr;
       final_channel = incoherent_sampled_channel->clone();
     }
 
-    if (debug_) cout << NOW << "  WossChannelModule::checkTimeArrVector() final channel: " 
-                     << *final_channel << endl;					
+    if (debug_) 
+      cout << NOW << "  WossChannelModule::checkTimeArrVector() final channel: " 
+           << *final_channel << endl;
 
-    if ( channels[i] != NULL ) delete channels[i];		
-    if ( coherent_sampled_channel != NULL ) delete coherent_sampled_channel;
-    if ( cropped_channel_equaliz != NULL ) delete cropped_channel_equaliz;
-    if ( cropped_channel_after_equaliz != NULL ) delete cropped_channel_after_equaliz;
-    if ( incoherent_sampled_channel != NULL ) delete incoherent_sampled_channel;
-		
-    channels[i] = final_channel;      
+    channels[i] = std::move(final_channel);
 
-    if ( channel_estimator ) channel_estimator->updateEstimation( coords[i].first, coords[i].second, final_channel->clone() );
+    if ( channel_estimator ) 
+      channel_estimator->updateEstimation( coords[i].first, coords[i].second, *channels[i] );
   }
 }
 
@@ -320,33 +329,33 @@ void WossChannelModule::schedulePacketCopies( const woss::CoordZPairVect& coordi
   Scheduler &s = Scheduler::instance();
 
   for( int i = 0; i < (int)coordinates.size(); i++ ) {
-    
     double curr_dist = coordinates[i].first.getCartDistance(coordinates[i].second);
-    
-    if (debug_) cout << NOW << "  WossChannelModule::schedulePacketCopies() sampled response :" << endl;
 
-    for ( TimeArrCIt it = channels[i]->begin(); it != channels[i]->end(); it++ ) {
+    if (debug_) 
+      cout << NOW << "  WossChannelModule::schedulePacketCopies() sampled response :" << endl;
 
-      if (debug_) cout << "   delay = " << it->first << "; complex att = " << it->second 
-                        << "; db = " << Pressure::getTxLossDb(it->second) << endl;
+    for ( auto it = channels[i]->begin(); it != channels[i]->end(); it++ ) {
+      if (debug_) 
+        cout << "   delay = " << it->first << "; complex att = " << it->second 
+             << "; db = " << Pressure::getTxLossDb(it->second) << endl;
 
       Packet* p_copy = p->copy();
 
       hdr_woss* hdr_woss = HDR_WOSS(p_copy);
 
-      Pressure* press_temp = SDefHandler::instance()->getPressure()->create( (it->second) );
+      auto press_temp = SDefHandler::instance().createPressure( (it->second) );
       press_temp->checkAttenuation( curr_dist, sim_freq.first );
-      const_cast< ::std::complex<double>& >( it->second ) = *press_temp;
-          
+      const_cast< std::complex<double>& >( it->second ) = *press_temp;
+
       hdr_woss->already_processed = true;
       hdr_woss->attenuation = *press_temp;
       hdr_woss->frequency = sim_freq.first;
 
-      if (debug_) cout << "  packet pressure db = " << Pressure::getTxLossDb(hdr_woss->attenuation) << endl;
+      if (debug_) 
+        cout << "  packet pressure db = " << Pressure::getTxLossDb(hdr_woss->attenuation) << endl;
       
-      delete press_temp;
-      press_temp = NULL;
-      
+      press_temp.reset();
+
       s.schedule(chsap_vector[i], p_copy, it->first);
     }
   }
@@ -354,17 +363,10 @@ void WossChannelModule::schedulePacketCopies( const woss::CoordZPairVect& coordi
 
 
 void WossChannelModule::deleteChannels( woss::TimeArrVector& channels ) {
-  for( int i = 0; i < (int)channels.size(); i++ ) {
-    delete channels[i];
-    channels[i] = NULL;
-  }
   channels.clear();
 }
-  
-  
+
 double WossChannelModule::getPropDelay( const CoordZ& tx, const CoordZ& rx ) {
   return(uw.getPropagationDelay( tx.getLatitude(), tx.getLongitude(), ( -1.0 * tx.getDepth()),
                                  rx.getLatitude(), rx.getLongitude(), ( -1.0 * rx.getDepth())));
 }
-
-

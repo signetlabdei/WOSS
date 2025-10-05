@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
-
 /**
  * @file   uw-woss-channel-estimator.h
  * @author Federico Guerra
@@ -40,16 +32,12 @@
 #ifndef CHANNEL_ESTIMATOR_H
 #define CHANNEL_ESTIMATOR_H
 
-
+#include <map>
+#include <memory>
 #include <plugin.h>
 #include <coordinates-definitions.h>
-#include <map>
-#include "uw-woss-position.h"
-
-
-namespace woss {
-  class TimeArr;
-}
+#include <time-arrival-definitions.h>
+#include <uw-woss-position.h>
 
 
 /**
@@ -58,39 +46,29 @@ namespace woss {
  * ChannelEstimator provides extensible estimation and averaging methods. 
  */
 class ChannelEstimator : public TclObject {
-  
-  
-  public:
-  
-    
-  typedef ::std::map< woss::CoordZ, woss::TimeArr*, woss::CoordComparator< ChannelEstimator, woss::CoordZ > > RxMap;
-  typedef RxMap::iterator RxMIter;
-  typedef RxMap::const_iterator RxMCIter;
-  typedef RxMap::reverse_iterator RxMRIter;
-  
-  typedef ::std::map< woss::CoordZ, RxMap, woss::CoordComparator< ChannelEstimator, woss::CoordZ > > ChannelMap;
-  typedef ChannelMap::iterator ChMapIter;
-  typedef ChannelMap::reverse_iterator ChMapRIter;
-    
-  typedef std::map< int, WossPosition* > MacToPosMap;
-  typedef MacToPosMap::iterator MacMapIter;
-  typedef MacToPosMap::reverse_iterator MacMapRIter;
-  
-//   typedef std::map< std::pair< woss::CoordZ, woss::CoordZ > , woss::TimeArr* > ChannelMap;
-//   typedef ChannelMap::iterator ChMapIter;
-//   typedef ChannelMap::reverse_iterator ChMapRIter;
 
+  public:
+
+  using RxMap = std::map< woss::CoordZ, std::unique_ptr<woss::TimeArr>, woss::CoordComparator< ChannelEstimator, woss::CoordZ > >;
+  using RxMIter = RxMap::iterator;
+  using RxMCIter = RxMap::const_iterator;
+  using RxMRIter = RxMap::reverse_iterator;
+  
+  using ChannelMap = std::map< woss::CoordZ, RxMap, woss::CoordComparator< ChannelEstimator, woss::CoordZ > >;
+  using ChMapIter = ChannelMap::iterator;
+  using ChMapRIter = ChannelMap::reverse_iterator;
+    
+  using MacToPosMap = std::map< int, WossPosition* >;
+  using MacMapIter = MacToPosMap::iterator;
+  using MacMapRIter = MacToPosMap::reverse_iterator;
   
   ChannelEstimator();
   
-  virtual ~ChannelEstimator(); 
+  virtual ~ChannelEstimator() override = default;
   
-  
-  virtual int command(int argc, const char*const* argv);
-  
+  virtual int command(int argc, const char*const* argv) override;
   
   static double getSpaceSampling() { return space_sampling; }
-  
   
   /**
   * Updates channel estimation for the given tx-rx couple
@@ -99,7 +77,7 @@ class ChannelEstimator : public TclObject {
   * @param rx ns address type of receiver node
   * @param curr_channel pointer to new channel value
   */
-  virtual void updateEstimation( const woss::CoordZ& tx, const woss::CoordZ& rx, woss::TimeArr* curr_channel );
+  virtual void updateEstimation( const woss::CoordZ& tx, const woss::CoordZ& rx, const woss::TimeArr& curr_channel );
  
   /**
   * Returns channel estimation for the given tx-rx couple
@@ -108,34 +86,27 @@ class ChannelEstimator : public TclObject {
   * @param rx ns address type of receiver node
   * @returns pointer to a heap-allocated woss::TimeArr channel
   */
-  woss::TimeArr* getEstimation( const woss::CoordZ& tx, const woss::CoordZ& rx );
-  
-  
+  std::unique_ptr<woss::TimeArr> getEstimation( const woss::CoordZ& tx, const woss::CoordZ& rx );
+
   void addMacAddress( int addr, WossPosition* pos ) { mac_to_pos_map[addr] = pos; }
   
   virtual WossPosition* findMacAddress( int addr );
   
-  
   virtual bool resetEstimator();
-  
   
   protected:
   
-  
   static double space_sampling;
-  
-    
+
   ChannelMap channel_map;
-   
+
   MacToPosMap mac_to_pos_map;
 
-  
   double debug_;
   
   double avg_coeff;
 
 };
-
 
 /**
  * \brief Service class for attaching a ChannelEstimator to the node bus
@@ -145,22 +116,17 @@ class ChannelEstimator : public TclObject {
  */
 class ChEstimatorPlugIn : public PlugIn {
 
-  
   public:
-    
-    
+
   ChEstimatorPlugIn();
   
-  virtual ~ChEstimatorPlugIn() { }
+  virtual ~ChEstimatorPlugIn() override = default;
   
+  virtual int command(int argc, const char*const* argv) override;
   
-  virtual int command(int argc, const char*const* argv);
-  
-  virtual int recvSyncClMsg(ClMessage* m);
-  
+  virtual int recvSyncClMsg(ClMessage* m) override;
   
   protected:
-  
     
   ChannelEstimator* channel_estimator;
   
@@ -168,6 +134,4 @@ class ChEstimatorPlugIn : public PlugIn {
 
 };
 
-
 #endif  // CHANNEL_ESTIMATOR_H
-

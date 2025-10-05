@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -52,25 +45,25 @@
 
 namespace woss {
   
-    
+
   /**
   * Map that links a DECK41 integer type to the number of times it has appeared in a database query result  
   * @see deck41-db-state-logic-constrol.h
   **/
-  typedef ::std::map<int, int> FrequencyMap;
-  typedef FrequencyMap::const_iterator FMCIter;
-  typedef FrequencyMap::iterator FMIter;
-  typedef FrequencyMap::reverse_iterator FMRIter;
-  typedef FrequencyMap::const_reverse_iterator FMCRIter;
+  using FrequencyMap = std::map<int, int>;
+  using FMCIter = FrequencyMap::const_iterator;
+  using FMIter = FrequencyMap::iterator;
+  using FMRIter = FrequencyMap::reverse_iterator;
+  using FMCRIter = FrequencyMap::const_reverse_iterator;
 
 
   /**
   * Map that links a condition of Deck41TypeTests to its weight for calculating weighted average value 
   * @see Deck41TypeTests
   **/
-  typedef ::std::map< char, double > SedimWeightMap;
-  typedef SedimWeightMap::iterator SWIter;
-  typedef SedimWeightMap::reverse_iterator SWRIter;
+  using SedimWeightMap = std::map< char, double >;
+  using SWIter = SedimWeightMap::iterator;
+  using SWRIter = SedimWeightMap::reverse_iterator;
 
 
   /**
@@ -81,10 +74,8 @@ namespace woss {
   **/
   class SedimDeck41Db : public WossDb, public WossSedimentDb {
 
-    
     friend class SedimDeck41DbCreator;
-    
-    
+
     public:
 
 
@@ -92,27 +83,26 @@ namespace woss {
     * SedimDeck41Db constructor
     * @param name pathname of database
     **/
-    SedimDeck41Db( const ::std::string& name );
+    SedimDeck41Db( const std::string& name );
 
-    virtual ~SedimDeck41Db() { }
-
-  
-  /**
-    * Not allowed
-    **/
-    virtual bool openConnection() { return false; }
+    virtual ~SedimDeck41Db() override = default;
 
   /**
     * Not allowed
     **/
-    virtual bool finalizeConnection() { return false; }
+    virtual bool openConnection() override { return false; }
+
+  /**
+    * Not allowed
+    **/
+    virtual bool finalizeConnection() override { return false; }
 
 
     /**
     * Closes the connection to the three databases provided
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool closeConnection();
+    virtual bool closeConnection() override;
 
 
     /**
@@ -121,7 +111,7 @@ namespace woss {
     * @param bathymetry_value const Reference to Sediment value to be inserted
     * @returns <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool insertValue( const Coord& coordinates, const Sediment& sediment_value );
+    virtual bool insertValue( const Coord& coordinates, const Sediment& sediment_value ) override;
     
     
     /**
@@ -129,18 +119,18 @@ namespace woss {
     * if present in any of the three databases.
     * <b>User is responsible of pointer's ownership</b>
     * @param coords const reference to a valid CoordZ object
-    * @return <i>valid</i> Sediment if coordinates are found, <i>not valid</i> otherwise
+    * @return a std::unique_ptr to a <i>valid</i> Sediment if coordinates are found, <i>not valid</i> otherwise
     **/
-    virtual Sediment* getValue( const CoordZ& coordz ) const ;
+    virtual std::unique_ptr<Sediment> getValue( const CoordZ& coordz ) const override;
 
     /**
     * Returns a pointer to a heap-based Sediment for given coordinates and depth vector, 
     * if at least one set of coordinates is present in any of the three databases.
     * <b>User is responsible of pointer's ownership</b>
     * @param coordz_vector const reference to a valid CoordZ vector
-    * @return <i>valid</i> Sediment if at least one set of coordinates is found, <i>not valid</i> otherwise
+    * @return std::unique_ptr to a <i>valid</i> Sediment if at least one set of coordinates is found, <i>not valid</i> otherwise
     **/
-    virtual Sediment* getValue( const CoordZVector& coordz_vector ) const ;
+    virtual std::unique_ptr<Sediment> getValue( const CoordZVector& coordz_vector ) const override;
 
 
     protected:
@@ -161,7 +151,6 @@ namespace woss {
     **/
     SedimDeck41MarsdenOneDb sediment_marsden_one_db;
 
-    
     /**
     * Current iteration Deck41TypeTests
     **/
@@ -172,7 +161,6 @@ namespace woss {
     **/
     mutable Deck41TypeTests prev_tests_state;
 
-  
     /**
     * Weight map for DECK41 floor type to Sediment conversion 
     **/
@@ -230,18 +218,18 @@ namespace woss {
     * Creates the corresponding Sediment from the searched Deck41Types returned by calculateDeck41Types
     * @param floor_types the Deck41Types pair resulted from the search process
     * @param avg_depth depth value [m] for Sediment calculations
-    * @returns Sediment value
+    * @returns std::unique_ptr to a Sediment value
     **/
-    Sediment* calculateSediment( const Deck41Types& floor_types, double avg_depth ) const;
+    std::unique_ptr<Sediment> calculateSediment( const Deck41Types& floor_types, double avg_depth ) const;
 
     /**
     * Creates a Sediment from the DECK41 integer type number
     * @param deck41_type DECK41 integer floor type number
     * @param depth depth value [m] for Sediment calculations
-    * @returns Sediment value
+    * @returns std::unique_ptr to a Sediment value
     * @see Deck41TypeTests
     **/
-    Sediment* createSediment( int deck41_type, double depth ) const;
+    std::unique_ptr<Sediment> createSediment( int deck41_type, double depth ) const;
 
     
     /**
@@ -258,7 +246,7 @@ namespace woss {
     * @param test const Deck41TypeTests reference
     * @returns <i>true</i> if test succeed, <i>false</i> otherwise
     **/
-    bool doTestA( const Deck41TypeTests& test ) const ;
+    bool doTestA( const Deck41TypeTests& test ) const;
 
     /**
     * Does Test B on given Deck41TypeTests reference. A positive result means that the search in the databases for a 
@@ -266,7 +254,7 @@ namespace woss {
     * @param test const Deck41TypeTests reference
     * @returns <i>true</i> if test succeed, <i>false</i> otherwise
     **/
-    bool doTestB( const Deck41TypeTests& test ) const ;
+    bool doTestB( const Deck41TypeTests& test ) const;
   
     /**
     * Does Test C on given Deck41TypeTests reference. A positive result means that the search in the databases for a 
@@ -274,9 +262,8 @@ namespace woss {
     * @param test const Deck41TypeTests reference
     * @returns <i>true</i> if test succeed, <i>false</i> otherwise
     **/
-    bool doTestC( const Deck41TypeTests& test ) const ;
-    
-    
+    bool doTestC( const Deck41TypeTests& test ) const;
+
   };
 
 
@@ -297,7 +284,6 @@ namespace woss {
   inline bool SedimDeck41Db::doTestC(const Deck41TypeTests& floor) const {
     return ((floor.getConditionC() == true) || (floor.getConditionD() == true));
   }
-
 
 }
 

@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   uw-woss-random-generator.h
@@ -40,7 +33,7 @@
 #ifndef UNDERWATER_WOSS_RANDOM_GENERATOR_H
 #define UNDERWATER_WOSS_RANDOM_GENERATOR_H
 
-
+#include <memory>
 #include <random-generator-definitions.h>
 #include <rng.h>
 #include <tclcl.h>
@@ -56,18 +49,21 @@ class WossRandomGenerator : public woss::RandomGenerator {
     
     
     WossRandomGenerator( const WossRandomGenerator& copy );
+
+    WossRandomGenerator( WossRandomGenerator&& tmp ) = default;
     
     WossRandomGenerator& operator=( const WossRandomGenerator& copy );
+
+    WossRandomGenerator& operator=( WossRandomGenerator&& tmp ) = default;
+
+    
+    virtual ~WossRandomGenerator() override = default;
     
     
-    virtual ~WossRandomGenerator();
+    virtual std::unique_ptr<woss::RandomGenerator> create( int s ) const override { return std::make_unique<WossRandomGenerator>(s); }
     
-    
-    virtual WossRandomGenerator* create( int s ) { return new WossRandomGenerator(s); }
-    
-    virtual WossRandomGenerator* clone() const { return new WossRandomGenerator(*this); }
-      
-    
+    virtual std::unique_ptr<woss::RandomGenerator> clone() const override { return std::make_unique<WossRandomGenerator>(*this); }
+
     virtual double getRand() const;
 
     virtual int getRandInt() const;
@@ -76,11 +72,9 @@ class WossRandomGenerator : public woss::RandomGenerator {
 
     
     protected:
-      
-      
-    RNG* rng;
-    
-    
+
+    std::unique_ptr<RNG> rng = nullptr;
+
 };
 
 
@@ -92,8 +86,10 @@ class WossRandomGeneratorTcl : public WossRandomGenerator, public TclObject {
     
   WossRandomGeneratorTcl();
 
+  virtual ~WossRandomGeneratorTcl() override = default;
+
   
-  virtual int command(int argc, const char*const* argv);  
+  virtual int command(int argc, const char*const* argv) override;
 
   
 };

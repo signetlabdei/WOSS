@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   definitions-handler.cpp
@@ -37,89 +30,5 @@
  */
 
 
-#include "sediment-definitions.h"
-#include "time-definitions.h"
-#include "time-arrival-definitions.h"
-#include "ssp-definitions.h"
-#include "definitions-handler.h"
-#include "transducer-definitions.h"
-#include "altimetry-definitions.h"
-
-using namespace woss;
 
 
-DefHandler::DefHandler()
-: debug(false),
-  ssp_creator(NULL),
-  sediment_creator(NULL),
-  pressure_creator(NULL),
-  time_arr_creator(NULL),
-  time_reference(NULL),
-  rand_generator(NULL),
-  transducer(NULL),
-  altimetry_creator(NULL)
-{
-
-}
-
-
-DefHandler::DefHandler( const DefHandler& copy ) 
-: debug(copy.debug),
-  ssp_creator(copy.ssp_creator->clone()),
-  sediment_creator(copy.sediment_creator->clone()),
-  pressure_creator(copy.pressure_creator->clone()),
-  time_arr_creator(copy.time_arr_creator->clone()),
-  time_reference(copy.time_reference->clone()),
-  rand_generator(copy.rand_generator->clone()),
-  transducer(copy.transducer->clone()),
-  altimetry_creator(copy.altimetry_creator->clone())
-{
-
-
-}
-
-
-DefHandler& DefHandler::operator=( const DefHandler& copy ) {
-  if (this == &copy) return *this;
-  debug = copy.debug;
-  ssp_creator = copy.ssp_creator->clone();
-  sediment_creator = copy.sediment_creator->clone();
-  pressure_creator = copy.pressure_creator->clone();
-  time_arr_creator = copy.time_arr_creator->clone();
-  time_reference = copy.time_reference->clone();
-  rand_generator = copy.rand_generator->clone();
-  transducer = copy.transducer->clone();
-  altimetry_creator = copy.altimetry_creator->clone();
-  return( *this );
-}
-    
-    
-DefHandler::~DefHandler() {
-  if (ssp_creator != NULL) {
-    delete ssp_creator;
-  }
-  if (sediment_creator != NULL) {
-    delete sediment_creator;
-  }
-  if (pressure_creator != NULL) {
-    delete pressure_creator;
-  }
-  if (time_arr_creator != NULL) {
-    delete time_arr_creator;
-  }
-  if (time_reference != NULL) {
-    delete time_reference;
-  }
-  if (rand_generator != NULL) {
-    delete rand_generator;
-  }
-  if (transducer != NULL) {
-    delete transducer;
-  }
-  if (altimetry_creator != NULL) {
-    delete altimetry_creator;
-  }
-}
-
-
- 

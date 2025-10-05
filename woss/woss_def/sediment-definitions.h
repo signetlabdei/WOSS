@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -41,18 +34,16 @@
 #define WOSS_SEDIMENT_DEFINITIONS_H
 
 
+#include <utility>
 #include <string>
-#include "coordinates-definitions.h"
-
+#include <memory>
+#include <ostream>
 
 namespace woss {
-  
-    
-  #define SEDIMENT_NOT_SET_VALUE (-10000.0)
 
+  static constexpr inline double SEDIMENT_NOT_SET_VALUE = (-10000.0);
 
-  typedef ::std::pair < int , int > Deck41Types;
-
+  using Deck41Types = std::pair < int , int >;
 
   /**
   * \brief Surficial sediment geoacoustic parameters definitions
@@ -62,14 +53,13 @@ namespace woss {
   **/
   class Sediment {
 
-    
     public:
 
     /**
     * Sediment default constructor. The object created is not valid
-    **/  
+    **/
     Sediment();
-    
+
     /**
     * Sediment constructor
     * @param name textual name
@@ -80,21 +70,21 @@ namespace woss {
     * @param atts shear wave attenuation [db/wavelength or user defined]
     * @param bottom_depth bottom depth [m]
     **/
-    Sediment( const ::std::string& name, double velc, double vels, double dens, double attc, double atts, double bottom_depth = 1.0 );
+    Sediment( const std::string& name, double velc, double vels, double dens, double attc, double atts, double bottom_depth = 1.0 );
+
+    Sediment( const Sediment& copy ) = default;
+
+    Sediment( Sediment&& tmp ) = default;
+
+    virtual ~Sediment() = default;
 
     /**
-    * Sediment copy constructor
-    * @param copy Sediment to be copied
-    **/
-    Sediment( const Sediment& copy );
-    
-    
-    /**
     * Sediment virtual factory method
-    * @return a heap-created Sediment object
-    **/  
-    virtual Sediment* create() const { return new Sediment(); }
-    
+    * @return a heap-created invalid Sediment object
+    **/
+     virtual std::unique_ptr<Sediment> create() const {
+      return std::make_unique<Sediment>(); }
+
     /**
     * Sediment virtual factory method
     * @param name textual name
@@ -104,34 +94,23 @@ namespace woss {
     * @param attc compressional wave attenuation [db/wavelength or user defined]
     * @param atts shear wave attenuation [db/wavelength or user defined]
     * @param bottom_depth bottom depth [m]
-    * @return a heap-created Sediment object
+    * @return std::unique_ptr to a heap-created Sediment object
     **/
-    virtual Sediment* create( const ::std::string& name, double velc, double vels, double dens, double attc, double atts, double bottom_depth = 1.0 ) const {
-      return new Sediment( name, velc, vels, dens, attc, atts, bottom_depth); }
+    virtual std::unique_ptr<Sediment> create( const std::string& name, double velc, double vels, double dens, double attc, double atts, double bottom_depth = 1.0 ) const {
+      return std::make_unique<Sediment>( name, velc, vels, dens, attc, atts, bottom_depth); }
 
     /**
     * Sediment virtual factory method
-    * @param copy Sediment to be copied
-    * @return a heap-created Sediment object
+    * @return std::unique_ptr to a heap-created copy of <b>this</b> instance
     **/
-    virtual Sediment* create( const Sediment& copy ) const { return new Sediment(copy); }
-    
-    /**
-    * Sediment virtual factory method
-    * @return a heap-created copy of <b>this</b> instance
-    **/
-    virtual Sediment* clone() const  { return new Sediment(*this); }
-    
-    
-    virtual ~Sediment() { };
+    virtual std::unique_ptr<Sediment> clone() const { return std::make_unique<Sediment>(*this); }
 
-    
     /**
     * Sets textual type name
     * @param name string name
     * @return reference to <b>*this</b>
     **/
-    Sediment& setType( const ::std::string& name ) { type = name; return *this; }
+    Sediment& setType( const std::string& name ) { type = name; return *this; }
 
     /**
     * Sets compressional wave velocity
@@ -186,18 +165,16 @@ namespace woss {
     * @param bottom_depth bottom depth ( > 0 ) [m] 
     * @return reference to <b>*this</b>
     **/
-    Sediment& set( const ::std::string& name, double velc, double vels, double dens, double attc , double atts, double bottom_depth ) { 
+    Sediment& set( const std::string& name, double velc, double vels, double dens, double attc , double atts, double bottom_depth ) { 
                         type = name; vel_c = velc; vel_s = vels, density = dens;
                         att_c = attc; att_s = atts; depth = bottom_depth; return *this; }
-
 
     /**
     * Sets debug for the whole class
     * @param flag debug value
     **/
     static void setDebug( bool flag ) { debug = flag; } 
-    
-    
+
     /**
     * Gets compressional wave velocity
     * @return velocity [m/s]
@@ -238,8 +215,7 @@ namespace woss {
     * Gets sediment type name
     * @return type
     **/
-    ::std::string getType() const { return type; }
-
+    std::string getType() const { return type; }
 
     /**
     * Checks the validity of geoacoustic parameters provided
@@ -248,21 +224,15 @@ namespace woss {
     virtual bool isValid() const { return ( vel_c != SEDIMENT_NOT_SET_VALUE && vel_s != SEDIMENT_NOT_SET_VALUE && density != SEDIMENT_NOT_SET_VALUE
                                         && att_c != SEDIMENT_NOT_SET_VALUE && att_s != SEDIMENT_NOT_SET_VALUE ); }
 
-    
     /**
     * Gets geoacoustic parameters in a formatted fashion
     * @return formatted string
     **/
-    virtual const ::std::string getStringValues() const;
-    
-    
-    /**
-    * Assignment operator
-    * @param copy const reference to a Sediment object to be copied
-    * @return Sediment reference to <i>this</i>
-    **/
-    Sediment& operator=( const Sediment& time );
-    
+    virtual const std::string getStringValues() const;
+
+    Sediment& operator=( const Sediment& sed ) = default;
+
+    Sediment& operator=( Sediment&& tmp ) = default;
 
     /**
     * Sum operator
@@ -279,7 +249,7 @@ namespace woss {
     * @return a new const instance holding the operation result  
     **/
     friend const Sediment operator-( const Sediment& left, const Sediment& right );
-  
+
     /**
     * Division operator
     * @param left left operand const reference
@@ -360,8 +330,7 @@ namespace woss {
     * @return <i>left</i> reference after the operation
     **/
     friend Sediment& operator*=( Sediment& left, double right );
-    
-    
+
     /**
     * Equality operator
     * @param left left operand const reference
@@ -377,8 +346,7 @@ namespace woss {
     * @return true if <i>left != right</i>, false otherwise
     **/  
     friend bool operator!=( const Sediment& left, const Sediment& right );
-    
-    
+
     /**
     * Scalar sum operator
     * @param left left operand const reference
@@ -410,8 +378,7 @@ namespace woss {
     * @return a new const instance holding the operation result  
     **/
     friend const Sediment operator*( const double left, const Sediment& right );
-    
-    
+
     /**
     * Scalar sum operator
     * @param left left operand const reference
@@ -435,7 +402,7 @@ namespace woss {
     * @return a new const instance holding the operation result  
     **/
     friend const Sediment operator/( const Sediment& left, double right );
-    
+
     /**
     * Scalar multiplication operator
     * @param left left operand const reference
@@ -443,7 +410,6 @@ namespace woss {
     * @return a new const instance holding the operation result  
     **/
     friend const Sediment operator*( const Sediment& left, double right );
-    
 
     /**
     * << operator
@@ -451,37 +417,35 @@ namespace woss {
     * @param instance right operand const Sediment reference
     * @return <i>os</i> reference after the operation
     **/ 
-    friend ::std::ostream& operator<<( ::std::ostream& os, const Sediment& instance );
-    
+    friend std::ostream& operator<<( std::ostream& os, const Sediment& instance );
 
     protected:
 
     /**
     * Sediment type name
     **/
-    ::std::string type;
+    std::string type;
 
-    
     /**
     * Bottom depth. Used for shear wave velocity calculations [m]
     **/
     double depth;
-    
+
     /**
     * Compressional wave velocity [m/s]
     **/
     double vel_c;
-    
+
     /**
     * Shear wave velocity [m/s]
     **/
     double vel_s; 
-    
+
     /**
     * Sediment density [g/cm^3]
     **/
     double density;
-    
+
     /**
     * Compressional wave attenuation [db/wavelength]
     **/
@@ -492,13 +456,11 @@ namespace woss {
     **/
     double att_s; 
 
-    
     /**
     * Debug flag
     **/
     static bool debug;
-    
-    
+
   };
 
   // non-inline friend operator declarations
@@ -532,40 +494,36 @@ namespace woss {
   //inline functions
   /////////////////
   inline bool operator==( const Sediment& left, const Sediment& right ) {
-    if ( &left == &right ) return true; 
+    if ( &left == &right ) 
+      return true; 
     return( left.vel_c == right.vel_c && left.vel_s == right.vel_s && left.att_c == right.att_c && left.att_s == right.att_s
         && left.density == right.density );
   }
 
-
   inline bool operator!=( const Sediment& left, const Sediment& right ) {
-    if ( &left == &right ) return false; 
+    if ( &left == &right ) 
+      return false; 
     return( left.vel_c != right.vel_c || left.vel_s != right.vel_s || left.att_c != right.att_c || left.att_s != right.att_s
         || left.density != right.density );
   }
 
-
-  inline ::std::ostream& operator<<(::std::ostream& os, const Sediment& instance ) {
+  inline std::ostream& operator<<(std::ostream& os, const Sediment& instance ) {
     os << "Sediment type = " << instance.type << "; velocity_c = " << instance.vel_c << "; velocity_s = " << instance.vel_s << "; density = " << instance.density
-      << "; attenuation_c = " << instance.att_c << "; attenuation_s = " << instance.att_s;
+       << "; attenuation_c = " << instance.att_c << "; attenuation_s = " << instance.att_s;
     return os;
   }
-
 
   inline const Sediment operator+( const Sediment& left, const Sediment& right ) {
     return( Sediment( left.type + " + " + right.type, left.vel_c + right.vel_c, left.vel_s + right.vel_s, left.density + right.density, left.att_c + right.att_c, left.att_s + right.att_s ) );
   }
 
-
   inline const Sediment operator-( const Sediment& left, const Sediment& right ) {
     return( Sediment( left.type + " - " + right.type, left.vel_c - right.vel_c, left.vel_s - right.vel_s, left.density - right.density, left.att_c - right.att_c, left.att_s - right.att_s ) );
   }
 
-
   inline const Sediment operator/( const Sediment& left, const Sediment& right ) {
     return( Sediment( left.type + " / " + right.type, left.vel_c / right.vel_c, left.vel_s / right.vel_s, left.density / right.density, left.att_c / right.att_c, left.att_s / right.att_s ) );
   }
-
 
   inline const Sediment operator*( const Sediment& left, const Sediment& right ) {
     return( Sediment( left.type + " * " + right.type, left.vel_c * right.vel_c, left.vel_s * right.vel_s, left.density * right.density, left.att_c * right.att_c, left.att_s * right.att_s ) );
@@ -583,13 +541,12 @@ namespace woss {
 
     SedimentGravel(double depth = 1.0);
 
-
     protected:
 
     /**
     * Shear wave velocity formula taken from the literature
     **/
-    double calculateVelocityS(double vels, double bottom_depth);
+    double calculateVelocityS(double vels, double bottom_depth) const;
 
   };
 
@@ -601,13 +558,10 @@ namespace woss {
   **/
   class SedimentSand : public Sediment {
 
-    
     public:
 
-      
     SedimentSand();
 
-    
   };
 
 
@@ -618,21 +572,17 @@ namespace woss {
   **/
   class SedimentSilt : public Sediment {
 
-    
     public:
 
-      
     SedimentSilt(double depth = 1.0);
-
 
     protected:
 
     /**
     * Shear wave velocity formula taken from the literature
     **/
-    double calculateVelocityS(double vels, double bottom_depth);
+    double calculateVelocityS(double vels, double bottom_depth) const;
 
-    
   };
 
 
@@ -643,13 +593,10 @@ namespace woss {
   **/
   class SedimentClay : public Sediment {
 
-    
     public:
 
-      
     SedimentClay();
 
-    
   };
 
 
@@ -660,13 +607,10 @@ namespace woss {
   **/
   class SedimentOoze : public Sediment {
 
-    
     public:
-      
 
     SedimentOoze();
 
-    
   };
 
 
@@ -677,21 +621,17 @@ namespace woss {
   **/
   class SedimentMud : public Sediment {
 
-    
     public:
 
-      
     SedimentMud(double depth = 1.0);
-
 
     protected:
 
     /**
     * Shear wave velocity formula taken from the literature
     **/
-    double calculateVelocityS(double vels, double bottom_depth);
+    double calculateVelocityS(double vels, double bottom_depth) const;
 
-    
   };
 
 
@@ -704,13 +644,10 @@ namespace woss {
   **/
   class SedimentRocks : public Sediment {
 
-    
     public:
 
-      
     SedimentRocks();
 
-    
   };
 
 
@@ -723,13 +660,10 @@ namespace woss {
   **/
   class SedimentOrganic : public Sediment {
 
-    
     public:
 
-      
     SedimentOrganic();
 
-    
   };
 
 
@@ -742,13 +676,10 @@ namespace woss {
   **/
   class SedimentNodules : public Sediment {
 
-    
     public:
 
-      
     SedimentNodules();
 
-    
   };
 
 
@@ -759,18 +690,13 @@ namespace woss {
   **/
   class SedimentHardBottom : public Sediment {
 
-    
     public:
 
-      
     SedimentHardBottom();
 
-    
   };
 
-  
 }
-
 
 #endif /* WOSS_SEDIMENT_DEFINITIONS_H */
 

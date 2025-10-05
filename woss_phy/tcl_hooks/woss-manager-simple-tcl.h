@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -46,8 +39,7 @@
 #include <tclcl.h>
 #include <time-arrival-definitions.h>
 #include <definitions-handler.h>
-#include "woss-manager-simple.h"
-
+#include <woss-manager-simple.h>
 
 namespace woss {
  
@@ -60,17 +52,15 @@ namespace woss {
   */
   template< typename WMResDb = WossManagerResDb >
   class WossManagerSimpleTcl : public WossManagerSimple< WMResDb >, public TclObject {
-     
-  
-    public:
 
+    public:
 
     /**
     * WossManagerSimpleTcl default constructor
     */
     WossManagerSimpleTcl();
     
-    virtual ~WossManagerSimpleTcl() { WossManagerSimple<WMResDb>::reset(); }
+    virtual ~WossManagerSimpleTcl() override = default;
        
     /**
     * TCL command interpreter. It implements the following OTcl methods:
@@ -87,12 +77,10 @@ namespace woss {
     * @return TCL_OK or TCL_ERROR whether the command has been dispatched succesfully or not
     * 
     **/
-    virtual int command( int argc, const char*const* argv );
-    
-    
+    virtual int command( int argc, const char*const* argv ) override;
+
     protected:
-    
-    
+
     double debug_;
     
     double is_time_evolution_active_;
@@ -115,10 +103,13 @@ namespace woss {
     if(argc==2) {
       if(strcasecmp(argv[1], "reset") == 0) {
         
-        if (this->debug) ::std::cout << "WossManagerSimpleTcl::command() reset called"  << ::std::endl;
+        if (this->debug) 
+          std::cout << "WossManagerSimpleTcl::command() reset called"  << std::endl;
       
-        if ( this->reset() ) return TCL_OK;
-        else return TCL_ERROR;
+        if ( this->reset() ) 
+          return TCL_OK;
+        else 
+          return TCL_ERROR;
       }
     }
     return TclObject::command(argc,argv);
@@ -129,22 +120,34 @@ namespace woss {
   int WossManagerSimpleTcl< WossManagerResDbMT >::command( int argc, const char*const* argv ) {
     if(argc==2) {
       if(strcasecmp(argv[1], "reset") == 0) {
-        
-        if (this->debug) ::std::cout << "WossManagerSimpleTcl::command() reset called"  << ::std::endl;
-      
-        if ( this->reset() ) return TCL_OK;
-        else return TCL_ERROR;
+        if (this->debug) 
+          std::cout << "WossManagerSimpleTcl::command() reset called"  << std::endl;
+
+        if ( this->reset() ) 
+          return TCL_OK;
+        else 
+          return TCL_ERROR;
       }
     }
     else if (argc==3) {
       if(strcasecmp(argv[1], "setConcurrentThreads") == 0) {
         int threads = atoi(argv[2]);
 
-        if (this->debug) ::std::cout << "WossManagerSimpleTcl::command() setConcurrentThreads " 
-                                     << threads << " called"  << ::std::endl;
+        if (this->debug) 
+          std::cout << "WossManagerSimpleTcl::command() setConcurrentThreads " 
+                    << threads << " called"  << std::endl;
 
         this->setConcurrentThreads(threads);
 
+        return TCL_OK;
+      }
+      else if(strcasecmp(argv[1], "setThreadPoolUsage") == 0) {
+        int usage = atoi(argv[2]);
+
+        if (this->debug) 
+          std::cout << "WossManagerSimpleTcl::command() setThreadPoolUsage " << usage << " called"  << std::endl;
+
+        this->setUseThreadPoolFlag( usage == 0 ? false : true );
         return TCL_OK;
       }
     }
@@ -156,5 +159,3 @@ namespace woss {
 #endif // WOSS_NS_MIRACLE_SUPPORT
 
 #endif /* WOSS_MANAGER_SIMPLE_DEFINITIONS_TCL_H */
-
-

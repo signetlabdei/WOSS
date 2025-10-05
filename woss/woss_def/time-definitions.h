@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -46,13 +39,11 @@
 #include <cassert>
 #include <cmath>
 #include <climits>
-
+#include <memory>
 
 namespace woss {
 
-    
-  #define TIME_NOT_SET_VALUE (LONG_MIN)
-
+  static constexpr long TIME_NOT_SET_VALUE = (LONG_MIN);
 
   /**
   * \brief Class for simulation time reference purposes
@@ -61,29 +52,26 @@ namespace woss {
   *
   **/ 
   class TimeReference {
-  
-    
-    public: 
 
+    public:
 
     virtual ~TimeReference() = 0;
 
     /**
     * woss::TimeReference virtual factory method
-    * @return a heap-allocated copy of <b>this</b> instance
-    **/      
-    virtual TimeReference* clone() = 0;
+    * @return a std::unique_ptr to a heap-allocated copy of <b>this</b> instance
+    **/
+    virtual std::unique_ptr<TimeReference> clone() const = 0;
 
     /**
     * Retuns simulation time
     * @return value in seconds
-    **/          
+    **/
     virtual double getTimeReference() const = 0;
-  
-    
+
   };
 
-  inline TimeReference::~TimeReference() { }
+  inline TimeReference::~TimeReference() = default;
 
   /**
   * \brief a class for time date manipulation
@@ -94,13 +82,11 @@ namespace woss {
   **/ 
   class Time {
 
-
     public:
 
-      
     /**
     * Default Time constructor. Object is not valid
-    **/ 
+    **/
     Time();
 
     /**
@@ -120,18 +106,11 @@ namespace woss {
     **/
     Time( int day, int month, int year, int hours = 0, int mins = 0, int seconds = 1 ); 
 
-    /**
-    * Time copy constructor
-    * @param copy TimeArr to be copied
-    **/
-    Time( const Time& copy );
-    
-    /**
-    * Time destructor.
-    * It is not <b>virtual</b>, since this class is not meant to be inherited from
-    **/
-    ~Time() { }
+    Time( const Time& copy ) = default;
 
+    Time( Time&& tmp ) = default;
+
+    ~Time() = default;
 
     /**
     * Sets month 
@@ -176,20 +155,17 @@ namespace woss {
     **/
     Time& setSeconds( int s ) { assert( s >= 0 && s <= 59 ); timeinfo.tm_sec = s; raw_time = mktime(&timeinfo); return *this; }
 
-
     /**
     * Sets debug flag for all instances
     * @param flag debug bool
     **/
     static void setDebug(bool flag) { debug = flag; }
-    
 
     /**
     * Checks the validity of Time
     * @return <i>true</i> if it has a initialized date time, <i>false</i> otherwise
     **/
     bool isValid() const { return ( raw_time != TIME_NOT_SET_VALUE ); }
-
 
     /**
     * Returns month value
@@ -227,20 +203,15 @@ namespace woss {
     **/
     int getSeconds() const { return timeinfo.tm_sec; }
 
-
     /**
     * time_t operator
     * @return the time_t
     **/
     operator time_t() const;
 
-    /**
-    * Assignment operator
-    * @param copy const reference to a Time object to be copied
-    * @return Time reference to <i>this</i>
-    **/ 
-    Time& operator=( const Time& copy );
+    Time& operator=( const Time& copy ) = default;
 
+    Time& operator=( Time&& tmp ) = default;
 
     /**
     * Sum operator
@@ -255,7 +226,7 @@ namespace woss {
     * @param left left operand const reference
     * @param right right operand const reference
     * @return a new const instance holding the operation result  
-    **/  
+    **/
     friend const Time operator-( const Time& left, const time_t right );
 
     /**
@@ -265,7 +236,6 @@ namespace woss {
     * @return time difference in seconds 
     **/  
     friend double operator-( const Time& left, const Time& right );
-
 
     /**
     * Compound assignment sum operator
@@ -283,7 +253,6 @@ namespace woss {
     **/
     friend Time& operator-=( Time& left, time_t right );
 
-
     /**
     * Equality operator
     * @param left left operand const reference
@@ -300,7 +269,6 @@ namespace woss {
     **/ 
     friend bool operator!=( const Time& left, const Time& right );
 
-    
     /**
     * Greater than operator
     * @param left left operand const reference
@@ -333,18 +301,15 @@ namespace woss {
     **/ 
     friend bool operator>=( const Time& left, const Time& right );
 
-
     /**
     * << operator
     * @param os left operand ostream reference
     * @param instance right operand const Time reference
     * @return <i>os</i> reference after the operation
     **/ 
-    friend ::std::ostream& operator<<( ::std::ostream& os, const Time& instance );
-
+    friend std::ostream& operator<<( std::ostream& os, const Time& instance );
 
     protected:
-
 
     /**
     * Struct tm from ctime library
@@ -355,7 +320,6 @@ namespace woss {
     * Number of seconds corresponding to date time <i>timeinfo</i>
     **/
     time_t raw_time;
-    
 
     /**
     * Debug flag
@@ -364,103 +328,82 @@ namespace woss {
 
   };
 
-  
   /**
   * \brief Struct that stores start and end Time
   *
   * woss::SimeTime is a pair of woss::Time objects for simulation purposes. A start Time and a end Time
   **/ 
   struct SimTime {
-    
-    
+
     SimTime( Time time1 = Time(), Time time2 = Time() ) : start_time(time1), end_time(time2) { }
-    
-    
+
     friend std::ostream& operator<<( std::ostream& os, const SimTime& instance ) {
       os << "start time = " << instance.start_time << "; end time = " << instance.end_time;
       return os;
-    }   
-    
-    
+    }
+
     Time start_time;
     
     Time end_time;
-  
-    
+
   };
-  
 
   // non-inline operator declarations
   double operator-( const Time& left, const Time& right );
 
-  
   //inline functions
   //////////
   inline Time::operator time_t() const {
     return( mktime(&timeinfo) );
   }
-  
-  
+
   inline bool operator==( const Time& left, const Time& right ) {
     if ( &left == &right ) return true; 
     return( mktime(const_cast<tm*>(&left.timeinfo)) == mktime(const_cast<tm*>(&right.timeinfo)) );
   }
-
 
   inline bool operator!=( const Time& left, const Time& right ) {
     if ( &left == &right ) return false; 
     return( mktime(const_cast<tm*>(&left.timeinfo)) != mktime(const_cast<tm*>(&right.timeinfo)) );
   }
 
-
   inline bool operator>( const Time& left, const Time& right ) {
     if ( &left == &right ) return false; 
     return( mktime(const_cast<tm*>(&left.timeinfo)) > mktime(const_cast<tm*>(&right.timeinfo)) );
   }
-
 
   inline bool operator<( const Time& left, const Time& right ) {
     if ( &left == &right ) return false; 
     return( mktime(const_cast<tm*>(&left.timeinfo)) < mktime(const_cast<tm*>(&right.timeinfo)) );
   }
 
-
   inline bool operator<=( const Time& left, const Time& right ) {
     return( mktime(const_cast<tm*>(&left.timeinfo)) <= mktime(const_cast<tm*>(&right.timeinfo)) );
   }
 
-
   inline bool operator>=( const Time& left, const Time& right ) {
     return( mktime(const_cast<tm*>(&left.timeinfo)) >= mktime(const_cast<tm*>(&right.timeinfo)) );
   }
-
 
   inline std::ostream& operator<<( std::ostream& os, const Time& time ) {
     os << asctime(const_cast<tm*>(&time.timeinfo)) ;
     return os;
   }
 
-
   inline const Time operator+( const Time& left, const time_t right ) {
     time_t sum_time = mktime(const_cast<tm*>(&left.timeinfo)) + right;
     return( Time( localtime( &sum_time ) ) );
   }
-
 
   inline const Time operator-( const Time& left, const time_t right ) {
     time_t diff_time = mktime(const_cast<tm*>(&left.timeinfo)) - right;
     return( Time( localtime( &diff_time ) ) );
   }
 
-
   Time& operator+=( Time& left, time_t right );
-
 
   Time& operator-=( Time& left, time_t right );
 
 }
 
-
 #endif /* WOSS_TIME_DEFINITIONS_H */
-
-

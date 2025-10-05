@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,14 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   woss.h
@@ -42,43 +34,38 @@
 
 
 #include <set>
-#include <vector>
 #include <map>
 #include <climits>
+#ifdef WOSS_MULTITHREAD
+#include <atomic>
+#endif // WOSS_MULTITHREAD
 #include <coordinates-definitions.h>
 #include <time-definitions.h>
+#include <pressure-definitions.h>
+#include <time-arrival-definitions.h>
 #include "res-reader.h"
 
 
-#ifdef WOSS_MULTITHREAD
-#include <pthread.h>
-#endif // WOSS_MULTITHREAD
-
-
 namespace woss {
-  
-  
-  class WossDbManager;
 
+  class WossDbManager;
 
   /**
   * Set of frequencies [Hz]
   **/
-  typedef ::std::set< double > FreqSet;
-  typedef FreqSet::iterator FreqSIt;
-  typedef FreqSet::const_iterator FreqSCIt;
-  typedef FreqSet::reverse_iterator FreqSRIt;
-  typedef FreqSet::const_reverse_iterator FreqSCRIt;
+  using FreqSet = std::set< double >;
+  using FreqSIt = FreqSet::iterator;
+  using FreqSCIt = FreqSet::const_iterator;
+  using FreqSRIt = FreqSet::reverse_iterator;
+  using FreqSCRIt = FreqSet::const_reverse_iterator;
 
+  static constexpr inline int WOSS_MIN_DEPTH = 0;            /**< Default miminum depth value [m] */
 
-  static const int WOSS_MIN_DEPTH = 0;            /**< Default miminum depth value [m] */
+  static constexpr inline int WOSS_MAX_DEPTH = INT_MAX;      /**< Default maximum depth value [m] */
 
-  static const int WOSS_MAX_DEPTH = INT_MAX;      /**< Default maximum depth value [m] */
+  static constexpr inline int WOSS_MIN_RANGE = -INT_MAX;     /**< Default miminum range value [m] */
 
-  static const int WOSS_MIN_RANGE = -INT_MAX;     /**< Default miminum range value [m] */
-
-  static const int WOSS_MAX_RANGE = INT_MAX;      /**< Default maximum range value [m] */
-
+  static constexpr inline int WOSS_MAX_RANGE = INT_MAX;      /**< Default maximum range value [m] */
 
   /**
   * \brief Abstract class that provides the interface for initializing and running a channel simulator
@@ -88,9 +75,7 @@ namespace woss {
   **/
   class Woss {
 
-    
     public:
-
 
     /**
     * Woss default constructor. Default constructed objects are not valid
@@ -111,29 +96,25 @@ namespace woss {
 
     virtual ~Woss();
 
-
     /**
     * Initializes the channel simulator
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
     virtual bool initialize() = 0;
 
-    
     /**
     * Runs the channel simulator. It is mandatory to set <b>is_running</b> to <i>true</i> at the beginning
     * of this function and set it to <i>false</i> before returning.
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
-    **/   
+    **/
     virtual bool run() = 0;
 
-    
     /**
     * Performs a time evoulion of all time-dependant parameters
     * @param time_value constant reference to a valid Time object ( between start_time and end_time)
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
-    **/   
+    **/
     virtual bool timeEvolve( const Time& time_value ) = 0;
-    
 
     /**
     * Checks the validity of Woss
@@ -141,7 +122,6 @@ namespace woss {
     **/
     virtual bool isValid() const = 0;
 
-    
     /**
     * Gets the average Pressure value in given rx range-depth box
     * @param frequency frequency [Hz]
@@ -150,9 +130,9 @@ namespace woss {
     * @param start_rx_range start receiver range [m]
     * @param end_rx_depth end receiver depth [m]
     * @param end_rx_range end receiver range [m]
-    * @return a valid Pressure value 
+    * @returns std::unique_ptr to a valid Pressure object
     **/
-    virtual Pressure* getAvgPressure( double frequency, double tx_depth, double start_rx_depth = WOSS_MIN_DEPTH, double start_rx_range = WOSS_MIN_RANGE, double end_rx_depth = WOSS_MAX_DEPTH , double end_rx_range = WOSS_MAX_RANGE ) const = 0;
+    virtual std::unique_ptr<Pressure> getAvgPressure( double frequency, double tx_depth, double start_rx_depth = WOSS_MIN_DEPTH, double start_rx_range = WOSS_MIN_RANGE, double end_rx_depth = WOSS_MAX_DEPTH , double end_rx_range = WOSS_MAX_RANGE ) const = 0;
 
     /**
     * Gets a Pressure value of given range, depths
@@ -160,10 +140,9 @@ namespace woss {
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
-    * @return a valid Pressure value 
+    * @returns std::unique_ptr to a valid Pressure object
     **/
-    virtual Pressure* getPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
-
+    virtual std::unique_ptr<Pressure> getPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
   
     /**
     * Gets a TimeArr value of given range, depths
@@ -171,10 +150,9 @@ namespace woss {
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
-    * @return a valid Pressure value 
+    * @returns std::unique_ptr to a valid TimeArr object
     **/
-    virtual TimeArr* getTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
-
+    virtual std::unique_ptr<TimeArr> getTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const = 0;
 
     /**
     * Sets debug flag
@@ -189,29 +167,27 @@ namespace woss {
     * @return reference to <b>*this</b>
     **/
     Woss& setCleanWorkDir( bool flag ) { clean_workdir = flag; return *this; }
-    
-    
+
     /**
     * Sets the work pathname
     * @param path valid pathname
     * @return reference to <b>*this</b>
     **/
-    Woss& setWorkDirPath( const ::std::string& path ) { work_dir_path = path; return *this; }
+    Woss& setWorkDirPath( const std::string& path ) { work_dir_path = path; return *this; }
 
     /**
     * Sets the WossDbManager pointer
-    * @param path const pointer to a const WossDbManager object
+    * @param path shared_ptr<WossDbManager> pointer
     * @return reference to <b>*this</b>
     **/
-    Woss& setWossDbManager( const WossDbManager* const ptr ) { db_manager = ptr; return *this; }
-
+    Woss& setWossDbManager( const std::shared_ptr<WossDbManager>& ptr ) { db_manager = ptr; return *this; }
 
     /**
     * Insert a frequency value into the FreqSet
     * @param freq a valid frequency value [Hz]
     * @return reference to <b>*this</b>
     **/
-    Woss& insertFrequency( double freq ) { frequencies.insert(freq); return *this; } 
+    Woss& insertFrequency( double freq ) { frequencies.emplace(freq); return *this; } 
 
     /**
     * Insert a range of valid frequencies
@@ -242,7 +218,6 @@ namespace woss {
     **/
     Woss& clearFrequencies() { frequencies.clear(); return *this; }
 
-
     /**
     * Sets the total number of channel simulator's runs 
     * @param runs number of runs
@@ -264,7 +239,6 @@ namespace woss {
     **/
     Woss& setRxCoordZ( const CoordZ& coordz ) { rx_coordz = coordz; return *this; }
 
-
     /**
     * Sets start date time
     * @param coordz const reference to a valid Time object
@@ -285,8 +259,7 @@ namespace woss {
     * @return reference to <b>*this</b>
     **/
     Woss& setEvolutionTimeQuantum( double value ) { evolution_time_quantum = value; return *this; } 
-    
-    
+
     /**
     * Returns the instance identifier
     * @returns id number
@@ -297,8 +270,7 @@ namespace woss {
     * Returns the work pathname
     * @returns string 
     **/
-    ::std::string getWorkDirPath() const { return work_dir_path; }
-
+    std::string getWorkDirPath() const { return work_dir_path; }
 
     /**
     * Returns the FreqSet in use
@@ -311,13 +283,12 @@ namespace woss {
     * @returns frequency value [Hz]
     **/
     double getMinFrequency() const { return( *( frequencies.begin() ) ); }
-    
+
     /**
     * Returns the maximum frequency in use
     * @returns frequency value [Hz]
     **/
     double getMaxFrequency() const { return( *( frequencies.rbegin() ) ); } 
-    
 
     /**
     * Returns a const iterator to the beginning of FreqSet in use
@@ -357,14 +328,12 @@ namespace woss {
     **/
     FreqSCIt freq_upper_bound( double frequency ) const { return( frequencies.upper_bound( frequency ) ); } 
 
-
     /**
     * Gets the total number of channel simulator's runs 
     * @returns total number of runs
     **/
     int getTotalRuns() const { return total_runs; }
-    
-    
+
     /**
     * Gets transmitter CoordZ
     * @returns valid CoordZ object
@@ -376,7 +345,6 @@ namespace woss {
     * @returns valid CoordZ object
     **/
     CoordZ getRxCoordZ() const { return rx_coordz; }
-
 
     /**
     * Gets start date time
@@ -401,7 +369,7 @@ namespace woss {
     * @returns time [s]
     **/    
     double getEvolutionTimeQuantum() const { return evolution_time_quantum; }
-    
+
     /**
     * Gets the surface great-circle distance between transmitter and receiver
     * @returns distance value [m]
@@ -430,48 +398,40 @@ namespace woss {
     * Checks if instance is already running the channel simulator
     **/
     virtual bool isRunning() const;
-    
-    
+
     protected:
 
-
-#ifdef WOSS_MULTITHREAD
-    /**
-    * Spinlock for syncronization purposes
-    **/
-    static pthread_spinlock_t woss_mutex;
-    
-    friend void destroyWossSpinlock();
-#endif // WOSS_MULTITHREAD
-    
+#if defined (WOSS_MULTITHREAD)
     /**
     * Unique instances id-counter
     **/
-    static int woss_counter;
-
+    static std::atomic<int> woss_counter;
+#else
+    /**
+    * Unique instances id-counter
+    **/
+   static int woss_counter;
+#endif // defined (WOSS_MULTITHREAD)
     /**
     * id of specific instance
     **/
     int woss_id;
 
-
     /**
     * Directory path for temporary files (e.g. channel simulator files)
     **/
-    ::std::string work_dir_path;
-
+    std::string work_dir_path;
 
     /**
-    * Constant pointer to the DbManager instance
+    * std::shared_ptr to the WossDbManager instance
     **/
-    const WossDbManager* db_manager;
-
+    std::shared_ptr<WossDbManager> db_manager;
 
     /**
     * Valid start date time value, for SSP averaging purposes
     **/
     Time start_time;
-    
+
     /**
      * Valid current simulated time (between start and end time)
      */
@@ -499,23 +459,21 @@ namespace woss {
     **/
     CoordZ rx_coordz;
 
-    
     /**
     * Frequencies in use
     **/
     FreqSet frequencies;
-    
-    
+
     /**
     * Initial bearing between tx_coordz and rx_coordz [radians]
     * @see Coord::getInitialBearing()
-    **/ 
+    **/
     double bearing;
 
     /**
     * Surface great-circle distance between tx_coordz and rx_coordz [m]
     * @see Coord::getGreatCircleDistance()
-    **/ 
+    **/
     double total_great_circle_distance;
 
     /**
@@ -528,27 +486,33 @@ namespace woss {
     * Total number of channel simulator's runs 
     **/
     int total_runs;
-    
 
     /**
     * Debug flag
     **/
     bool debug;
- 
-    
+
+#if defined (WOSS_MULTITHREAD)
+    std::atomic<bool> has_run_once;
+
+    /**
+    * Running flag
+    **/
+    std::atomic<bool> is_running;
+#else
     bool has_run_once;
-    
-    
+
     /**
     * Running flag
     **/
     volatile bool is_running;
+#endif // defined (WOSS_MULTITHREAD)
 
     /**
     * flag for removing working dir
     */
-    bool clean_workdir;    
-    
+    bool clean_workdir;
+
     /**
     * Creates the temporary work directory
     * @param curr_frequency frequency in use [Hz]
@@ -564,30 +528,20 @@ namespace woss {
     * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
     **/
     virtual bool rmWorkDir( double curr_frequency, int curr_run = 0 );
-    
+
     virtual bool rmWorkDir();
-    
-    
+
   };
 
-  
-#ifdef WOSS_MULTITHREAD
-  /**
-  * Function used to destroy the static pthread_spin_t woss_mutex
-  **/
-  void destroyWossSpinlock();
-#endif // WOSS_MULTITHREAD
-
-  
   /**
   * Map that links a frequency [Hz] to a ResReader instance
   **/
-  typedef ::std::map< double, ResReader* > ResReaderMap;
-  typedef ResReaderMap::iterator RRMIter;
-  typedef ResReaderMap::reverse_iterator RRMRIter;
-  typedef ResReaderMap::const_iterator RRMCIter;
-  typedef ResReaderMap::const_reverse_iterator RRMCRIter;
-  typedef ::std::pair< RRMIter, bool > RRMPair;
+  using ResReaderMap = std::map< double, std::unique_ptr<ResReader> >;
+  using RRMIter = ResReaderMap::iterator;
+  using RRMRIter = ResReaderMap::reverse_iterator;
+  using RRMCIter = ResReaderMap::const_iterator;
+  using RRMCRIter = ResReaderMap::const_reverse_iterator;
+  using RRMPair = std::pair< RRMIter, bool >;
 
 
   /**
@@ -598,14 +552,12 @@ namespace woss {
   **/
   class WossResReader : public Woss { 
 
-    
     public: 
     
-      
     /**
     * Default constructor
-    **/    
-    WossResReader() : Woss() { }
+    **/
+    WossResReader() = default;
 
     /**
     * Woss constructor
@@ -621,9 +573,7 @@ namespace woss {
                   double start_freq, double end_freq, double freq_step ) 
                   : Woss( tx, rx, start_t, end_t, start_freq, end_freq, freq_step ) { }
 
-    
-    virtual ~WossResReader() { clearResReaderMap(); }
-
+    virtual ~WossResReader() override = default;
 
     /**
     * Initializes current ResReader object
@@ -631,23 +581,19 @@ namespace woss {
     * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
     **/
     virtual bool initResReader( double curr_frequency ) = 0;
-    
-    
+
     protected:
-       
-    
+
     /**
     * ResReader map
     **/ 
     ResReaderMap res_reader_map;
-    
 
     /**
     * Clears res_reader_map
     **/ 
     void clearResReaderMap();
 
-    
   };
 
 }

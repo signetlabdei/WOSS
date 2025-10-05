@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   uw-woss-clmsg-channel-estimation.h
@@ -40,20 +33,15 @@
 #ifndef UW_WOSS_CLMSG_CHANNEL_ESTIMATION_H
 #define UW_WOSS_CLMSG_CHANNEL_ESTIMATION_H
 
-
+#include <memory>
 #include <clmessage.h>
-// #include <coordinates-definitions.h>
+#include <time-arrival-definitions.h>
 
-#define CLMSG_CH_ESTIMATION_VERBOSITY 2  // verbosity of this message
+
+static constexpr inline int CLMSG_CH_ESTIMATION_VERBOSITY = 2;  // verbosity of this message
 
 
 extern ClMessage_t CLMSG_CHANNEL_ESTIMATION;
-
-
-namespace woss {
-  class TimeArr;
-}
-
 
 /**
  * \brief Class for channel estimation synchronous cross-layer messaging 
@@ -62,54 +50,40 @@ namespace woss {
  * of channel estimation
  */
 class ClMsgChannelEstimation : public ClMessage {
-  
-  
+
   public:
-    
-    
-  ClMsgChannelEstimation( int i, int j, woss::TimeArr* time_arr = NULL );
+
+  ClMsgChannelEstimation( int i, int j, std::unique_ptr<woss::TimeArr> time_arr = nullptr );
   
-  virtual ~ClMsgChannelEstimation();
+  virtual ~ClMsgChannelEstimation() override = default;
   
-  virtual ClMessage* copy();  // copy the message
+  virtual ClMessage* copy() override;  // copy the message
   
 
-  const int getTx() { return tx; }
+  int getTx() const { return tx; }
   
-  const int getRx() { return rx; }
-  
-  
-  void setTimeArr( woss::TimeArr* time_arr ) { ch_estimation = time_arr; }
-  
-  woss::TimeArr* getTimeArr() { return ch_estimation; }
+  int getRx() const { return rx; }
   
   
-  void setDeletable() { deletable = true; }
+  void setTimeArr( std::unique_ptr<woss::TimeArr> time_arr ) { ch_estimation = std::move(time_arr); }
   
-  void unsetDeletable() { deletable = false; }
-  
-  
-  bool isQuery() {return query; }
+  std::unique_ptr<woss::TimeArr> getTimeArr() { return std::move(ch_estimation); }
 
-  bool isDeletable() { return deletable; }
+
+  bool isQuery() const {return query; }
 
 
   protected:
   
     
   bool query;
-  
-  bool deletable;
-  
+   
   int tx;
   
   int rx;
 
-  woss::TimeArr* ch_estimation;
+  std::unique_ptr<woss::TimeArr> ch_estimation;
 
-  
 };
 
-
 #endif //UW_WOSS_CLMSG_CHANNEL_ESTIMATION_H
-

@@ -1,10 +1,10 @@
 /*
  * WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,25 +20,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 #include <cassert>
 #include <cstdlib>
 #include <cmath>
+#include <sstream>
 #include <definitions.h>
 #include "bathymetry-utm-csv-db.h"
-#include <sstream>
 
 using namespace woss;
 
 const double BathyUtmCsvDb::land_approximation_depth = 0.000000001;
 
-BathyUtmCsvDb::BathyUtmCsvDb( const ::std::string& name ) 
+BathyUtmCsvDb::BathyUtmCsvDb( const std::string& name ) 
 : WossTextualDb(name),
   bathy_vec(),
   separator(','),
@@ -61,7 +55,7 @@ bool BathyUtmCsvDb::finalizeConnection() {
 
 
 bool BathyUtmCsvDb::insertValue( const Coord& coordinates, const Bathymetry& bathymetry_value ) {
-  ::std::cerr << "BathyUtmCsvDb::insertValue() method is not implemented." << ::std::endl;
+  std::cerr << "BathyUtmCsvDb::insertValue() method is not implemented." << std::endl;
   return false;
 }
 
@@ -71,19 +65,19 @@ double BathyUtmCsvDb::getValue( const Coord& coords ) const {
   int index = getBathyIndex(coords);
 
   if (index < 0 || index >= (int)bathy_vec.size()) {
-    ::std::cerr << "BathyUtmCsvDb::getValue() WARNING current coordinates"
-      << " are outside CSV bathymetry: " << coords  << ::std::endl;
+    std::cerr << "BathyUtmCsvDb::getValue() WARNING current coordinates"
+      << " are outside CSV bathymetry: " << coords  << std::endl;
     return (HUGE_VAL);
   }
   depth = bathy_vec[index];
   //std::cout << "Position " << coords << " depth= " << depth << std::endl;
   if ( depth != HUGE_VAL && depth <= 0.0 ) 
-    return(::std::abs(depth));
+    return(std::abs(depth));
   else {
     if  (debug)
-      ::std::cout << "BathyUtmCsvDb::getValue() WARNING current"
-                  << " coordinates are on land : " << coords << "; altitude = " 
-                  << depth << ::std::endl;
+      std::cout << "BathyUtmCsvDb::getValue() WARNING current"
+                << " coordinates are on land : " << coords << "; altitude = " 
+                << depth << std::endl;
     if (true == approx_land_to_sea_surface) {
       return land_approximation_depth;
     }
@@ -120,7 +114,6 @@ int BathyUtmCsvDb::getBathyIndex( const Coord& coords ) const {
       utm.getNorthing() > range_northing_end)
   {
     std::cerr << "UTM out of db ranges" << std::endl;
-
     return -1;
   }
 
@@ -136,7 +129,7 @@ int BathyUtmCsvDb::getBathyIndex( const Coord& coords ) const {
 
 bool BathyUtmCsvDb::importData() {
   textual_db.close();
-  textual_db.open( db_name.c_str() , ::std::fstream::in );
+  textual_db.open( db_name.c_str() , std::fstream::in );
   if (textual_db.is_open()) {
     if (debug) 
       std::cout << "file opened" << std::endl;
@@ -158,7 +151,7 @@ bool BathyUtmCsvDb::importData() {
         j++;
         n++;
       }
-        i++;
+      i++;
     }
 
     if (debug) 

@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009, 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,12 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -41,32 +35,24 @@
 #define ALTIMETRY_DEFINITIONS_H
 
 
-#include <cassert>
-#include <climits>
 #include <map>
+#include <memory>
 #include "custom-precision-double.h"
 #include "time-definitions.h"
 
 
 namespace woss {
-  
  
   /**
   * Map that links a PDouble range [m] to a double altimetry value.
   * Negative values ==> under water.
   * Positive values ==> above water.
   **/ 
-  typedef std::map < PDouble , double > AltimetryMap; 
-  typedef AltimetryMap::iterator AltIt;
-  typedef AltimetryMap::const_iterator AltCIt;
-  typedef AltimetryMap::reverse_iterator AltRIt;
-  typedef AltimetryMap::const_reverse_iterator AltCRIt;
-
-
-  /**
-  * Total range steps for default constructed Altimetry objects
-  **/ 
-  #define ALTIMETRY_RANGE_STEPS (1)
+  using AltimetryMap = std::map < PDouble, double >; 
+  using AltIt = AltimetryMap::iterator;
+  using AltCIt = AltimetryMap::const_iterator;
+  using AltRIt = AltimetryMap::reverse_iterator;
+  using AltCRIt = AltimetryMap::const_reverse_iterator;
 
 
   /**
@@ -103,48 +89,49 @@ namespace woss {
     * Altimetry copy constructor
     * @param copy Altimetry to be copied
     **/
-    Altimetry( const Altimetry& copy );
+    Altimetry( const Altimetry& copy ) = default;
 
-    virtual ~Altimetry() { }
-    
-    
+    /**
+    * Altimetry move constructor
+    * @param tmp Altimetry to be moved from
+    **/
+    Altimetry( Altimetry&& tmp) = default;
+
+    virtual ~Altimetry() = default;
+
     /**
     * Altimetry virtual factory method
-    * @return a heap-created Altimetry object
+    * @return a std::unique_ptr to a heap-created Altimetry object
     **/ 
-    virtual Altimetry* create() const { 
-      return &((new Altimetry() )->updateMinMaxAltimetryValues()); ; }
+    virtual std::unique_ptr<Altimetry> create() const { 
+      auto ptr = std::make_unique<Altimetry>();
+      ptr->updateMinMaxAltimetryValues();
+      return ptr; }
 
     /**
     * Altimetry virtual factory method
     * @param map custom time arrival map
-    * @return a heap-created Altimetry object
+    * @return a std::unique_ptr to a heap-created Altimetry object
     **/ 
-    virtual Altimetry* create( AltimetryMap& map ) const {
-      return &((new Altimetry( map ) )->updateMinMaxAltimetryValues()); }
-    
+    virtual std::unique_ptr<Altimetry> create( AltimetryMap& map ) const {
+      auto ptr = std::make_unique<Altimetry>(map);
+      ptr->updateMinMaxAltimetryValues();
+      return ptr; }
     /**
     * Altimetry virtual factory method
-    * @param copy Altimetry to be copied
-    * @return a heap-created Altimetry object
+    * @return a std::unique_ptr to a heap-created copy of <b>this</b> instance
     **/
-    virtual Altimetry* create( const Altimetry& copy ) const { return new Altimetry( copy ); }
-    
+    virtual std::unique_ptr<Altimetry> clone() const { 
+      return std::make_unique<Altimetry>(*this); }
     /**
-    * Altimetry virtual factory method
-    * @return a heap-created copy of <b>this</b> instance
-    **/
-    virtual Altimetry* clone() const { return new Altimetry(*this); }
-
-    /**
-    * Creates an instance not valid
-    * @return a new instance not valid ( e.g. range 0.0 = +inf )
+    * Returns a reference an AltimetryMap object not valid
+    * @return a AltimetryMap instance not valid ( e.g. range 0.0 = +inf )
     **/
     static AltimetryMap& createNotValid();
     
     /**
-    * Creates a flat altimetry
-    * @return a new flat altimetry instance ( e.g. range 0.0 = altimetry )
+    * Creates a flat AltimetryMap
+    * @return a reference AltimetryMap flat altimetry instance ( e.g. range 0.0 = altimetry )
     **/
     static AltimetryMap& createFlat(double altimetry = 0 );
 
@@ -188,14 +175,14 @@ namespace woss {
     * @param time_end end range value [m]
     * @returns a new Altimetry object
     **/
-    virtual Altimetry* crop( double range_start, double range_end );		
+    virtual std::unique_ptr<Altimetry> crop( double range_start, double range_end ) const;
  
      /**
     * Performs a random perturbation of altimetry values with given ratio
     * @param ratio_incr_value perturbation ratio
     * @return a <i>new</i> Altimetry object
     **/
-    virtual Altimetry* randomize( double ratio_incr_value ) const;   
+    virtual std::unique_ptr<Altimetry> randomize( double ratio_incr_value ) const;
     
     /**
     * Returns a const iterator to the beginning of the altimetry map
@@ -214,7 +201,7 @@ namespace woss {
     * @param i integer should be between 0 and size() 
     * @returns const iterator to end() if position <i>i</i> is not found
     **/
-    AltCIt at( const int i ) const ;
+    AltCIt at( const int i ) const;
 
     /**
     * Returns the number of altimetry values stored
@@ -268,7 +255,7 @@ namespace woss {
     /**
      * Sets the depth 
      * @param d scenario depth [m]
-     **/    
+     **/
     Altimetry& setDepth( double d) { depth = d; return *this; }
     
     
@@ -324,28 +311,28 @@ namespace woss {
      * Returns the scenario depth
      * @returns depth [m]
      **/
-    double getDepth() const { return depth; }    
+    double getDepth() const { return depth; }
     
     
     /**
     * Checks the validity of Altimetry
     * @return <i>true</i> if it has at least one value, <i>false</i> otherwise
     **/
-    virtual bool isValid() const; 
+    virtual bool isValid() const;
  
     /**
     * Initializes the altimetry vector. used if there is a matematical function
     * that generates the whole vector.
     * @return <i>true</i> succeeded <i>false</i> otherwise
     **/    
-    virtual bool initialize(); 
+    virtual bool initialize();
     
     /**
-    * Performs a time evoulion
+    * Performs a time evolution
     * @param time_value const reference to a valid Time object
-    * @return a pointer to a new heap allocated Altimetry object
+    * @return a std::unique_ptr to a new heap allocated Altimetry object
     **/
-    virtual Altimetry* timeEvolve( const Time& time_value );
+    virtual std::unique_ptr<Altimetry> timeEvolve( const Time& time_value );
     
     
     /**
@@ -353,8 +340,14 @@ namespace woss {
     * @param copy const reference to a Altimetry object to be copied
     * @return Altimetry reference to <i>this</i>
     **/ 
-    Altimetry& operator=( const Altimetry& copy ) ;
+    Altimetry& operator=( const Altimetry& copy ) = default;
 
+    /**
+    * Assignment move operator
+    * @param tmp rvalue to be moved from
+    * @return Altimetry reference to <i>this</i>
+    **/ 
+   Altimetry& operator=( Altimetry&& tmp ) = default;
 
     /**
     * Equality operator
@@ -362,7 +355,7 @@ namespace woss {
     * @param right right operand const reference
     * @return true if <i>left == right</i>, false otherwise
     **/  
-    friend bool operator==( const Altimetry& left, const Altimetry& right ) ;
+    friend bool operator==( const Altimetry& left, const Altimetry& right );
 
     /**
     * Inequality operator
@@ -514,10 +507,10 @@ namespace woss {
     **/ 
     friend std::ostream& operator<<( std::ostream& os, const Altimetry& instance );
 
-      
+
     protected:
 
-      
+
     virtual Altimetry& updateMinMaxAltimetryValues();
     
     /**
@@ -533,7 +526,7 @@ namespace woss {
     /**
     *range total steps
     **/    
-    int total_range_steps;   
+    int total_range_steps;
      
     /**
     * Stores the miminum altimetry value [m] i.e. the maximum positive value (if present)
@@ -562,15 +555,14 @@ namespace woss {
     
     /**
      * Stores the depth of the scenario [m]
-     **/     
+     **/
     double depth;
     
     /**
     * altimetry values map 
     **/ 
     AltimetryMap altimetry_map;
-    
-    
+
   };
  
   
@@ -609,74 +601,63 @@ namespace woss {
     **/
     AltimBretschneider( const AltimBretschneider& copy );
 
-    virtual ~AltimBretschneider() { }
-    
-    
+    /**
+    * AltimBretschneider move constructor
+    * @param tmp AltimBretschneider to be moved
+    **/
+    AltimBretschneider( AltimBretschneider&& tmp );
+
+    virtual ~AltimBretschneider() override = default;
+
     /**
     * AltimBretschneider virtual factory method
-    * @return a heap-created AltimBretschneider object
+    * @return a std::unique_ptr to a heap-created AltimBretschneider object
     **/ 
-    virtual AltimBretschneider* create() const { 
-      AltimBretschneider* ret_val = new AltimBretschneider();
-      ret_val->updateMinMaxAltimetryValues();
-      return ret_val; }
-
+    virtual std::unique_ptr<Altimetry> create() const override { 
+      auto ptr = std::make_unique<AltimBretschneider>();
+      ptr->updateMinMaxAltimetryValues();
+      return ptr; }
     /**
     * AltimBretschneider virtual factory method
     * @param map custom time arrival map
-    * @return a heap-created AltimBretschneider object
+    * @return a std::unique_ptr to a heap-created AltimBretschneider object
     **/ 
-    virtual AltimBretschneider* create( AltimetryMap& map ) const {
-      AltimBretschneider* ret_val = new AltimBretschneider( map );
-      ret_val->updateMinMaxAltimetryValues();
-      return ret_val;  }
-    
-    /**
-    * AltimBretschneider virtual factory method
-    * @param copy AltimBretschneider to be copied
-    * @return a heap-created AltimBretschneider object
-    **/
-    virtual AltimBretschneider* create( const AltimBretschneider& copy ) const { 
-      return new AltimBretschneider( copy ); }
-
-    /**
-    * AltimBretschneider virtual factory method
-    * @param copy AltimBretschneider to be copied
-    * @return a heap-created AltimBretschneider object
-    **/
-    virtual AltimBretschneider* create( const Altimetry& copy ) const { 
-      AltimBretschneider const* dyn_ptr = dynamic_cast<AltimBretschneider const*>(&copy);
-      if (dyn_ptr) {
-        return new AltimBretschneider( *dyn_ptr );
-      }
-      return create();
-    }
-
+    virtual std::unique_ptr<Altimetry> create( AltimetryMap& map ) const override {
+      auto ptr = std::make_unique<AltimBretschneider>( map );
+      ptr->updateMinMaxAltimetryValues();
+      return ptr; }
     /**
      * AltimBretschneider virtual factory method
      * @param ch_height characteristic wave height [m]
      * @param avg_per averate period [s]
      * @param total_range_steps total range steps
      * @param depth depth [m]
-     * @return a heap-created AltimBretschneider object
+     * @return a std::unique_ptr to a heap-created AltimBretschneider object
      **/     
-    virtual AltimBretschneider* create( double ch_height, double avg_per, int total_range_steps, double depth ) const {
-      return new AltimBretschneider( ch_height, avg_per, total_range_steps, depth);
+    virtual std::unique_ptr<Altimetry> create( double ch_height, double avg_per, int total_range_steps, double depth ) const {
+      return std::make_unique<AltimBretschneider>( ch_height, avg_per, total_range_steps, depth);
     }
     
     /**
     * AltimBretschneider virtual factory method
-    * @return a heap-created copy of <b>this</b> instance
+    * @return a std::unique_ptr to heap-created copy of <b>this</b> instance
     **/
-    virtual AltimBretschneider* clone() const { return new AltimBretschneider(*this); }
-  
+    virtual std::unique_ptr<Altimetry> clone() const override { 
+      return std::make_unique<AltimBretschneider>( *this ); }  
   
     /**
     * Assignment operator
     * @param copy const reference to a AltimBretschneider object to be copied
     * @return AltimBretschneider reference to <i>this</i>
     **/ 
-    AltimBretschneider& operator=( const AltimBretschneider& copy ) ;
+    AltimBretschneider& operator=( const AltimBretschneider& copy ) = default;
+
+    /**
+    * Assignment operator
+    * @param tmp rvalue reference to a AltimBretschneider object to be moved
+    * @return AltimBretschneider reference to <i>this</i>
+    **/ 
+    AltimBretschneider& operator=( AltimBretschneider&& tmp ) = default;
     
     
     /**
@@ -684,30 +665,30 @@ namespace woss {
     * that generates the whole vector.
     * @return <i>true</i> succeeded <i>false</i> otherwise
     **/     
-    virtual bool initialize();
+    virtual bool initialize() override;
     
     
     /**
     * Checks the validity of AltimBretschneider
     * @return <i>true</i> if it has at least one value, <i>false</i> otherwise
     **/    
-    virtual bool isValid() const;
+    virtual bool isValid() const override;
   
     
     /**
     * Performs a time evoulion
     * @param time_value const reference to a valid Time object
-    * @return a pointer to a new heap allocated AltimBretschneider object
+    * @return a std::unique_ptr to a new heap allocated AltimBretschneider object
     **/    
-    virtual AltimBretschneider* timeEvolve( const Time& time_value );
+    virtual std::unique_ptr<Altimetry> timeEvolve( const Time& time_value ) override;
     
     
     /**
      * Performs a random perturbation of altimetry values with given ratio
      * @param ratio_incr_value perturbation ratio
-     * @return a <i>new</i> Altimetry object
+     * @return a std::unique_ptr to a <i>new</i> Altimetry object
      **/
-    virtual AltimBretschneider* randomize( double ratio_incr_value ) const;     
+    virtual std::unique_ptr<Altimetry> randomize( double ratio_incr_value ) const override;
 
     /**
      * Configures H - the characteristic height of the wave [m]
@@ -813,12 +794,17 @@ namespace woss {
 
 
   inline Altimetry& Altimetry::sumValue( double range, double altimetry ) {  
-    if ( altimetry < min_altimetry_value ) min_altimetry_value = altimetry;
-    if ( altimetry > max_altimetry_value ) max_altimetry_value = altimetry;
+    if ( altimetry < min_altimetry_value ) 
+      min_altimetry_value = altimetry;
+    if ( altimetry > max_altimetry_value ) 
+      max_altimetry_value = altimetry;
     
-    AltIt it = altimetry_map.find( range );
-    if ( it == altimetry_map.end() ) altimetry_map.insert( std::make_pair( range, altimetry ) );
-    else it->second += altimetry; 
+    auto it = altimetry_map.find( range );
+    if ( it == altimetry_map.end() ) 
+      altimetry_map.emplace( std::make_pair( range, altimetry ) );
+    else 
+      it->second += altimetry;
+
     return *this;
   }
 
@@ -838,20 +824,18 @@ namespace woss {
 
 
   inline bool operator==( const Altimetry& left, const Altimetry& right ) { 
-    if ( &left == &right ) return true; 
+    if ( &left == &right ) 
+      return true;
     return( left.altimetry_map == right.altimetry_map );
   }
 
 
   inline bool operator!=( const Altimetry& left, const Altimetry& right ) { 
-    if ( &left == &right ) return false; 
+    if ( &left == &right ) 
+      return false; 
     return( left.altimetry_map != right.altimetry_map );
   }
 
 }
 
-
 #endif /* ALTIMETRY_DEFINITIONS_H */
-
-
- 

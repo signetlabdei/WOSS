@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -44,31 +37,26 @@
 #include <map>
 #include <utility>
 #include <climits>
-#include "uw-woss-position.h"
+#include <uw-woss-position.h>
 
 
 class WossWpPosition : public WossPosition {
 
-  
   public:
-    
-    
+
   WossWpPosition();
 
-  virtual ~WossWpPosition() { }
+  virtual ~WossWpPosition() override = default;
   
+  virtual int command(int argc, const char*const* argv) override;  
   
-  virtual int command(int argc, const char*const* argv);  
-  
-  
-  virtual bool isEquivalentTo( const woss::CoordZ& coordz );
+  virtual bool isEquivalentTo( const woss::CoordZ& coordz ) override;
 
+  virtual woss::CoordZ getLocation() override;
 
-  virtual woss::CoordZ getLocation();
-
-  virtual double getVerticalOrientation();
+  virtual double getVerticalOrientation() override;
   
-  virtual double getBearing();
+  virtual double getBearing() override;
   
   virtual double getSpeed();
   
@@ -77,14 +65,11 @@ class WossWpPosition : public WossPosition {
   
   
   class WayPoint {
-    
-    
+
     public:
-    
-      
+
     WayPoint( const woss::CoordZ& destination, double speed = 0.0, double time = HUGE_VAL, int loop_id = INT_MAX, int total_loops = 0 );
-    
-    
+
     void setDestination( const woss::CoordZ& dest ) { destination = dest; }
    
     void setSpeed( double s ) { speed = s; }
@@ -129,8 +114,7 @@ class WossWpPosition : public WossPosition {
     }
     
     protected:
-  
-    
+
     woss::CoordZ destination;
         
     double speed;
@@ -140,15 +124,14 @@ class WossWpPosition : public WossPosition {
     int loop_to_waypoint_id;
 
     int total_loops;
-    
-    
+
   };
    
-  typedef ::std::vector< WayPoint > WayPointVect;
+  using WayPointVect = std::vector< WayPoint >;
   
-  typedef ::std::map< double, int > TimeIdMap;
-  typedef TimeIdMap::iterator TIMIter;
-  typedef TimeIdMap::reverse_iterator TIMRIter;
+  using TimeIdMap = std::map< double, int >;
+  using TIMIter = TimeIdMap::iterator;
+  using TIMRIter = TimeIdMap::reverse_iterator;
   
   
   double time_threshold;
@@ -173,9 +156,6 @@ class WossWpPosition : public WossPosition {
   
   virtual double addLoopPoint( const WayPoint& waypoint );
   
-  
 };
 
-
 #endif // UNDERWATER_WOSS_WAYPOINT_POSITION_H
-

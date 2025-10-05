@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,12 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
+
 
 /**
  * @file   bellhop-woss.h
@@ -41,9 +36,13 @@
 
 
 #include <iomanip>
+#include <memory>
+#include <map>
 #include <definitions.h>
+#include <coordinates-definitions.h>
 #include <sediment-definitions.h>
 #include <transducer-definitions.h>
+#include <ssp-definitions.h>
 #include "ac-toolbox-arr-asc-reader.h"
 #include "ac-toolbox-arr-bin-reader.h"
 #include "ac-toolbox-shd-reader.h"
@@ -51,29 +50,27 @@
 
 
 namespace woss {
-  
-  
-  typedef ::std::map< double, SSP* > NormSSPMap;
-  typedef NormSSPMap::iterator NSMIter;
-  typedef NormSSPMap::const_iterator NSMCIter;
-  typedef NormSSPMap::reverse_iterator NSMRIter;
-  typedef NormSSPMap::const_reverse_iterator NSMCRIter;
+
+  using NormSSPMap = std::map< double, std::unique_ptr<SSP> >;
+  using NSMIter = NormSSPMap::iterator;
+  using NSMCIter = NormSSPMap::const_iterator;
+  using NSMRIter = NormSSPMap::reverse_iterator;
+  using NSMCRIter = NormSSPMap::const_reverse_iterator;
 
   /*
    * .arr file syntax to be used during parsing
    */
-  enum BellhopArrSyntax {
+  enum class BellhopArrSyntax {
     BELLHOP_CREATOR_ARR_FILE_SYNTAX_0 = 0, ///< Pre 31 august 2016 syntax, without imaginary time delay
     BELLHOP_CREATOR_ARR_FILE_SYNTAX_1, ///< Post 31 August 2016 syntax, with imaginary time delay
     BELLHOP_CREATOR_ARR_FILE_SYNTAX_2, ///< Post 31 March 2019 syntax, with different header syntax
     BELLHOP_CREATOR_ARR_FILE_INVALID ///< invalid syntax, must always be the last element
   };
 
-
   /*
    * .shd file syntax to be used during parsing
    */
-  enum BellhopShdSyntax {
+  enum class BellhopShdSyntax {
     BELLHOP_CREATOR_SHD_FILE_SYNTAX_0 = 0,
     BELLHOP_CREATOR_SHD_FILE_SYNTAX_1,
     BELLHOP_CREATOR_SHD_FILE_INVALID ///< invalid syntax, must always be the last element
@@ -86,9 +83,7 @@ namespace woss {
   **/
   class BellhopWoss : public ACToolboxWoss { 
 
-
     public:
-
 
     /**
     * BellhopWoss default constructor. Default constructed objects are not valid
@@ -107,14 +102,21 @@ namespace woss {
     **/
     BellhopWoss(const CoordZ& tx, const CoordZ& rx, const Time& start_t, const Time& end_t, double start_freq, double end_freq, double freq_step ) ;
 
-    virtual ~BellhopWoss();
+    BellhopWoss(const BellhopWoss& copy) = default;
 
-    
+    BellhopWoss(BellhopWoss&& tmp) = default;
+
+    virtual ~BellhopWoss() override = default;
+
+    BellhopWoss& operator=(const BellhopWoss& copy) = default;
+
+    BellhopWoss& operator=(BellhopWoss&& tmp) = default;
+
     /**
     * Gets enviromental data and writes the env file
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool initialize();
+    virtual bool initialize() override;
 
     /**
     * Initializes the ShdResReader object for given frequency
@@ -130,41 +132,63 @@ namespace woss {
     **/
     virtual bool initTimeArrResReader( double curr_frequency ); 
 
-
     /**
     * Runs the channel simulator. It is mandatory to set <b>has_run</b> to <i>true</i> before
     * returning from this function
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/   
-    virtual bool run();
-
+    virtual bool run() override;
 
     /**
     * Performs a time evoulion of all time-dependant parameters
     * @param time_value constant reference to a valid Time object (between start_time and end_time)
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/  
-    virtual bool timeEvolve( const Time& time_value );
+    virtual bool timeEvolve( const Time& time_value ) override;
 
     /**
     * Checks the validity of Woss
     * @return <i>true</i> if it's valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() const;
+    virtual bool isValid() const override;
 
-    
-    virtual Pressure* getAvgPressure( double frequency, double tx_depth, double start_rx_depth = WOSS_MIN_DEPTH, double start_rx_range = WOSS_MIN_RANGE, double end_rx_depth = WOSS_MAX_DEPTH , double end_rx_range = WOSS_MAX_RANGE ) const;
+    /**
+    * Gets the average Pressure value in given rx range-depth box
+    * @param frequency frequency [hZ]
+    * @param tx_depth transmitter depth [m]
+    * @param start_rx_depth start receiver depth [m]
+    * @param start_rx_range start receiver range [m]
+    * @param end_rx_depth end receiver depth [m]
+    * @param end_rx_range end receiver range [m]
+    * @return a std::unique_ptr to a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
+    **/
+    virtual std::unique_ptr<Pressure> getAvgPressure( double frequency, double tx_depth, double start_rx_depth = WOSS_MIN_DEPTH, double start_rx_range = WOSS_MIN_RANGE, double end_rx_depth = WOSS_MAX_DEPTH , double end_rx_range = WOSS_MAX_RANGE ) const;
 
-    virtual Pressure* getPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const;
+    /**
+    * Gets a Pressure value of given range, depths
+    * @param frequency frequency [hZ]
+    * @param tx_depth transmitter depth [m]
+    * @param rx_depth receiver depth [m]
+    * @param rx_range receiver range [m]
+    * @return a std::unique_ptr to a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
+    **/
+    virtual std::unique_ptr<Pressure> getPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const;
 
-  
-    virtual TimeArr* getTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const;
+    /**
+    * Gets a TimeArr value for given range, depths
+    * @param frequency frequency [hZ]
+    * @param tx_depth transmitter depth [m]
+    * @param rx_depth receiver depth [m]
+    * @param rx_range receiver range [m]
+    * @return a std::unique_ptr to a valid TimeArr value; a not valid TimeArr if arr_file hasn't been read yet
+    **/
+    virtual std::unique_ptr<TimeArr> getTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const;
 
      /**
      * Sets the thorpe attenuation flag
      * @param flag boolean flag
      * @returns reference to <b>*this</b>
-     */    
+     */
     BellhopWoss& setThorpeAttFlag( bool flag ) { use_thorpe_att = flag; return *this; }
 
     /**
@@ -270,7 +294,7 @@ namespace woss {
     * @param path filesystem path
     * @return reference to <b>*this</b>
     */
-    BellhopWoss& setBellhopPath( const ::std::string& path ) { bellhop_path = path; return *this; }
+    BellhopWoss& setBellhopPath( const std::string& path ) { bellhop_path = path; return *this; }
 
     /**
     * Sets the bellhop arr file syntax
@@ -291,45 +315,43 @@ namespace woss {
     * @param options beam options ( G, C, R , B)
     * @return reference to <b>*this</b>
     */
-    BellhopWoss& setBeamOptions( const ::std::string& options ) { beam_options = options; return *this; }
+    BellhopWoss& setBeamOptions( const std::string& options ) { beam_options = options; return *this; }
 
     /**
     * Sets the Bellhop run mode string. See Bellhop documentation for more info
     * @param mode Bellhop run mode ( A, a , C, I , S) 
     * @return reference to <b>*this</b>
     */
-    BellhopWoss& setBhMode( const ::std::string& mode );
+    BellhopWoss& setBhMode( const std::string& mode );
 
     /**
     * Sets the bathymetry type ( L, C). See Bellhop documentation for more info
     * @param type beam options
     * @return reference to <b>*this</b>
     */
-    BellhopWoss& setBathymetryType( const ::std::string& type ) { bathymetry_type = type; return *this; }
+    BellhopWoss& setBathymetryType( const std::string& type ) { bathymetry_type = type; return *this; }
 
     /**
     * Sets the bathymetry write method (S, D)
     * @param type beam options
     * @return reference to <b>*this</b>
     */
-    BellhopWoss& setBathymetryMethod( const ::std::string& type ) { bathymetry_method = type; return *this; }
+    BellhopWoss& setBathymetryMethod( const std::string& type ) { bathymetry_method = type; return *this; }
 
-     /**
-      * Sets the altimetry type ( L, C). See Bellhop documentation for more info
-      * @param type beam options
-      * @return reference to <b>*this</b>
-      */
-    BellhopWoss& setAltimetryType( const ::std::string& type ) { altimetry_type = type; return *this; }
-     
-     
+    /**
+    * Sets the altimetry type ( L, C). See Bellhop documentation for more info
+    * @param type beam options
+    * @return reference to <b>*this</b>
+    */
+    BellhopWoss& setAltimetryType( const std::string& type ) { altimetry_type = type; return *this; }
+
     /**
     * Sets the transducer type. See TransducerDbCreator for more info
     * @param type tranducer type
     * @return reference to <b>*this</b>
     */
-    BellhopWoss& setTransducer( const Transducer* const ptr ) { transducer = ptr; return *this; }
-    
-    
+    BellhopWoss& setTransducer( std::unique_ptr<Transducer> ptr ) { transducer = std::move(ptr); return *this; }
+
     /**
     * Sets the depth steps (and possibly transform) of all SSP in use
     * @param type beam options
@@ -337,7 +359,6 @@ namespace woss {
     */ 
     BellhopWoss& setTransformSSPDepthSteps( int depth_steps ) { transform_ssp_depth_steps = depth_steps; return *this; }
 
-  
     /**
     * Sets the transmitter beam pattern
     * @param type valid woss::BeamPattern
@@ -346,9 +367,6 @@ namespace woss {
     BellhopWoss& setBeamPatternParam( double init_bearing, double vert_rot = 0.0, double horiz_rot = 0.0, double mult = 1.0, double add = 0.0 ) {
       bp_initial_bearing = init_bearing; bp_vertical_rotation = vert_rot; bp_horizontal_rotation = horiz_rot;
       bp_mult_costant = mult; bp_add_costant = add; return *this; }
-    
-  
-  //   BellhopWoss& useBeamBlock( bool command ) { using_beam_block = command; }
 
     /**
      * Gets the thorpe attenuation flag
@@ -445,14 +463,13 @@ namespace woss {
     * @return transformed SSP depth steps
     */ 
     int getTransformSSPDepthSteps() const  { return transform_ssp_depth_steps; }
-    
 
     /**
     * Gets the path of bellhop program
     * @return path of bellhop program
     */
-    ::std::string getBellhopPath() const { return bellhop_path; }
-    
+    std::string getBellhopPath() const { return bellhop_path; }
+
    /**
     * Gets the .arr file sintax
     * @return arr file syntax
@@ -469,41 +486,37 @@ namespace woss {
     * Gets the beam option string
     * @returns "R" , "B", "C" or "G" 
     */
-    ::std::string getBeamOptions() const { return beam_options; }
+    std::string getBeamOptions() const { return beam_options; }
 
     /**
     * Gets bathymetry type string
     * @returns "C" or "L"
     */
-    ::std::string getBathymetryType() const { return bathymetry_type; }
+    std::string getBathymetryType() const { return bathymetry_type; }
 
     /**
     * Gets bathymetry write method string
     * @returns "S" or "D"
     */
-    ::std::string getBathymetryMethod() const { return bathymetry_method; }
+    std::string getBathymetryMethod() const { return bathymetry_method; }
 
     /**
     * Gets altimetry type string
     * @returns "C" or "L"
     */
-    ::std::string getAltimetryType() const { return altimetry_type; }
+    std::string getAltimetryType() const { return altimetry_type; }
 
     /**
     * Gets bathymetry type string
     * @returns "C" or "L"
     */
-    const Transducer* const getTransducer() const { return transducer; }
-    
-    
+    std::unique_ptr<Transducer> getTransducer() const { return transducer->clone(); }
+
     /**
     * Checks the validity of Bellhop run mode
     * @return <i>true</i> if it's valid, <i>false</i> otherwise
     **/
-    bool isValidBhMode( const ::std::string& ) const ;
-
-    
-  //   bool usingBeamBlock() const { return using_beam_block; }
+    bool isValidBhMode( const std::string& ) const ;
 
     /**
     * Signals if the instance is using Bellhop in SHD mode ( C, S , I)
@@ -523,7 +536,6 @@ namespace woss {
     */
     bool usingSSPFile() const { return using_ssp_file; }
 
-
     protected:
 
     /**
@@ -534,69 +546,67 @@ namespace woss {
     /**
     * Bellhop beam options ( G, C, R, B )
     **/
-    ::std::string beam_options;
+    std::string beam_options;
     
     /**
     * Bathymetry type ( L, C )
     **/
-    ::std::string bathymetry_type;
+    std::string bathymetry_type;
 
     /**
     * Bathymetry write method ( S, D )
     **/
-    ::std::string bathymetry_method;
+    std::string bathymetry_method;
 
     /**
      * Altimetry type ( L, C )
      **/
-    ::std::string altimetry_type;    
+    std::string altimetry_type;    
     
     /**
     * Bellhop run mode ( A, a, C, I, S )
     **/
-    ::std::string bellhop_op_mode;
-
+    std::string bellhop_op_mode;
 
     /**
     * Pathname of Bellhop configuration file
     **/ 
-    ::std::string bellhop_env_file;
+    std::string bellhop_env_file;
 
     /**
     * Pathname of Bellhop bathymetry file
     **/ 
-    ::std::string bathymetry_file;
+    std::string bathymetry_file;
     
     /**
     * Pathname of Bellhop altimetry file
     **/ 
-    ::std::string altimetry_file;
+    std::string altimetry_file;
     
     /**
     * Pathname of Bellhop beam pattern file
     **/     
-    ::std::string beam_pattern_file;
-    
+    std::string beam_pattern_file;
 
     /**
     * Pathname of Bellhop SSP file
     **/ 
-    ::std::string ssp_file;
-    
+    std::string ssp_file;
+
     /**
     * Pathname of Bellhop SHD file
     **/ 
-    ::std::string shd_file;
-    
+    std::string shd_file;
+
     /**
     * Pathname of Bellhop ARR file
     **/ 
-    ::std::string arr_file;
+    std::string arr_file;
 
     /**
     * Pathname of Bellhop program
     **/
-    ::std::string bellhop_path;
+    std::string bellhop_path;
     
     /**
      * .arr file syntax to be used during file parsing
@@ -607,15 +617,14 @@ namespace woss {
      * .shd file syntax to be used during file parsing
      */
     BellhopShdSyntax bellhop_shd_syntax;
-    
+
     /**
     * Current working path
     **/    
-    ::std::string curr_path;
+    std::string curr_path;
     
-    ::std::string transducer_type;
-    
-    
+    std::string transducer_type;
+
     /**
     * Transmitter minimum depth offset [m]
     **/  
@@ -631,7 +640,6 @@ namespace woss {
     **/  
     int total_transmitters;
 
-
     /**
     * Number of receiver depths
     **/  
@@ -646,7 +654,6 @@ namespace woss {
     * Receiver maximum depth offset [m]
     **/
     double rx_max_depth_offset;
-
 
    /**
     * Number of receiver ranges.
@@ -666,13 +673,11 @@ namespace woss {
     **/
     double rx_max_range_offset;
 
-
     /**
     * Number of launched rays
     **/ 
     int total_rays;
-    
-    
+
     /**
     * Minimum launching angle [decimal degrees]
     **/ 
@@ -682,7 +687,6 @@ namespace woss {
     * Maximum launching angle [decimal degrees]
     **/ 
     double max_angle;
-
 
     /**
     * Minimum depth of normalized SSP matrix [m]
@@ -698,19 +702,16 @@ namespace woss {
     * Depth steps of all SSP involved
     **/ 
     int curr_norm_ssp_depth_steps;
-    
-    
+
     /**
     * transformed SSP depth steps. Set <= 0 in order to disable the feature.
     **/ 
     int transform_ssp_depth_steps;
 
-    
     /**
     * Transmitter beam pattern
-    **/     
-    const Transducer* transducer;
-    
+    **/
+    std::unique_ptr<Transducer> transducer;
     
     double bp_initial_bearing;
     
@@ -721,15 +722,12 @@ namespace woss {
     double bp_mult_costant;
     
     double bp_add_costant;
-        
-    
+
     bool using_ssp_file;
 
     bool using_press_mode;
 
     bool using_time_arrival_mode;
-
-  //   bool using_beam_block; 
 
     /**
     * SSP matrix normalized for Bellhop requirements (same depths and same depth-steps for all SSP involved)
@@ -751,13 +749,11 @@ namespace woss {
     **/ 
     double box_range;
 
-    
     /**
     * ofstream for file writing
     **/
-    ::std::ofstream f_out;
+    std::ofstream f_out;
 
-    
     /**
     * Normalizes the SSP matrix for Bellhop requirements (same depths and same depth-steps for all SSP involved)
     **/
@@ -767,16 +763,14 @@ namespace woss {
      * Deletes all normalized SSPs
      **/    
     virtual void resetNormalizedDbSSP();
-    
-//     bool initTransducer();
-    
+
     /**
     * Initializes the ResReader object for given frequency
     * @param curr_frequency frequency in use [Hz]
     * @returns <i>true</i> if method succeeded, <i>false</i> otherwise
     **/
     bool initResReader( double curr_frequency );
-  
+
     /**
     * Initializes the Bellhop box
     * @param depth box depth [m]
@@ -790,8 +784,7 @@ namespace woss {
     * @param curr_run current run number
     **/
     void initCfgFiles( double curr_frequency, int curr_run );
-   
-    
+
     /**
     * Writes the configuration file(s)
     * @param curr_frequency frequency in use [Hz]
@@ -858,22 +851,20 @@ namespace woss {
     * Writes db created altimetry in the configuration file(s)
     * @param curr_run current run number
     **/ 
-    void writeAltimetryFile( int curr_run );    
+    void writeAltimetryFile( int curr_run );
 
-    
     /**
     * Writes all configuration files
     **/
     void removeAllCfgFiles();
-    
+
     /**
     * Removes the configuration file(s)
     * @param curr_frequency frequency in use [Hz]
     * @param curr_run current run number
     **/
-    void removeCfgFiles( double curr_frequency, int curr_run ); 
-    
-    
+    void removeCfgFiles( double curr_frequency, int curr_run );
+
     /**
     * Checks parameters passed by a WossManager request and modifies them in place if they are not consistent with data
     * @param frequency frequency [Hz]
@@ -909,91 +900,84 @@ namespace woss {
     * Checks the consistency of rx range offsets and modifies them if needed
     **/ 
     void checkRangeOffsets();
-  
-  
-  };
 
+  };
 
   //inline functions
   //////////
-  inline bool BellhopWoss::isValidBhMode( const ::std::string& mode ) const {
+  inline bool BellhopWoss::isValidBhMode( const std::string& mode ) const {
     return (  mode == "a" || mode == "A" || mode == "C" || mode == "I" || mode == "S" );
   }
 
-
   inline void BellhopWoss::initBox( double depth, double range ) {
-	  if(box_depth < 0) //box depth not set by user - default to depth + 10%
-		  box_depth = depth + depth / 10.0;
+    if(box_depth < 0) //box depth not set by user - default to depth + 10%
+      box_depth = depth + depth / 10.0;
 
-	  if(box_range < 0) //box range not set by user - default to range + 10%
-		  box_range = range + range / 10.0;
-
+    if(box_range < 0) //box range not set by user - default to range + 10%
+      box_range = range + range / 10.0;
   }
-
 
   inline void BellhopWoss::writeSediment() {
-    f_out << "\'A*\' 0.0" << ::std::setw(30) << "! BOTTOM TYPE" << ::std::endl
+    f_out << "\'A*\' 0.0" << std::setw(30) << "! BOTTOM TYPE" << std::endl
           << max_normalized_ssp_depth << " " << sediment_map.begin()->second->getStringValues() <<  "  /  ! " 
-          << sediment_map.begin()->second->getType() << " BOTTOM TYPE " << ::std::endl;
+          << sediment_map.begin()->second->getType() << " BOTTOM TYPE " << std::endl;
   }
-
 
   inline void BellhopWoss::writeHeader( double curr_frequency, int curr_run ) {
     f_out.precision(WOSS_DECIMAL_PRECISION);
-    f_out << "\'BELLHOP - woss id = " << woss_id << "; run = " << curr_run << "\'" << ::std::endl
-          << curr_frequency << ::std::setw(30) << "! FREQUENCY [HZ]" << ::std::endl
-          << 1 << ::std::setw(30) << "! NMEDIA" << ::std::endl;   
+    f_out << "\'BELLHOP - woss id = " << woss_id << "; run = " << curr_run 
+          << "; tx(" << tx_coordz.getLatitude() << "," << tx_coordz.getLongitude() << "," << tx_coordz.getDepth() << ")"
+          << "; rx(" << rx_coordz.getLatitude() << "," << rx_coordz.getLongitude() << "," << rx_coordz.getDepth() << ")"
+          << "\'" << std::endl
+          << curr_frequency << std::setw(30) << "! FREQUENCY [HZ]" << std::endl
+          << 1 << std::setw(30) << "! NMEDIA" << std::endl;
   }
-
 
   inline void BellhopWoss::writeTransmitter() {
-    f_out << total_transmitters << ::std::setw(30) << "! NUMBER OF SOURCES" << ::std::endl;
-    if (total_transmitters == 1) f_out << tx_coordz.getDepth() + tx_min_depth_offset << "  " << "/" << ::std::setw(30) << "! SOURCE'S DEPTH" << ::std::endl;
-    else f_out << tx_coordz.getDepth() + tx_min_depth_offset << "  " << tx_coordz.getDepth() + tx_max_depth_offset 
-              << "  " << "/" << ::std::setw(30) << "! SOURCES' DEPTHS" << ::std::endl;
+    f_out << total_transmitters << std::setw(30) << "! NUMBER OF SOURCES" << std::endl;
+    if (total_transmitters == 1) 
+      f_out << tx_coordz.getDepth() + tx_min_depth_offset << "  " << "/" << std::setw(30) << "! SOURCE'S DEPTH" << std::endl;
+    else 
+      f_out << tx_coordz.getDepth() + tx_min_depth_offset << "  " << tx_coordz.getDepth() + tx_max_depth_offset 
+            << "  " << "/" << std::setw(30) << "! SOURCES' DEPTHS" << std::endl;
   }
 
+  inline void BellhopWoss::writeReceiver() {
+    f_out << total_rx_depths << std::setw(30) << "! NUMBER OF RX DEPTH(S)" << std::endl;
+    if (total_rx_depths == 1) 
+      f_out << rx_coordz.getDepth() + rx_min_depth_offset << "  " << "/" << std::setw(30) << "! RX'S DEPTH" << std::endl;
+    else 
+      f_out << rx_coordz.getDepth() + rx_min_depth_offset << "  " << rx_coordz.getDepth() + rx_max_depth_offset << "  " << "/" 
+            << std::setw(30) << "! RX'S DEPTHS" << std::endl;
 
-  inline void BellhopWoss::writeReceiver() {  
-    f_out << total_rx_depths << ::std::setw(30) << "! NUMBER OF RX DEPTH(S)" << ::std::endl;
-    if (total_rx_depths == 1) f_out << rx_coordz.getDepth() + rx_min_depth_offset << "  " << "/" << ::std::setw(30) << "! RX'S DEPTH" << ::std::endl;
-    else f_out << rx_coordz.getDepth() + rx_min_depth_offset << "  " << rx_coordz.getDepth() + rx_max_depth_offset << "  " << "/" 
-              << ::std::setw(30) << "! RX'S DEPTHS" << ::std::endl;
-
-    f_out << total_rx_ranges << ::std::setw(30) << "!NUMBER OF RX RANGE(S)" << ::std::endl;
-    if (total_rx_ranges == 1) f_out << ((total_great_circle_distance + rx_min_range_offset) / 1000.0) << "  " << "/" << ::std::setw(30) << "! RX'S RANGE" << ::std::endl;
-    else f_out << ((total_great_circle_distance + rx_min_range_offset) / 1000.0) << "  " << ((total_great_circle_distance + rx_max_range_offset)/1000.0) << "  " << "/" 
-              << ::std::setw(30) << "! RX'S RANGES" << ::std::endl;
+    f_out << total_rx_ranges << std::setw(30) << "!NUMBER OF RX RANGE(S)" << std::endl;
+    if (total_rx_ranges == 1) 
+      f_out << ((total_great_circle_distance + rx_min_range_offset) / 1000.0) << "  " << "/" << std::setw(30) << "! RX'S RANGE" << std::endl;
+    else 
+      f_out << ((total_great_circle_distance + rx_min_range_offset) / 1000.0) << "  " << ((total_great_circle_distance + rx_max_range_offset)/1000.0) << "  " << "/" 
+            << std::setw(30) << "! RX'S RANGES" << std::endl;
   }
-
 
   inline void BellhopWoss::writeRayOptions() {
     f_out << "\'"<< bellhop_op_mode << beam_options; 
     
-    if ( transducer->isValid() ) f_out << "*";   
+    if ( transducer->isValid() ) 
+      f_out << "*";   
     
-    f_out << "\'" << ::std::setw(30) << "! RAY OPTIONS" << ::std::endl 
-          << total_rays << ::std::setw(30) << "! NUMBER OF RAYS" << ::std::endl
-          << min_angle << "  " << max_angle << "  " << "/" << ::std::setw(30) << "! START, END ANGLES" << ::std::endl;   
+    f_out << "\'" << std::setw(30) << "! RAY OPTIONS" << std::endl 
+          << total_rays << std::setw(30) << "! NUMBER OF RAYS" << std::endl
+          << min_angle << "  " << max_angle << "  " << "/" << std::setw(30) << "! START, END ANGLES" << std::endl;   
   }
-
 
   inline void BellhopWoss::writeBox() {
     f_out << "0.0" << " " << box_depth << " " << (box_range/1000.0)  << " ,  "
-                  << "! RAY-STEP , BOX DEPTH, BOX RANGE" << ::std::endl;
+                   << "! RAY-STEP , BOX DEPTH, BOX RANGE" << std::endl;
   }
-
 
   inline void BellhopWoss::writeBeamBlock() {  
-    f_out << "\'MS\' 1.0 100.0 0," << ::std::endl << "3 5" << ::std::endl;
+    f_out << "\'MS\' 1.0 100.0 0," << std::endl << "3 5" << std::endl;
   }
-
 
 }
 
-
 #endif /* WOSS_BELLHOP_H */
-
-
-
-

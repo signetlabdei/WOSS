@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
-
 /**
  * @file   ssp-woa2005-db-creator-tcl.h
  * @author Federico Guerra
@@ -40,7 +32,6 @@
 #ifndef WOSS_SSP_NETCDF_DB_CREATOR_TCL_H 
 #define WOSS_SSP_NETCDF_DB_CREATOR_TCL_H
 
-
 #ifdef WOSS_NS_MIRACLE_SUPPORT
 
 #include <tclcl.h>
@@ -51,8 +42,7 @@
 
 
 namespace woss {
-  
-    
+
   /**
   * \brief Tcl hooks for SspWoa2005DbCreator class
   *
@@ -61,10 +51,8 @@ namespace woss {
   **/
   class SspWoa2005DbCreatorTcl : public SspWoa2005DbCreator, public TclObject {
 
-    
     public:
-    
-      
+
     /**
     * Default SspWoa2005DbCreatorTcl constructor
     **/    
@@ -78,9 +66,8 @@ namespace woss {
     SspWoa2005DbCreatorTcl( WOADbType db_type );
 #endif // defined (WOSS_NETCDF4_SUPPORT)
     
-    virtual ~SspWoa2005DbCreatorTcl() { }
-  
-  
+    virtual ~SspWoa2005DbCreatorTcl() override = default;
+
     /**
     * TCL command interpreter. It implements the following OTcl methods:
     * <ul>
@@ -97,27 +84,20 @@ namespace woss {
     * @return TCL_OK or TCL_ERROR whether the command has been dispatched succesfully or no
     * 
     **/
-    virtual int command(int argc, const char*const* argv);
+    virtual int command(int argc, const char*const* argv) override;
     
-  
     protected:
-    
     
     double debug_;
     
     double woss_db_debug_;
-    
-    
+
   };
 
-  
 }
 
 #endif // WOSS_NETCDF_SUPPORT
 
-
 #endif // WOSS_NS_MIRACLE_SUPPORT
 
-
 #endif /* WOSS_SSP_NETCDF_DB_CREATOR_TCL_H */
-

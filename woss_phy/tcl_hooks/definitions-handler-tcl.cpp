@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -46,17 +39,25 @@
 #include <ssp-definitions.h>
 #include <transducer-definitions.h>
 #include <altimetry-definitions.h>
+#include <definitions-handler.h>
 #include "definitions-handler-tcl.h"
 
 
 using namespace woss;
+
+/**
+* \brief Singleton implementation of DefHandler class
+*
+* Singleton implementation of DefHandler class
+*/
+using SDefHandlerTcl = woss::Singleton< DefHandlerTcl >;
 
 
 static class DefHandlerClass : public TclClass {
   public:
   DefHandlerClass() : TclClass("WOSS/Definitions/Handler") {}
   TclObject* create(int, const char*const*) {
-    return( SDefHandlerTcl::instance() );
+    return( SDefHandlerTcl::instance_ptr() );
   }
 } class_DefHandler;
 
@@ -66,7 +67,8 @@ DefHandlerTcl::DefHandlerTcl()
 { 
   bind("debug", &debug);
   
-  if ( debug > 0 ) SDefHandler::instance()->setDebug(true);
+  if ( debug > 0 ) 
+    SDefHandler::instance().setDebug(true);
 }
 
 
@@ -75,96 +77,117 @@ int DefHandlerTcl::command( int argc, const char*const* argv ) {
 
   if ( argc == 3) {
     if(strcasecmp(argv[1], "setPressureCreator") == 0) {
-      if (debug) ::std::cout << "DefHandlerTcl::command() setPressureCreator called"  << ::std::endl;
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setPressureCreator called"  << std::endl;
 
-      Pressure* pressure_creator = dynamic_cast< Pressure* >( tcl.lookup(argv[2]) )->clone();
+      auto pressure_creator = dynamic_cast< Pressure* >( tcl.lookup(argv[2]) )->clone();
 
       if ( pressure_creator ) {
-        SDefHandler::instance()->setPressure(pressure_creator);
+        SDefHandler::instance().setPressure(std::move(pressure_creator));
         
         return TCL_OK;
       }
       else return TCL_ERROR;
     }
     else if(strcasecmp(argv[1], "setTimeArrCreator") == 0) {
-      if (debug) ::std::cout << "DefHandlerTcl::command() setTimeArrCreator called"  << ::std::endl;
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setTimeArrCreator called"  << std::endl;
 
-      TimeArr* time_arr_creator = dynamic_cast< TimeArr* >( tcl.lookup(argv[2]) )->clone();
+      auto time_arr_creator = dynamic_cast< TimeArr* >( tcl.lookup(argv[2]) )->clone();
 
       if ( time_arr_creator ) {
-        SDefHandler::instance()->setTimeArr(time_arr_creator);
+        SDefHandler::instance().setTimeArr(std::move(time_arr_creator));
         
         return TCL_OK;
       }
       else return TCL_ERROR;
     }
     else if(strcasecmp(argv[1], "setSedimentCreator") == 0) {
-      if (debug) ::std::cout << "DefHandlerTcl::command() setSedimentCreator called"  << ::std::endl;
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setSedimentCreator called"  << std::endl;
 
-      Sediment* sediment_creator = dynamic_cast< Sediment* >( tcl.lookup(argv[2]) )->clone();
+      auto sediment_creator = dynamic_cast< Sediment* >( tcl.lookup(argv[2]) )->clone();
 
       if ( sediment_creator ) { 
-        SDefHandler::instance()->setSediment(sediment_creator); 
+        SDefHandler::instance().setSediment(std::move(sediment_creator)); 
         
         return TCL_OK;
       }
       else return TCL_ERROR;
     }
     else if(strcasecmp(argv[1], "setSSPCreator") == 0) {
-      if (debug) ::std::cout << "DefHandlerTcl::command() setSSPCreator called"  << ::std::endl;
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setSSPCreator called"  << std::endl;
 
-      SSP* ssp_creator = dynamic_cast< SSP* >( tcl.lookup(argv[2]) )->clone();
+      auto ssp_creator = dynamic_cast< SSP* >( tcl.lookup(argv[2]) )->clone();
 
       if ( ssp_creator ) { 
-        SDefHandler::instance()->setSSP(ssp_creator); 
+        SDefHandler::instance().setSSP(std::move(ssp_creator)); 
         
         return TCL_OK;
       }
       else return TCL_ERROR;
     }
     else if(strcasecmp(argv[1], "setAltimetryCreator") == 0) {
-      if (debug) ::std::cout << "DefHandlerTcl::command() setAltimetryCreator called"  << ::std::endl;
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setAltimetryCreator called"  << std::endl;
 
-      Altimetry* altimetry_creator = dynamic_cast< Altimetry* >( tcl.lookup(argv[2]) )->clone();
+      auto altimetry_creator = dynamic_cast< Altimetry* >( tcl.lookup(argv[2]) )->clone();
 
       if ( altimetry_creator ) {
-        SDefHandler::instance()->setAltimetry(altimetry_creator);
+        SDefHandler::instance().setAltimetry(std::move(altimetry_creator));
         
         return TCL_OK;
       }
       else return TCL_ERROR;
     }    
-    else if(strcasecmp(argv[1], "setTimeReference") == 0) {
-      if (debug) ::std::cout << "DefHandlerTcl::command() setTimeReference called"  << ::std::endl;
+    else if(strcasecmp(argv[1], "setTimeReferenceCreator") == 0) {
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setTimeReferenceCreator called"  << std::endl;
 
-      TimeReference* time_reference = dynamic_cast< TimeReference* >( tcl.lookup(argv[2]) )->clone();
+      auto time_reference = dynamic_cast< TimeReference* >( tcl.lookup(argv[2]) )->clone();
 
       if ( time_reference ) {
-        SDefHandler::instance()->setTimeReference(time_reference);
+        SDefHandler::instance().setTimeReference(std::move(time_reference));
         
         return TCL_OK;
       }
       else return TCL_ERROR;
     }
-    else if(strcasecmp(argv[1], "setRandomGenerator") == 0) {
-      if (debug) ::std::cout << "DefHandlerTcl::command() setRandomGenerator called"  << ::std::endl;
+    else if(strcasecmp(argv[1], "setRandomGeneratorCreator") == 0) {
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setRandomGeneratorCreator called"  << std::endl;
 
-      RandomGenerator* rand_generator = dynamic_cast< RandomGenerator* >( tcl.lookup(argv[2]) )->clone();
+      auto rand_generator = dynamic_cast< RandomGenerator* >( tcl.lookup(argv[2]) )->clone();
 
       if ( rand_generator ) {
-        SDefHandler::instance()->setRandGenerator(rand_generator);
+        SDefHandler::instance().setRandGenerator(std::move(rand_generator));
         
         return TCL_OK;
       }
       else return TCL_ERROR;
     }
     else if(strcasecmp(argv[1], "setTransducerCreator") == 0) {
-      if (debug) ::std::cout << "DefHandlerTcl::command() setTransducerCreator called"  << ::std::endl;
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setTransducerCreator called"  << std::endl;
 
-      Transducer* transducer = dynamic_cast< Transducer* >( tcl.lookup(argv[2]) )->clone();
+      auto transducer = dynamic_cast< Transducer* >( tcl.lookup(argv[2]) )->clone();
 
       if ( transducer ) {
-        SDefHandler::instance()->setTransducer(transducer);
+        SDefHandler::instance().setTransducer(std::move(transducer));
+        
+        return TCL_OK;
+      }
+      else return TCL_ERROR;
+    }
+    else if(strcasecmp(argv[1], "setLocationCreator") == 0) {
+      if (debug) 
+        std::cout << "DefHandlerTcl::command() setLocationCreator called"  << std::endl;
+
+      auto location = dynamic_cast< Location* >( tcl.lookup(argv[2]) )->clone();
+
+      if ( location ) {
+        SDefHandler::instance().setLocation(std::move(location));
         
         return TCL_OK;
       }

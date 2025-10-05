@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -42,6 +35,8 @@
 
 
 #include <fstream>
+#include <memory>
+#include <pressure-definitions.h>
 #include <time-arrival-definitions.h>
 #include "res-reader.h"
 
@@ -56,45 +51,36 @@ namespace woss {
   */
   class ShdData {
 
-    
     public:
-      
-      
-    ShdData();
-    
-    /**
-    * Destructor
-    */
-    ~ShdData() { delete[] theta; delete[] tx_depths; delete[] rx_ranges; 
-                 delete[] rx_depths; delete[] press_values; }
+
+    ShdData() = default;
+
+    ~ShdData() = default;
     
     /**
     * Record byte length of a binary SHD file. See Bellhop code for more info
     */
-    int32_t record_length;
-    
+    int32_t record_length = 0;
 
     /**
     * Plot typename. See Bellhop code for more info
     */
-    char* plot_type;
+    std::unique_ptr<char[]> plot_type = nullptr;
 
-    
-    /**
+   /**
     * Frequency value [Hz]
     */
-    float frequency;
+    float frequency = 0.0;
 
     /**
     * Total number of theta values. See Bellhop code for more info
     */
-    int32_t Ntheta;
+    int32_t Ntheta = 0;
 
     /**
     * Pointer to an array of theta values
     */
-    float* theta;
-
+    std::unique_ptr<float[]> theta = nullptr;
 
     /**
     * Total number of transmitter depths
@@ -104,48 +90,43 @@ namespace woss {
     /**
     * Pointer to an array of transmitter depths [m]
     */
-    float* tx_depths;
-
+    std::unique_ptr<float[]> tx_depths = nullptr;
 
     /**
     * Total number of receiver depths
     */
-    int32_t Nrd;
+    int32_t Nrd = 0;
 
     /**
     * Pointer to an array of receiver depths [m]
     */
-    float* rx_depths;
+    std::unique_ptr<float[]> rx_depths = nullptr;
 
-    
     /**
     * Total number of receiver ranges
     */
-    int32_t Nrr;
+    int32_t Nrr = 0;
 
     /**
     * Pointer to an array of receiver ranges [m]
     */
-    float* rx_ranges;
+    std::unique_ptr<float[]> rx_ranges = nullptr;
 
     /**
     * Total number of receiver per range
     */
-    int32_t Nrx_per_range;
-
+    int32_t Nrx_per_range = 0;
 
     /**
     * Pointer to an array of complex\<double\> values [m]
     */
-    ::std::complex<double>* press_values;
-
+    std::unique_ptr< std::complex<double>[] > press_values = nullptr;
 
     /**
     * Initializes the struct 
     */
-    void initialize() { plot_type = NULL; Ntheta = 0; theta = NULL; Nrx_per_range = 0; record_length = 0; tx_depths = NULL;
-                        rx_depths = NULL; rx_ranges = NULL; Nrr = 0; Nrd = 0; Nsd = 0; press_values = NULL; frequency = 0.0; }
-
+    void initialize() { plot_type.reset(); Ntheta = 0; theta.reset(); Nrx_per_range = 0; record_length = 0; tx_depths.reset();
+                        rx_depths.reset(); rx_ranges.reset(); Nrr = 0; Nrd = 0; Nsd = 0; press_values.reset(); frequency = 0.0; }
 
     /**
     * Returns the press_values index associated to given parameters
@@ -164,7 +145,7 @@ namespace woss {
     * @param array_size size of passed array
     * @returns valid array index value
     */
-    int getIndex( float value, float* array, int32_t array_size ) const;
+    int getIndex( float value, float array[], int32_t array_size ) const;
 
   };
 
@@ -176,99 +157,89 @@ namespace woss {
   class ShdData_v1 {
 
     public:
-      
-    ShdData_v1();
-    
-    /**
-    * Destructor
-    */
-    ~ShdData_v1() { delete[] frequencies; delete[] theta; delete[] tx_depths; delete[] rx_ranges; 
-                 delete[] rx_depths; delete[] press_values; }
-    
+
+    ShdData_v1() = default;
+
+    ~ShdData_v1() = default;
+
     /**
     * Record byte length of a binary SHD file. See Bellhop code for more info
     */
-    int32_t record_length;
-    
+    int32_t record_length = 0;
 
     /**
     * Plot typename. See Bellhop code for more info
     */
-    char* plot_type;
+    std::unique_ptr< char[] > plot_type = nullptr;
 
-    
     /**
     * Frequency value [Hz]
     */
-    double frequency;
+    double frequency = 0.0;
 
-    int32_t Nfreq;
+    int32_t Nfreq = 0;
 
-    double* frequencies;
+    std::unique_ptr< double[] > frequencies = nullptr;
 
     /**
     * Total number of theta values. See Bellhop code for more info
     */
-    int32_t Ntheta;
+    int32_t Ntheta = 0;
 
     /**
     * Pointer to an array of theta values
     */
-    double* theta;
-
+    std::unique_ptr< double[] > theta = nullptr;
 
     /**
     * Total number of transmitter depths
     */
-    int32_t Nsd;
+    int32_t Nsd = 0;
 
     /**
     * Pointer to an array of transmitter depths [m]
     */
-    float* tx_depths;
-
+    std::unique_ptr< float[] > tx_depths = nullptr;
 
     /**
     * Total number of receiver depths
     */
-    int32_t Nrd;
+    int32_t Nrd = 0;
 
     /**
     * Pointer to an array of receiver depths [m]
     */
-    float* rx_depths;
+    std::unique_ptr< float[] > rx_depths = nullptr;
 
-    
     /**
     * Total number of receiver ranges
     */
-    int32_t Nrr;
+    int32_t Nrr = 0;
 
     /**
     * Pointer to an array of receiver ranges [m]
     */
-    double* rx_ranges;
+    std::unique_ptr<double[]> rx_ranges = nullptr;
 
     /**
     * Total number of receiver per range
     */
-    int32_t Nrx_per_range;
+    int32_t Nrx_per_range = 0;
 
-    double stabil_atten;
+
+    double stabil_atten = 0.0;
 
     /**
     * Pointer to an array of complex\<double\> values [m]
     */
-    ::std::complex<double>* press_values;
-
+    std::unique_ptr< std::complex<double>[] > press_values = nullptr;
 
     /**
     * Initializes the struct 
     */
-    void initialize() { plot_type = NULL; frequency = 0.0; Nfreq = 0; frequencies = NULL; Ntheta = 0; 
-                        theta = NULL; Nrx_per_range = 0; record_length = 0; tx_depths = NULL; stabil_atten = 0.0;
-                        rx_depths = NULL; rx_ranges = NULL; Nrr = 0; Nrd = 0; Nsd = 0; press_values = NULL; }
-
+    void initialize() { plot_type.reset(); frequency = 0.0; Nfreq = 0; frequencies.reset(); Ntheta = 0; 
+                        theta.reset(); Nrx_per_range = 0; record_length = 0; tx_depths.reset(); stabil_atten = 0.0;
+                        rx_depths.reset(); rx_ranges.reset(); Nrr = 0; Nrd = 0; Nsd = 0; press_values.reset(); }
 
     /**
     * Returns the press_values index associated to given parameters
@@ -288,7 +259,7 @@ namespace woss {
     * @param array_size size of passed array
     * @returns valid array index value
     */
-    int getIndex( float value, float* array, int32_t array_size ) const;
+    int getIndex( float value, float array[], int32_t array_size ) const;
 
     /**
     * Returns the index of given array associated to given value
@@ -297,7 +268,7 @@ namespace woss {
     * @param array_size size of passed array
     * @returns valid array index value
     */
-    int getIndex( double value, double* array, int32_t array_size ) const;
+    int getIndex( double value, double array[], int32_t array_size ) const;
   };
 
   /**
@@ -308,28 +279,21 @@ namespace woss {
   */
   class ShdResReader : public ResReader {
 
-
     public:
-
-
-    /**
-    * ShdResReader default constructor
-    */
-    ShdResReader();
 
     /**
     * ShdResReader constructor
     * @param woss const pointer to a const Woss object
     */
-    ShdResReader( const Woss* const woss );
+    ShdResReader( const Woss& woss );
 
-    virtual ~ShdResReader();
+    virtual ~ShdResReader() override = default;
 
     /**
     * Initializes the ShdResReader object, reads SHD file, and stores read Pressure values
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool initialize();
+    virtual bool initialize() override;
 
     /**
     * Gets the average Pressure value in given rx range-depth box
@@ -339,9 +303,9 @@ namespace woss {
     * @param start_rx_range start receiver range [m]
     * @param end_rx_depth end receiver depth [m]
     * @param end_rx_range end receiver range [m]
-    * @return a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
-    **/  
-    virtual Pressure* readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range );
+    * @return a std::unique_ptr to a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
+    **/
+    virtual std::unique_ptr<Pressure> readAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range ) override;
 
     /**
     * Gets a Pressure value of given range, depths
@@ -349,9 +313,9 @@ namespace woss {
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
-    * @return a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
+    * @return a std::unique_ptr to a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
     **/
-    virtual Pressure* readPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const;
+    virtual std::unique_ptr<Pressure> readPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const override;
 
     
     /**
@@ -361,13 +325,11 @@ namespace woss {
     * @param tx_depth transmitter depth [m]
     * @param rx_depth receiver depth [m]
     * @param rx_range receiver range [m]
-    * @return a special TimeArr that holds a single Pressure value and no delay information
+    * @return a std::unique_ptr to a TimeArr that holds a single Pressure value and no delay information
     **/
-    virtual TimeArr* readTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const; 
-    
-    
+    virtual std::unique_ptr<TimeArr> readTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const override; 
+
     protected:
-      
 
     /**
     * Boolean associated to the reading of SHD file header
@@ -379,12 +341,10 @@ namespace woss {
     */
     bool shd_file_collected;
 
-
     /**
     * Input file stream 
     */
-    ::std::ifstream file_reader;
-
+    std::ifstream file_reader;
 
     /**
     * Struct that holds Pressure data read from SHD file
@@ -406,8 +366,7 @@ namespace woss {
 
     double last_end_rx_range;
 
-    ::std::complex<double> last_ret_value;
-
+    std::complex<double> last_ret_value;
 
     /**
     * Gets the average Pressure value in given rx range-depth box from ShdData Pressure array
@@ -419,9 +378,8 @@ namespace woss {
     * @param end_rx_range end receiver range [m]
     * @param theta theta value
     * @return a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
-    **/  
-    ::std::complex<double> readMapAvgPressure(double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range, double theta = 0.0 );
-
+    **/
+    std::complex<double> readMapAvgPressure(double frequency, double tx_depth, double start_rx_depth, double start_rx_range, double end_rx_depth, double end_rx_range, double theta = 0.0 );
 
     /**
     * Gets the Pressure value from ShdData Pressure array associated to given parameters
@@ -432,8 +390,7 @@ namespace woss {
     * @param theta theta value
     * @return a valid Pressure value; a not valid Pressure if shd_file hasn't been read yet
     **/  
-    ::std::complex<double> accessMap(double frequency, double tx_depth, double rx_depth, double rx_range, double theta = 0.0 ) const;
-
+    std::complex<double> accessMap(double frequency, double tx_depth, double rx_depth, double rx_range, double theta = 0.0 ) const;
 
     /**
     * Process the SHD file data
@@ -446,13 +403,10 @@ namespace woss {
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
     bool getShdHeader();
-    
-    
+
   };
 
 }
 
-
 #endif /* AC_TOOLBOX_RES_READER_DEFINITIONS_H */
 
- 

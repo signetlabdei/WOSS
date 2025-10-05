@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -42,11 +35,11 @@
 
 
 #include <complex>
-
+#include <memory>
+#include <ostream>
 
 namespace woss {
-  
-    
+
   class TimeArr;
 
   /**
@@ -58,96 +51,82 @@ namespace woss {
   **/
   class Pressure {
 
-    
     public:
-      
-      
+
     /**
     * Pressure constructor
     * @param real real part
     * @param imag imaginary part
-    **/     
+    **/
     Pressure( double real = 0.0, double imag = 0.0 );
 
     /**
     * Pressure constructor
     * @param complex_press complex\<double\> value
-    **/   
-    Pressure( const ::std::complex<double>& complex_press );
+    **/
+    Pressure( const std::complex<double>& complex_press );
 
     /**
     * Constructs a Pressure from a TimeArr
     * @param time_arr valid TimeArr const reference
     **/
-    Pressure( const TimeArr& time_arr );
-    
-    /**
-    * Pressure copy constructor
-    * @param copy Pressure to be copied
-    **/
-    Pressure( const Pressure& copy );
+    explicit Pressure( const TimeArr& time_arr );
 
-    
+    Pressure( const Pressure& copy ) = default;
+
+    Pressure( Pressure&& tmp ) = default;
+
+    virtual ~Pressure() = default;
+
     /**
     * Pressure virtual factory method
     * @param real real part
     * @param imag imaginary part
-    * @return a heap-created Pressure object
-    **/     
-    virtual Pressure* create( double real = 0.0, double imag = 0.0 ) const { return new Pressure( real, imag ); }
+    * @return a std::unique_ptr to a heap-created Pressure object
+    **/
+    virtual std::unique_ptr<Pressure> create( double real = 0.0, double imag = 0.0 ) const { return std::make_unique<Pressure>( real, imag ); }
 
     /**
     * Pressure virtual factory method
     * @param complex_press complex\<double\> value
-    * @return a heap-created Pressure object
+    * @return std::unique_ptr to a heap-created Pressure object
     **/   
-    virtual Pressure* create( const ::std::complex<double>& complex_press ) const { return new Pressure( complex_press ); }
+    virtual std::unique_ptr<Pressure> create( const std::complex<double>& complex_press ) const { return std::make_unique<Pressure>( complex_press ); }
 
     /**
     * Pressure virtual factory method
     * @param time_arr valid TimeArr const reference
-    * @return a heap-created Pressure object
+    * @return std::unique_ptr to a heap-created Pressure object
     **/
-    virtual Pressure* create( const TimeArr& time_arr ) const { return new Pressure( time_arr ); }
-    
+    virtual std::unique_ptr<Pressure> create( const TimeArr& time_arr ) const { return std::make_unique<Pressure>( time_arr ); }
+
     /**
     * Pressure virtual factory method
-    * @param copy Pressure to be copied
-    * @return a heap-created Pressure object
+    * @return std::unique_ptr to a heap-created copy of <b>this</b> instance
     **/
-    virtual Pressure* create( const Pressure& copy ) const { return new Pressure( copy ); }
-    
-    /**
-    * Pressure virtual factory method
-    * @return a heap-created copy of <b>this</b> instance
-    **/
-    virtual Pressure* clone() const { return new Pressure(*this); }
-    
+    virtual std::unique_ptr<Pressure> clone() const { return std::make_unique<Pressure>(*this); }
+
     /**
     * Pressure virtual factory method
     * @param array_size size of array
-    * @return a heap-created array of size array_size
+    * @return std::unique_ptr to a heap-created array of size array_size
     **/
-    virtual Pressure* createArray( unsigned int array_size ) const { return new Pressure[array_size]; }
-    
-    
-    virtual ~Pressure() { }
-
+    virtual std::unique_ptr<Pressure[]> createArray( unsigned int array_size ) const { return std::make_unique<Pressure[]>(array_size); }
 
     /**
     * complex\<double\> operator for implicit casting
     * @return a copy of complex_pressure
     **/
-    operator ::std::complex<double>() const { return complex_pressure; }
-
+    operator std::complex<double>() const { return complex_pressure; }
 
     /**
     * Creates an instance not valid
     * @return an instance not valid ( e.g. (+inf, +inf) )
     **/
-    static const ::std::complex<double> createNotValid() { return( ::std::complex<double>( HUGE_VAL, HUGE_VAL ) ); } 
-    
-    
+    static constexpr std::complex<double> createNotValid() { return( std::complex<double>( HUGE_VAL, HUGE_VAL ) ); } 
+
+    void clear() { complex_pressure = {0.0, 0.0}; };
+
     /**
     * Gets the real part
     * @return double real part
@@ -159,50 +138,55 @@ namespace woss {
     * @return double imaginary part
     **/
     double imag() const { return complex_pressure.imag(); }
-    
-    
+
     /**
     * Gets the absolute value
     * @return double absolute value
     **/
-    double abs() const { return ::std::abs( complex_pressure ); }
+    double abs() const { return std::abs( complex_pressure ); }
 
     /**
     * Gets the phase (arg) value
     * @return double phase (arg) value
     **/
-    double phase() const { return ::std::arg( complex_pressure ); }
+    double phase() const { return std::arg( complex_pressure ); }
 
     /**
     * Gets the square root of a complex number
     * @return double square root value
     **/
-    Pressure sqrt() const { return ::std::sqrt( complex_pressure ); }
-
+    Pressure sqrt() const { return std::sqrt( complex_pressure ); }
 
     /**
     * Checks the validity of complex pressure provided
     * @return <i>true</i> if complex pressure is valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() const { return( complex_pressure != ::std::complex<double>( HUGE_VAL, HUGE_VAL ) ); }
-    
+    virtual bool isValid() const { return( complex_pressure != std::complex<double>( HUGE_VAL, HUGE_VAL ) ); }
 
     /**
     * Returns the Transmission Loss measured in db
     * @return the Transmission Loss [db]
     **/
-    static double getTxLossDb( const ::std::complex<double>& val ) { if ( val == ::std::complex<double>( HUGE_VAL, HUGE_VAL ) ) return -HUGE_VAL;
-                                else if( val == ::std::complex<double>( 0.0, 0.0 ) ) return HUGE_VAL; 
-                                else return( -20.0 * log10( ::std::abs(val) ) ); }
+    static constexpr double getTxLossDb( const std::complex<double>& val ) { 
+        if ( val == std::complex<double>( HUGE_VAL, HUGE_VAL ) ) 
+          return -HUGE_VAL;
+        else if( val == std::complex<double>( 0.0, 0.0 ) ) 
+          return HUGE_VAL; 
+        else 
+          return( -20.0 * log10( std::abs(val) ) ); 
+    }
 
     /**
     * Returns the Transmission Loss measured in db
     * @return the Transmission Loss [db]
     **/
     double getTxLossDb() const { 
-      if (isValid() == false) return -HUGE_VAL;
-      else if ( complex_pressure == ::std::complex<double>( 0.0, 0.0 ) ) return HUGE_VAL;
-      else return ( -20.0 * log10( abs() ));
+      if (isValid() == false) 
+        return -HUGE_VAL;
+      else if ( complex_pressure == std::complex<double>( 0.0, 0.0 ) ) 
+        return HUGE_VAL;
+      else 
+        return ( -20.0 * log10( abs() ));
     }
 
     /**
@@ -215,21 +199,15 @@ namespace woss {
     **/  
     virtual bool checkAttenuation( double distance, double frequency );
 
-    
     /**
     * Sets debug for the whole class
     * @param flag debug value
     **/
     static void setDebug( bool flag ) { debug = flag; } 
-    
-    
-    /**
-    * Assignment operator
-    * @param copy const reference to a Pressure object to be copied
-    * @return Pressure reference to <i>this</i>
-    **/  
-    Pressure& operator=( const Pressure& x );
-    
+
+    Pressure& operator=( const Pressure& copy ) = default;
+
+    Pressure& operator=( Pressure&& tmp ) = default;
     
     /**
     * Sum operator
@@ -263,7 +241,6 @@ namespace woss {
     **/
     friend const Pressure operator*( const Pressure& left, const Pressure& right );
 
-
     /**
     * Compound assignment sum operator
     * @param left left operand reference
@@ -295,14 +272,13 @@ namespace woss {
     * @return <i>left</i> reference after the operation
     **/
     friend Pressure& operator*=( Pressure& left, const Pressure& right );
-    
-    
+
     /**
     * Equality operator
     * @param left left operand const reference
     * @param right right operand const reference
     * @return true if <i>left == right</i>, false otherwise
-    **/  
+    **/
     friend bool operator==( const Pressure& left, const Pressure& right );
 
     /**
@@ -312,30 +288,26 @@ namespace woss {
     * @return true if <i>left != right</i>, false otherwise
     **/  
     friend bool operator!=( const Pressure& left, const Pressure& right );
-    
-    
+
     /**
     * << operator
     * @param os left operand ostream reference
     * @param instance right operand const Pressure reference
     * @return <i>os</i> reference after the operation
     **/ 
-    friend ::std::ostream& operator<<( ::std::ostream& os, const Pressure& instance );
-    
-      
+    friend std::ostream& operator<<( std::ostream& os, const Pressure& instance );
+
     protected:
-    
-      
+
     /**
     * Debug flag
     **/
     static bool debug;
-    
-    
+
     /**
     * Complex acoustic pressure
     **/
-    ::std::complex< double > complex_pressure;
+    std::complex< double > complex_pressure;
 
     /**
     * Gets the linear acoustic attenuation incurred at given frequency along the given distance
@@ -343,84 +315,73 @@ namespace woss {
     * @param freq frequency in <i>hertz</i>
     * @return linear attenuation
     **/ 
-    virtual double getAttenuation( double dist, double freq );
+    virtual double getAttenuation( double dist, double freq ) const;
 
     /**
     * Gets the acoustic attenuation (in db re uPa / m ) given by Thorp absorption process incurred at given frequency
     * @param freq frequency in <i>hertz</i>
     * @return attenuation in <i>db re uPa / m</i>
     **/ 
-    double getThorpAtt( double frequency );
+    constexpr double getThorpAtt( double frequency ) const;
     
   };
 
-  
   //inline functions 
   /////////////
   inline bool operator==( const Pressure& left, const Pressure& right ) { 
-    if ( &left == &right ) return true; 
+    if ( &left == &right ) 
+      return true; 
     return( left.complex_pressure == right.complex_pressure );
   }
 
-
   inline bool operator!=( const Pressure& left, const Pressure& right ) { 
-    if ( &left == &right ) return false; 
+    if ( &left == &right ) 
+      return false; 
     return( left.complex_pressure != right.complex_pressure );
   }
-
 
   inline const Pressure operator+( const Pressure& left, const Pressure& right ) { 
     return( Pressure( left.complex_pressure + right.complex_pressure ) );
   }
-    
-    
+
   inline const Pressure operator-( const Pressure& left, const Pressure& right ) { 
     return( Pressure( left.complex_pressure - right.complex_pressure ) );
   }
-    
-    
+
   inline const Pressure operator/( const Pressure& left, const Pressure& right ) { 
     return( Pressure( left.complex_pressure / right.complex_pressure ) );
   }
-    
-    
+
   inline const Pressure operator*( const Pressure& left, const Pressure& right ) { 
     return( Pressure( left.complex_pressure * right.complex_pressure ) );
   }
 
-    
+
   inline Pressure& operator+=( Pressure& left, const Pressure& right ) { 
     left.complex_pressure += right.complex_pressure;
     return left;
   }
-    
-    
+
   inline Pressure& operator-=( Pressure& left, const Pressure& right ) { 
     left.complex_pressure -= right.complex_pressure;
     return left;
   }
-    
-    
+
   inline Pressure& operator/=( Pressure& left, const Pressure& right ) { 
     left.complex_pressure /= right.complex_pressure;
     return left;
   }
-    
-    
+
   inline Pressure& operator*=( Pressure& left, const Pressure& right ) { 
     left.complex_pressure *= right.complex_pressure;
     return left;
   }
-    
 
-  inline ::std::ostream& operator<<( ::std::ostream& os, const Pressure& instance ) { 
+  inline std::ostream& operator<<( std::ostream& os, const Pressure& instance ) { 
     os << instance.complex_pressure << " TL = " << instance.getTxLossDb() << " dB";
     return os; 
   }
 
-
 }
 
-
 #endif /* PRESSURE_DEFINITIONS_H */
-

@@ -3,7 +3,7 @@
  * Copyright (C) 2009 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -47,13 +40,6 @@
 using namespace woss;
 
 
-SspWoa2005DbCreator::SspWoa2005DbCreator()
-: WossDbCreator(),
-  woa_db_type(WOA_DB_TYPE_2005)
-{
-
-}
-
 #if defined (WOSS_NETCDF4_SUPPORT)
 SspWoa2005DbCreator::SspWoa2005DbCreator( WOADbType db_type )
 : WossDbCreator(),
@@ -63,27 +49,23 @@ SspWoa2005DbCreator::SspWoa2005DbCreator( WOADbType db_type )
 }
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 
-SspWoa2005DbCreator::~SspWoa2005DbCreator() {
 
-}
-
-
-WossDb* const SspWoa2005DbCreator::createWossDb() {
+std::unique_ptr<WossDb> SspWoa2005DbCreator::createWossDb() const {
   assert( pathname.length() > 0 );
 
 #if defined (WOSS_NETCDF4_SUPPORT)
-  SspWoa2005Db* woss_db = new SspWoa2005Db( pathname, woa_db_type );
+  auto woss_db = std::make_unique<SspWoa2005Db>( pathname, woa_db_type );
 #else
-  SspWoa2005Db* woss_db = new SspWoa2005Db( pathname );
+  auto woss_db = std::make_unique<SspWoa2005Db>( pathname );
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 
-  assert( initializeDb( woss_db ) );
-  
+  assert( initializeDb( *woss_db ) );
+
   return( woss_db );
 }
 
 
-bool SspWoa2005DbCreator::initializeDb( WossDb* const woss_db ) {
+bool SspWoa2005DbCreator::initializeDb( WossDb& woss_db ) const {
   return( WossDbCreator::initializeDb( woss_db ) );
 }
 

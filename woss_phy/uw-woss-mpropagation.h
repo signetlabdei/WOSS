@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,14 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   uw-woss-mpropagation.h
@@ -46,7 +38,7 @@
 #include <underwater-mpropagation.h>
 #include <underwater.h>
 #include <mphy.h>
-#include "uw-woss-pkt-hdr.h"
+#include <uw-woss-pkt-hdr.h>
 #include <coordinates-definitions.h>
 
 
@@ -55,9 +47,9 @@ namespace woss {
 }
 
 
-typedef std::map< woss::CoordZ , std::map < woss::CoordZ , double > > GainMatrix;
-typedef GainMatrix::iterator GMIter;
-typedef GainMatrix::reverse_iterator GMRIter;
+using GainMatrix = std::map< woss::CoordZ , std::map < woss::CoordZ , double > >;
+using GMIter = GainMatrix::iterator;
+using GMRIter = GainMatrix::reverse_iterator;
 
 
 /**
@@ -67,14 +59,11 @@ typedef GainMatrix::reverse_iterator GMRIter;
  */
 class WossMPropagation : public UnderwaterMPropagation {  
 
-  
   public:
 
-    
   WossMPropagation();
   
-  virtual ~WossMPropagation() { }
-  
+  virtual ~WossMPropagation() override = default;
 
   /**
   * Checks if a WossChannelModule has already processed current Packet; if not, it provides calculations
@@ -82,27 +71,21 @@ class WossMPropagation : public UnderwaterMPropagation {
   * @param p pointer to the current Packet being processed
   * @return gain in uPa
   */
-  virtual double getGain(Packet* p);
+  virtual double getGain(Packet* p) override;
 
-  
-  virtual int command(int argc, const char*const* argv);  
+  virtual int command(int argc, const char*const* argv) override;
 
-  
   private:
   
-    
+  // keep raw pointer since we are dependant on legacy TCL memory management
   woss::WossManager* woss_manager;
-  
   
   GainMatrix std_gain_map;
   
-  
   bool write_gain_matrix;
 
-  
   fstream std_gain_out;
 
-  
   string std_gain_matrix_name;
 
   
@@ -117,10 +100,8 @@ class WossMPropagation : public UnderwaterMPropagation {
   */
   double computeGain(Packet* p);
 
-  
   void writeStdGainMatrix();
 
-  
 };
 
 

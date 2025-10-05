@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -43,7 +36,7 @@
 
 using namespace woss;
 
-WossDb::WossDb( const ::std::string& name )
+WossDb::WossDb( const std::string& name )
  : db_name(name),
    debug(false)
 { 
@@ -51,8 +44,7 @@ WossDb::WossDb( const ::std::string& name )
 }
 
 
-PathName WossDb::getPathName( const ::std::string& full_path ) {
-   
+PathName WossDb::getPathName( const std::string& full_path ) const {
    assert(full_path.length() > 0);
 
    PathName ret_value;
@@ -60,7 +52,7 @@ PathName WossDb::getPathName( const ::std::string& full_path ) {
    found = full_path.rfind("/");
    
    // path found
-   if (found != ::std::string::npos) {
+   if (found != std::string::npos) {
       // we set the name and excluding "/"
       ret_value.second = full_path.substr(found + 1);
       // we set the path, including "/"
@@ -80,9 +72,9 @@ PathName WossDb::getPathName( const ::std::string& full_path ) {
 ///////////////////////////////
 
 #ifdef WOSS_NETCDF_SUPPORT
-WossNetcdfDb::WossNetcdfDb( const ::std::string& name )
+WossNetcdfDb::WossNetcdfDb( const std::string& name )
 : WossDb(name),
-  netcdf_db(NULL)
+  netcdf_db(nullptr)
 {
 
 }
@@ -97,30 +89,27 @@ WossNetcdfDb::~WossNetcdfDb() {
 bool WossNetcdfDb::openConnection() {
   assert( isValid() );
 
-  if (netcdf_db == NULL) {
+  if (netcdf_db == nullptr) {
 #if defined (WOSS_NETCDF4_SUPPORT)
-    netcdf_db = new netCDF::NcFile( db_name, netCDF::NcFile::read );
+    netcdf_db = std::move( std::make_unique< netCDF::NcFile >( db_name, netCDF::NcFile::read ) );
 #else
-    netcdf_db = new NcFile( db_name.c_str() );
+    netcdf_db = std::move( std::make_unique< NcFile >( db_name.c_str() ) );
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 
-    return ( netcdf_db != NULL );
+    return ( netcdf_db != nullptr );
   }
 
   return true;
 }
 
 bool WossNetcdfDb::closeConnection() {
-  if (netcdf_db != NULL) {
-    delete netcdf_db;
-    netcdf_db = NULL;
-  }
+  netcdf_db->close();
   return true;
 }
 #endif // WOSS_NETCDF_SUPPORT
 ////////////////////////////
 
-WossTextualDb::WossTextualDb( const ::std::string& name )
+WossTextualDb::WossTextualDb( const std::string& name )
 : WossDb(name),
   textual_db()
 {
@@ -143,5 +132,3 @@ bool WossTextualDb::closeConnection() {
   textual_db.close();
   return true;
 }
-
-

@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -43,14 +36,11 @@
 
 #ifdef WOSS_NS_MIRACLE_SUPPORT
 
-
 #include <tclcl.h>
 #include <res-time-arr-txt-db-creator.h>
 
-
 namespace woss {
-  
-    
+
   /**
   * \brief Tcl hooks class for ResTimeArrTxtDbCreator
   *
@@ -59,17 +49,14 @@ namespace woss {
 	**/
   class ResTimeArrTxtDbCreatorTcl : public ResTimeArrTxtDbCreator, public TclObject {
 
-    
     public:
-    
 
     /**
     * ResTimeArrTxtDbCreator default constructor
     **/
     ResTimeArrTxtDbCreatorTcl();
     
-    virtual ~ResTimeArrTxtDbCreatorTcl() { }
-    
+    virtual ~ResTimeArrTxtDbCreatorTcl() override = default;
     
    /**
     * TCL command interpreter. It implements the following OTcl methods:
@@ -89,19 +76,15 @@ namespace woss {
     **/
     virtual int command(int argc, const char*const* argv);
 
-    
     protected:
-    
     
     double debug_;
     
     double woss_db_debug_;
-    
-    
+
   };
 
 }
-
 
 #endif // WOSS_NS_MIRACLE_SUPPORT
 

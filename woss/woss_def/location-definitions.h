@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -42,16 +35,15 @@
 
 
 #include <cmath>
+#include <ostream>
+#include <memory>
 #include "coordinates-definitions.h"
-#include <iostream>
 
 
 namespace woss {
-  
-  
-  #define LOCATION_COMPARISON_DISTANCE (0.0)
-  
-  
+
+  static constexpr inline double LOCATION_COMPARISON_DISTANCE = (0.0);
+
   /**
   * \brief Class that stores the coordinates of moving entity
   *
@@ -59,15 +51,13 @@ namespace woss {
   **/
   class Location {
   
-  
     public:
-      
 
     /**
     * Location default constructor
     * @param coordz coordinates
     * @param dist distance comparison precision [m]
-    **/      
+    **/
     Location( const CoordZ& coordz = CoordZ(), double dist = LOCATION_COMPARISON_DISTANCE );
       
     /**
@@ -76,47 +66,50 @@ namespace woss {
     * @param longitude longitude value [decimal degrees]
     * @param depth depth value [m]
     * @param dist distance comparison precision [m]
-    **/       
+    **/
     Location( double latitude, double longitude, double depth = 0, double dist = LOCATION_COMPARISON_DISTANCE );
-    
-    /**
-    * Location destructor
-    **/    
-    virtual ~Location() { }
-    
+
+    Location( const Location& copy) = default;
+
+    Location( Location&& tmp) = default;
+
+    virtual ~Location() = default;
+
+    Location& operator=(const Location& copy) = default;
+
+    Location& operator=(Location&& tmp) = default;
+
     /**
     * Location virtual factory method
     * @param latitude latitude value [decimal degrees]
     * @param longitude longitude value [decimal degrees]
     * @param depth depth value [m]
     * @param dist distance comparison precision [m]
-    * @return a heap-allocated Location object
+    * @return a std::unique_ptr to a heap-allocated Location object
     **/ 
-    virtual Location* create( double latitude, double longitude, double depth = 0, double dist = LOCATION_COMPARISON_DISTANCE ) const { 
-      return new Location(latitude, longitude, depth, dist); }
+    virtual std::unique_ptr<Location> create( double latitude, double longitude, double depth = 0, double dist = LOCATION_COMPARISON_DISTANCE ) const { 
+      return std::make_unique<Location>(latitude, longitude, depth, dist); }
 
     /**
     * Location virtual factory method
     * @param coordz coordinates
     * @param dist distance comparison precision [m]
-    * @return a heap-allocated Location object
+    * @return a std::unique_ptr to heap-allocated Location object
     **/ 
-    virtual Location* create( const CoordZ& coordz = CoordZ(), double dist = LOCATION_COMPARISON_DISTANCE ) const { 
-      return new Location(coordz,dist); }
-    
+    virtual std::unique_ptr<Location> create( const CoordZ& coordz = CoordZ(), double dist = LOCATION_COMPARISON_DISTANCE ) const { 
+      return std::make_unique<Location>(coordz,dist); }
+
     /**
     * Location virtual factory method
-    * @return a heap-allocated copy of <b>this</b> instance
+    * @return a std::unique_ptr to heap-allocated copy of <b>this</b> instance
     **/
-    virtual Location* clone() const { return new Location(*this); }
-
+    virtual std::unique_ptr<Location> clone() const { return std::make_unique<Location>(*this); }
 
     /**
     * Checks the validity of Location
     * @return <i>true</i> if curr_coordz is valid, <i>false</i> otherwise
     **/
     virtual bool isValid() const { return curr_coordz.isValid(); }
-    
 
     /**
     * Checks if the woss::CoordZ given is equivalent to this Location
@@ -124,8 +117,7 @@ namespace woss {
     * @return <i>true</i> if assumption is valid, <i>false</i> otherwise
     **/
     virtual bool isEquivalentTo( const woss::CoordZ& coordz ); 
-    
-  
+
     /**
     * Sets initial coordinates
     * @param coordz valid woss::CoordZ 
@@ -149,138 +141,126 @@ namespace woss {
     * @param lat valid depth [m]
     **/
     virtual void setDepth( double depth );
-    
-    
+
     /**
     * Sets current vertical orientation from reference line (0 degrees = parallel to sea surface / bottom ).
     * Negative values are towards the surface, while positive ones are towards sea bottom
     * @param angle delta angle [dec degrees]
-    **/   
+    **/
     virtual void setVerticalOrientation( double angle );
-    
+
     /**
     * Gets current horizontal orientation from reference line (0 degrees = parallel to direction of current movement )
     * positive values are counter-clockwise rotations, while negative ones are clockwise rotations
     * @param angle delta angle [dec degrees]
-    **/     
+    **/
     virtual void setHorizontalOrientation( double angle );
-    
-    
+
     /**
     * Gets current coordinates
     * @returns valid woss::CoordZ 
-    **/    
-    virtual CoordZ getLocation(); 
+    **/
+    virtual CoordZ getLocation();
  
     /**
     * Gets current latitude
     * @returns valid latitude [decimal degrees]
-    **/     
-    virtual double getLatitude(); 
+    **/
+    virtual double getLatitude();
     
     /**
     * Gets current longitude
     * @returns valid longitude [decimal degrees]
-    **/        
-    virtual double getLongitude(); 
+    **/
+    virtual double getLongitude();
 
     /**
     * Gets current depth
     * @returns valid depth [m]
-    **/    
-    virtual double getDepth(); 
-
+    **/
+    virtual double getDepth();
 
     /**
     * Gets current cartesian x-axis value
     * @returns x value
-    **/    
-    virtual double getX(); 
+    **/
+    virtual double getX();
     
     /**
     * Gets current cartesian y-axis value
     * @returns y value
-    **/        
+    **/
     virtual double getY(); 
     
     /**
     * Gets current cartesian z-axis value
     * @returns z value
-    **/    
+    **/
     virtual double getZ();
     
     /**
     * Gets current vertical orientation from reference line (0 degrees = parallel to sea surface / bottom ).
     * Negative values are towards the surface, while positive ones are towards sea bottom
     * @returns difference angle [dec degrees]
-    **/   
+    **/
     virtual double getVerticalOrientation();
     
     /**
     * Gets current horizontal orientation from reference line (0 degrees = parallel to direction of current movement )
     * positive values are counter-clockwise rotations, while negative ones are clockwise rotations
     * @returns difference angle [dec degrees]
-    **/     
+    **/
     virtual double getHorizontalOrientation();
   
     /**
     * Gets current bearing in [-pi,pi]
     * @returns bearing [dec degrees]
-    **/         
+    **/
     virtual double getBearing();
-    
-    
+
     /**
     * << operator
     * @param os left operand ostream reference
     * @param instance right operand const Location reference
     * @return <i>os</i> reference after the operation
     **/ 
-    friend ::std::ostream& operator<<( ::std::ostream& os, const Location& instance ) {
+    friend std::ostream& operator<<( std::ostream& os, const Location& instance ) {
       os << "Location, latitude = " << instance.curr_coordz.getLatitude() << "; longitude = " << instance.curr_coordz.getLongitude()
          << "; depth = " << instance.curr_coordz.getDepth();
       return os;
     }
 
-  
     protected:
-      
-    
+
     /**
     * Comparison distance [m]
-    **/      
+    **/
     double comparison_distance;
-    
-    
+
     /**
     * current coordinates
-    **/    
+    **/
     CoordZ curr_coordz;
-    
-    
+
     /**
     * current vertical orientation. It's the delta angle from reference direction 
     * (0 degrees = parallel to sea surface / bottom )
-    **/      
+    **/
     double vertical_orientation;
- 
+
     /**
     * current horizontal orientation. It's the delta angle from reference direction 
     * (0 degrees = parallel to movement's direction )
-    **/        
+    **/
     double horizontal_orientation;
 
     /**
     * current bearing
-    **/      
+    **/
     double bearing;
-    
-    
+
   };
-  
   
 }
 
-
 #endif /* LOCATION_DEFINITIONS_H */
-

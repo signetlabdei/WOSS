@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -43,6 +36,7 @@
 
 #ifdef WOSS_NETCDF_SUPPORT
 
+#include <utility>
 #include <sediment-definitions.h>
 #include "woss-db.h"
 #if defined (WOSS_NETCDF4_SUPPORT)
@@ -51,35 +45,34 @@
 
 namespace woss {
 
-    
-  static const int DECK41_MINUTES_SEDIM_NLAT = 10801; /**< Custom made NetCDF DECK41 total number of latitudes */
+  static constexpr int DECK41_MINUTES_SEDIM_NLAT = 10801; /**< Custom made NetCDF DECK41 total number of latitudes */
 
-  static const int DECK41_MINUTES_SEDIM_NLON = 21601; /**< Custom made NetCDF DECK41 total number of longitudes */
+  static constexpr int DECK41_MINUTES_SEDIM_NLON = 21601; /**< Custom made NetCDF DECK41 total number of longitudes */
 
-  static const double DECK41_MINUTES_SEDIM_SPACING = 0.0166666666666667; /**< Spacing between coordinates value [decimal degree] */
+  static constexpr double DECK41_MINUTES_SEDIM_SPACING = 0.0166666666666667; /**< Spacing between coordinates value [decimal degree] */
 
-  static const int DECK41_V2_SEDIM_NLAT = 10800; /**< Custom made NetCDF DECK41 total number of latitudes */
+  static constexpr int DECK41_V2_SEDIM_NLAT = 10800; /**< Custom made NetCDF DECK41 total number of latitudes */
 
-  static const int DECK41_V2_SEDIM_NLON = 21600; /**< Custom made NetCDF DECK41 total number of longitudes */
+  static constexpr int DECK41_V2_SEDIM_NLON = 21600; /**< Custom made NetCDF DECK41 total number of longitudes */
 
-  static const double DECK41_V2_SEDIM_MIN_LAT = -89.9833333333333333; /**< Custom made NetCDF DECK41 mimimum latitude */
+  static constexpr double DECK41_V2_SEDIM_MIN_LAT = -89.9833333333333333; /**< Custom made NetCDF DECK41 mimimum latitude */
 
-  static const double DECK41_V2_SEDIM_MAX_LAT = 89.9833333333333333; /**< Custom made NetCDF DECK41 maximum latitude */
+  static constexpr double DECK41_V2_SEDIM_MAX_LAT = 89.9833333333333333; /**< Custom made NetCDF DECK41 maximum latitude */
 
-  static const double DECK41_V2_SEDIM_MIN_LON = -179.9833333333333333; /**< Custom made NetCDF DECK41 mimimum longitude */
+  static constexpr double DECK41_V2_SEDIM_MIN_LON = -179.9833333333333333; /**< Custom made NetCDF DECK41 mimimum longitude */
 
-  static const double DECK41_V2_SEDIM_MAX_LON = 179.9833333333333333; /**< Custom made NetCDF DECK41 maximum longitude */
+  static constexpr double DECK41_V2_SEDIM_MAX_LON = 179.9833333333333333; /**< Custom made NetCDF DECK41 maximum longitude */
 
-  static const double DECK41_V2_SEDIM_START_LAT = -89.9833333333333333; /**< Custom made NetCDF DECK41 start latitude */
+  static constexpr double DECK41_V2_SEDIM_START_LAT = -89.9833333333333333; /**< Custom made NetCDF DECK41 start latitude */
 
-  static const double DECK41_V2_SEDIM_START_LON = -179.9833333333333333; /**< Custom made NetCDF DECK41 start longitude */
+  static constexpr double DECK41_V2_SEDIM_START_LON = -179.9833333333333333; /**< Custom made NetCDF DECK41 start longitude */
 
-  static const double DECK41_V2_SEDIM_SPACING = 0.0166666666666667; /**< Spacing between coordinates value [decimal degree] */
+  static constexpr double DECK41_V2_SEDIM_SPACING = 0.0166666666666667; /**< Spacing between coordinates value [decimal degree] */
 
   /**
   * DECK41 db version in use
   **/
-  enum DECK41DbType {
+  enum class DECK41DbType {
     DECK41_DB_V1_TYPE       = 0,  ///< DECK41 V1 NetCDF Legacy db
     DECK41_DB_V2_TYPE       = 1,  ///< DECK41 V2 NetCDF4 db
     DECK41_DB_INVALID_TYPE        ///< INVALID, must be last
@@ -93,14 +86,13 @@ namespace woss {
   **/
   class SedimDeck41CoordDb : public WossNetcdfDb {
 
-
     public:
 
     /**
     * SedimDeck41CoordDb default constructor. Default constructed object are not valid
     * @param name pathname of database
     **/
-    SedimDeck41CoordDb( const ::std::string& name = DB_NAME_NOT_SET );
+    SedimDeck41CoordDb( const std::string& name = DB_NAME_NOT_SET );
 
 #if defined (WOSS_NETCDF4_SUPPORT)
     /**
@@ -108,32 +100,32 @@ namespace woss {
     * @param name pathname of database
     * @param db_type DECK41 db type
     **/
-    SedimDeck41CoordDb( const ::std::string& name, DECK41DbType db_type );
+    SedimDeck41CoordDb( const std::string& name, DECK41DbType db_type );
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 
-    virtual ~SedimDeck41CoordDb() { }
+    virtual ~SedimDeck41CoordDb() override = default;
 
     /**
     * Returns a Deck41Types for the given coordinates
     * @param coordinates const reference to a valid Coord object
     * @returns a Deck41Types value ( main type value, secondary type value )
     **/
-    Deck41Types getSeaFloorType( const Coord& coordinates ) const ;
+    Deck41Types getSeaFloorType( const Coord& coordinates ) const;
 
 
     /**
     * Post openConnection() actions, used to create and initialize NetCDF variables
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool finalizeConnection();
+    virtual bool finalizeConnection() override;
 
     
     /**
     * Checks the validity of SedimDeck41CoordDb
     * @return <i>true</i> if pathname is valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() { return( WossNetcdfDb::isValid() 
-                                    && db_name != DB_NAME_NOT_SET && deck41_db_type != DECK41_DB_INVALID_TYPE ); }
+    virtual bool isValid() const override { return( WossNetcdfDb::isValid() 
+                                            && db_name != DB_NAME_NOT_SET && deck41_db_type != DECK41DbType::DECK41_DB_INVALID_TYPE ); }
 
 #if defined (WOSS_NETCDF4_SUPPORT)
     /**
@@ -199,7 +191,7 @@ namespace woss {
     * @param coordinates const reference to a valid Coord object
     * @returns index value
     **/
-    int getSedimIndex( const Coord& coords ) const ;
+    int getSedimIndex( const Coord& coords ) const;
 
 #if defined (WOSS_NETCDF4_SUPPORT)
    /**
@@ -207,7 +199,7 @@ namespace woss {
     * @param coordinates const reference to a valid Coord object
     * @returns index pair
     **/
-    ::std::pair< int, int > getSedimIndexes( const Coord& coordinates ) const;
+    std::pair< int, int > getSedimIndexes( const Coord& coordinates ) const;
 #endif // defined (WOSS_NETCDF4_SUPPORT)
   };
 

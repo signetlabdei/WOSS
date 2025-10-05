@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 #ifndef UNDERWATER_WOSS_BPSK_H 
 #define UNDERWATER_WOSS_BPSK_H
@@ -40,11 +33,11 @@
  * Provides the interface for WossMPhyBpsk class
  */
 
-
+#include <memory>
 #include <underwater-bpsk.h>
 
 
-#define UWWOSSMPHYBPSK_MODNAME "UWWOSSBPSK"
+static constexpr inline const char* UWWOSSMPHYBPSK_MODNAME = "UWWOSSBPSK";
 
 
 namespace woss {
@@ -61,38 +54,28 @@ namespace woss {
  */
 class UwMPhyBpskTransducer :  public UnderwaterMPhyBpsk {
 
-  
   public:
     
-    
-  UwMPhyBpskTransducer();
+  UwMPhyBpskTransducer() = default;
 
+  virtual ~UwMPhyBpskTransducer() override = default;
 
-  virtual ~UwMPhyBpskTransducer() { }
-  
-  
-  virtual int command( int argc, const char*const* argv );
+  virtual int command( int argc, const char*const* argv ) override;
 
-  
   protected:
 
- 
-  virtual double consumedEnergyTx( double Ptx, double duration );
-  
-  
-  virtual const woss::Transducer* const getTransducer( double frequency ) const; 
-  
-  
-  typedef ::std::map< ::std::pair< double, double >, const woss::Transducer* > FreqTransducerMap;
-  typedef FreqTransducerMap::iterator FTMIter;
-  typedef FreqTransducerMap::const_iterator FTMCIter;
-  typedef FreqTransducerMap::reverse_iterator FTMRIter;
-  typedef FreqTransducerMap::const_reverse_iterator FTMRCIter;
-   
- 
+  virtual double consumedEnergyTx( double Ptx, double duration ) override;
+
+  virtual std::shared_ptr<woss::Transducer> getTransducer( double frequency ) const; 
+
+  using FreqTransducerMap = std::map< std::pair< double, double >, std::shared_ptr<woss::Transducer> >;
+  using FTMIter = FreqTransducerMap::iterator;
+  using FTMCIter = FreqTransducerMap::const_iterator;
+  using FTMRIter = FreqTransducerMap::reverse_iterator;
+  using FTMRCIter = FreqTransducerMap::const_reverse_iterator;
+
   FreqTransducerMap freq_transd_map;
-  
-  
+
 };
 
 
@@ -103,19 +86,14 @@ class UwMPhyBpskTransducer :  public UnderwaterMPhyBpsk {
  */
 class WossMPhyBpsk :  public UwMPhyBpskTransducer {
 
-  
   public:
-    
-    
-  WossMPhyBpsk();
 
+  WossMPhyBpsk() = default;
 
-  virtual ~WossMPhyBpsk() { }
-  
-   
+  virtual ~WossMPhyBpsk() override = default;
+
   protected:
 
-    
   /**
   * It sends a synchronous cross-layer message asking for the current channel estimation. Upon valid answer
   * it provides optimal power calculations.
@@ -123,13 +101,8 @@ class WossMPhyBpsk :  public UwMPhyBpskTransducer {
   * @param p pointer to the current Packet being processed
   * @return Tx power in uPa
   */
-  virtual double getTxPower( Packet* p );
- 
+  virtual double getTxPower( Packet* p ) override;
  
 };
 
-
 #endif /* UNDERWATER_WOSS_BPSK_H */
-
-
-

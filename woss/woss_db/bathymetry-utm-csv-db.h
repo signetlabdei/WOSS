@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,15 +19,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 /**
- * @file   bathymetry-hamburg-port-db.h
+ * @file   bathymetry-utm-csv-db.h
  * @author Alberto Signori, Federico Guerra
  * 
  * \brief Provides the interface for woss::BathyUtmCsvDb class
@@ -39,13 +32,12 @@
 #ifndef WOSS_BATHYMETRY_UTM_CSV_DB_H 
 #define WOSS_BATHYMETRY_UTM_CSV_DB_H
 
-#include "woss-db.h"
 #include <vector>
 #include <utility>
+#include "woss-db.h"
 
 namespace woss {
 
- 
   /**
   * \brief Specialization of WossTextualDb for UTM CSV database
   *
@@ -60,9 +52,9 @@ namespace woss {
     * 
     * @param name pathname of database
     **/
-    BathyUtmCsvDb( const ::std::string& name );
+    BathyUtmCsvDb( const std::string& name );
 
-    virtual ~BathyUtmCsvDb() { }
+    virtual ~BathyUtmCsvDb() override = default;
 
 
     /**
@@ -72,7 +64,7 @@ namespace woss {
     * @param bathymetry_value const reference to woss::Bathymetry value to be inserted
     * @returns <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool insertValue( const Coord& coordinates, const Bathymetry& bathymetry_value );
+    virtual bool insertValue( const Coord& coordinates, const Bathymetry& bathymetry_value ) override;
 
     /**
     * Returns the positive depth value ( bathymetry ) of given coordinates, if present in the database.
@@ -81,7 +73,7 @@ namespace woss {
     * @param coords const reference to a valid Coord object
     * @return <i>positive</i> depth value [m] if coordinates are found, <i>HUGE_VAL</i> otherwise
     **/
-    virtual double getValue( const Coord& coords ) const ;
+    virtual Bathymetry getValue( const Coord& coords ) const override;
 
     
     /**
@@ -89,7 +81,7 @@ namespace woss {
     * 
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool finalizeConnection();
+    virtual bool finalizeConnection() override;
 
     /**
     * Sets the char separator used in CSV textual db
@@ -205,7 +197,7 @@ namespace woss {
     * @param coords const reference to a valid Coord object
     * @return index value 
     **/
-    int getBathyIndex( const Coord& coords ) const ;
+    int getBathyIndex( const Coord& coords ) const;
 
     /**
      * Imports data from .csv file and store depth values in the bathy_vec 

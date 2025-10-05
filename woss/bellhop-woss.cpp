@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
 
 /**
  * @file   bellhop-woss.cpp
@@ -36,42 +29,45 @@
  * Provides the implementation of woss::BellhopWoss class
  */
 
-
+#include <iostream>
 #include <cstdlib>
 #include <altimetry-definitions.h>
 #include "bellhop-woss.h"
 
 
-#define BELLHOP_NOT_SET (-3000)
+static constexpr inline int BELLHOP_NOT_SET = (-3000);
 
-static const char* WOSS_BELLHOP_PROGRAM = "bellhop.exe"; /**< Bellhop program name */
+static constexpr inline const char* WOSS_BELLHOP_PROGRAM = "bellhop.exe"; /**< Bellhop program name */
 
-static const char* WOSS_BELLHOP_NAME = "bellhop";  /**< Bellhop configuration file name */
+static constexpr inline const char* WOSS_BELLHOP_NAME = "bellhop";  /**< Bellhop configuration file name */
 
-static const char* WOSS_BELLHOP_ATI = ".ati"; /**< Bellhop altimetry file extension */
+static constexpr inline const char* WOSS_BELLHOP_ATI = ".ati"; /**< Bellhop altimetry file extension */
 
-static const char* WOSS_BELLHOP_BTY = ".bty"; /**< Bellhop batimetry file extension */
+static constexpr inline const char* WOSS_BELLHOP_BTY = ".bty"; /**< Bellhop batimetry file extension */
 
-//  static const char* WOSS_BELLHOP_TRC = ".trc"; /**< Bellhop top reflection coefficients file extension */
+#if 0
+static constexpr inline const char* WOSS_BELLHOP_TRC = ".trc"; /**< Bellhop top reflection coefficients file extension */
 
-//  static const char* WOSS_BELLHOP_BRC = ".brc"; /**< Bellhop bottom reflection coefficients file extension */
+static constexpr inline const char* WOSS_BELLHOP_BRC = ".brc"; /**< Bellhop bottom reflection coefficients file extension */
+#endif 
 
-static const char* WOSS_BELLHOP_SBP = ".sbp"; /**< Bellhop source beam pattern extension */
+static constexpr inline const char* WOSS_BELLHOP_SBP = ".sbp"; /**< Bellhop source beam pattern extension */
 
-static const char* WOSS_BELLHOP_SSP = ".ssp"; /**< Bellhop SSP matrix file extension */
+static constexpr inline const char* WOSS_BELLHOP_SSP = ".ssp"; /**< Bellhop SSP matrix file extension */
 
-static const char* WOSS_BELLHOP_SHD = ".shd"; /**< Bellhop binary SHD file extension */
+static constexpr inline const char* WOSS_BELLHOP_SHD = ".shd"; /**< Bellhop binary SHD file extension */
 
-static const char* WOSS_BELLHOP_ARR = ".arr";  /**< Bellhop ARR file extension */
+static constexpr inline const char* WOSS_BELLHOP_ARR = ".arr";  /**< Bellhop ARR file extension */
 
-static const char* WOSS_BELLHOP_ENV = ".env";  /**< Bellhop configuration file extension */
+static constexpr inline const char* WOSS_BELLHOP_ENV = ".env";  /**< Bellhop configuration file extension */
 
-static const char* WOSS_BATHYMETRY_MODE_SLOPE = "S"; /**< Bathymetry write method: Slope */
+static constexpr inline const char* WOSS_BATHYMETRY_MODE_SLOPE = "S"; /**< Bathymetry write method: Slope */
 
-static const char* WOSS_BATHYMETRY_MODE_DISCRETE = "D"; /**< Bathymetry write method: Discrete */
+static constexpr inline const char* WOSS_BATHYMETRY_MODE_DISCRETE = "D"; /**< Bathymetry write method: Discrete */
 
-static const char WOSS_BATHYMETRY_TYPE_LONG_SYNTAX = 'L'; /**< Bathymetry write method: Long, with geoacustic */
-static const double BELLHOP_QUAD_SSP_RANGE_FACTOR = 1.05; /**< Bellhop range factor multiplier, used in SSP quad file */
+static constexpr inline char WOSS_BATHYMETRY_TYPE_LONG_SYNTAX = 'L'; /**< Bathymetry write method: Long, with geoacustic */
+
+static constexpr inline double BELLHOP_QUAD_SSP_RANGE_FACTOR = 1.05; /**< Bellhop range factor multiplier, used in SSP quad file */
 
 using namespace woss;
 
@@ -108,7 +104,7 @@ BellhopWoss::BellhopWoss()
   max_normalized_ssp_depth(0.0),
   curr_norm_ssp_depth_steps(BELLHOP_NOT_SET),
   transform_ssp_depth_steps(BELLHOP_NOT_SET),
-  transducer(NULL),
+  transducer(nullptr),
   bp_initial_bearing(0.0),
   bp_vertical_rotation(0.0),
   bp_horizontal_rotation(0.0),
@@ -159,7 +155,7 @@ BellhopWoss::BellhopWoss(const CoordZ& tx, const CoordZ& rx, const Time& start_t
   max_normalized_ssp_depth(0.0),
   curr_norm_ssp_depth_steps(BELLHOP_NOT_SET),
   transform_ssp_depth_steps(BELLHOP_NOT_SET),
-  transducer(NULL),
+  transducer(nullptr),
   bp_initial_bearing(0.0),
   bp_vertical_rotation(0.0),
   bp_horizontal_rotation(0.0),
@@ -178,18 +174,6 @@ BellhopWoss::BellhopWoss(const CoordZ& tx, const CoordZ& rx, const Time& start_t
 }
 
 
-BellhopWoss::~BellhopWoss() {
-  for ( NSMIter it = normalized_ssp_map.begin(); it != normalized_ssp_map.end(); it++ ) {
-    delete it->second;
-    it->second = NULL;
-  }
-  for ( NSMIter it = randomized_ssp_map.begin(); it != randomized_ssp_map.end(); it++ ) {
-    delete it->second;
-    it->second = NULL;
-  }
-}
-
-
 bool BellhopWoss::isValid() const {
   return ( ACToolboxWoss::isValid() && isValidBhMode(bellhop_op_mode) && total_transmitters != BELLHOP_NOT_SET && total_rx_depths != BELLHOP_NOT_SET 
         && total_range_steps != BELLHOP_NOT_SET && total_rx_ranges != BELLHOP_NOT_SET && total_rays != BELLHOP_NOT_SET 
@@ -197,7 +181,7 @@ bool BellhopWoss::isValid() const {
 }
 
 
-BellhopWoss& BellhopWoss::setBhMode( const ::std::string& mode ) {
+BellhopWoss& BellhopWoss::setBhMode( const std::string& mode ) {
   if (isValidBhMode(mode) == true) {
     bellhop_op_mode = mode;
 
@@ -211,7 +195,7 @@ BellhopWoss& BellhopWoss::setBhMode( const ::std::string& mode ) {
     }
   }
   else {
-    ::std::cerr << "BellhopWoss(" << woss_id << ")::setBhMode() ERROR wrong Bellhop Mode!" << ::std::endl;
+    std::cerr << "BellhopWoss(" << woss_id << ")::setBhMode() ERROR wrong Bellhop Mode!" << std::endl;
     exit(1);
   }
 
@@ -221,10 +205,6 @@ BellhopWoss& BellhopWoss::setBhMode( const ::std::string& mode ) {
 
 void BellhopWoss::resetNormalizedDbSSP()
 {
-  for( NSMIter it = normalized_ssp_map.begin(); it != normalized_ssp_map.end(); it++ ) {
-    if ( it->second != NULL ) delete it->second;
-  }
-  
   normalized_ssp_map.clear();
 }
 
@@ -237,12 +217,12 @@ void BellhopWoss::normalizeDbSSP() {
                              && min_ssp_depth_steps == max_ssp_depth_steps );
 
   if (debug)
-    ::std::cout << "BellhopWoss::normalizeDbSSP() is_ssp_map_transformable = " << is_ssp_map_transformable
-                << "; transform_ssp_depth_steps = " << transform_ssp_depth_steps 
-                << "; is_normalized_matrix = " << is_normalized_matrix << ::std::endl;
+    std::cout << "BellhopWoss::normalizeDbSSP() is_ssp_map_transformable = " << is_ssp_map_transformable
+              << "; transform_ssp_depth_steps = " << transform_ssp_depth_steps 
+              << "; is_normalized_matrix = " << is_normalized_matrix << std::endl;
 
   if ((is_ssp_map_transformable == true) && (transform_ssp_depth_steps > 0)) {  
-    min_normalized_ssp_depth = ::std::min( min_altimetry_depth, *( min_ssp_depth_set.begin() ) );
+    min_normalized_ssp_depth = std::min( min_altimetry_depth, *( min_ssp_depth_set.begin() ) );
 
     if (max_bathy_depth <= *( max_ssp_depth_set.rbegin()))
       max_normalized_ssp_depth = max_bathy_depth;
@@ -250,16 +230,16 @@ void BellhopWoss::normalizeDbSSP() {
       max_normalized_ssp_depth = *( max_ssp_depth_set.rbegin());
 
     if (debug) 
-      ::std::cout << "BellhopWoss::normalizeDbSSP() min norm ssp depth = " << min_normalized_ssp_depth
-                  << "; min alt depth = " << min_altimetry_depth 
-                  << "; max_normalized_ssp_depth " << max_normalized_ssp_depth 
-                  << "; max_bathy_depth = " << max_bathy_depth << ::std::endl;
+      std::cout << "BellhopWoss::normalizeDbSSP() min norm ssp depth = " << min_normalized_ssp_depth
+                << "; min alt depth = " << min_altimetry_depth 
+                << "; max_normalized_ssp_depth " << max_normalized_ssp_depth 
+                << "; max_bathy_depth = " << max_bathy_depth << std::endl;
     
-    for ( SSPMap::iterator it = ssp_map.begin(); it != ssp_map.end(); ++it ) {
-      normalized_ssp_map[range_vector[it->first]] = it->second->transform( tx_coordz, 
+    for ( const auto& it : ssp_map ) {
+      normalized_ssp_map[range_vector[it.first]] = it.second->transform( tx_coordz, 
                   min_normalized_ssp_depth, max_normalized_ssp_depth, transform_ssp_depth_steps);
 
-      assert( normalized_ssp_map[range_vector[it->first]]->isValid() );
+      assert( normalized_ssp_map[range_vector[it.first]]->isValid() );
     }
 
     curr_norm_ssp_depth_steps = normalized_ssp_map.begin()->second->size(); 
@@ -268,8 +248,8 @@ void BellhopWoss::normalizeDbSSP() {
   }
 
   if ( is_normalized_matrix == true ) {
-    for ( SSPMap::iterator it = ssp_map.begin(); it != ssp_map.end(); ++it ) {
-      normalized_ssp_map[it->first] = it->second->truncate(ceil(max_bathy_depth));
+    for ( const auto& it : ssp_map ) {
+      normalized_ssp_map[it.first] = it.second->truncate(ceil(max_bathy_depth));
     }
 
     min_normalized_ssp_depth = *( min_ssp_depth_set.begin() );
@@ -310,48 +290,42 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
   if (use_thorpe_att == true)
     f_out << "T";
   
-  f_out << ( ( (altimetry_value != NULL) && (altimetry_value->isValid()) ) ? "*" : "" )  
-        << "\'" << ::std::setw(30) << "! OPTIONS1" << ::std::endl;
+  f_out << ( ( (altimetry_value != nullptr) && (altimetry_value->isValid()) ) ? "*" : "" )  
+        << "\'" << std::setw(30) << "! OPTIONS1" << std::endl;
   
-  f_out << "0 0.0 " << max_normalized_ssp_depth << ::std::setw(30) << "! NMESH SIGMAS Z(NSSP)" << ::std::endl;
+  f_out << "0 0.0 " << max_normalized_ssp_depth << std::setw(30) << "! NMESH SIGMAS Z(NSSP)" << std::endl;
  
-  NSMIter it1 = normalized_ssp_map.begin();
+  auto it1 = normalized_ssp_map.begin();
 
   /////////////////////////////////////////////
   DConstIter it2;
   DConstIter it3;
-  bool has_to_delete = false;
-  SSP* curr_ssp = NULL;
+  SSP* curr_ssp;
+  std::unique_ptr<SSP> tmp_uniq;
+
   if ( curr_run > 0 ) {
-    curr_ssp = it1->second->randomize( 0.0001 );
-    has_to_delete = true;
+    tmp_uniq = it1->second->randomize( 0.0001 );
+    curr_ssp = tmp_uniq.get();
   }
   else {
-    curr_ssp = it1->second;
+    curr_ssp = it1->second.get();
+    tmp_uniq = nullptr;
   }
   ////////////////////
-  DConstIter it4 = curr_ssp->begin();
-  f_out << ::std::min( (double)it4->first, min_normalized_ssp_depth ) << "  " << it4->second << "  / "<< ::std::endl;
+  auto it4 = curr_ssp->begin();
+  f_out << std::min( (double)it4->first, min_normalized_ssp_depth ) << "  " << it4->second << "  / "<< std::endl;
   it4++;
   
   for ( ; it4 != curr_ssp->end(); it4++) { 
-     f_out << it4->first << "  " << it4->second << "  / "<< ::std::endl;
+     f_out << it4->first << "  " << it4->second << "  / "<< std::endl;
   }  
 
-  if ( has_to_delete ) {
-    delete curr_ssp;
-    curr_ssp = NULL;
-  }
   if (using_ssp_file == true) {
     if ( curr_run > 0 ) {
-      for ( NSMIter it = randomized_ssp_map.begin(); it != randomized_ssp_map.end(); it++ ) {
-        delete it->second;
-        it->second = NULL;
-      }
       randomized_ssp_map.clear();
     }
      
-    ::std::ofstream ssp_out ( ssp_file.c_str() );
+    std::ofstream ssp_out ( ssp_file.c_str() );
     assert ( ssp_out.is_open() );
 
     ssp_out.precision(WOSS_DECIMAL_PRECISION);
@@ -362,55 +336,56 @@ void BellhopWoss::writeNormalizedSSP( int curr_run ) {
      * - the first one at -box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR
      * - the last one at box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR
      */
-    ssp_out << normalized_ssp_map.size() + 2 << ::std::endl;
+    ssp_out << normalized_ssp_map.size() + 2 << std::endl;
 
     // first box range
-    ssp_out << ::std::setw(30) << (-box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR) / 1000.0;
+    ssp_out << std::setw(30) << (-box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR) / 1000.0;
 
     //write actual ranges
-    for (NSMIter it = normalized_ssp_map.begin(); it != normalized_ssp_map.end(); it++) {
-      ssp_out << ::std::setw(30) << ((double) it->first / 1000.0); // write ranges
+    for (const auto& it : normalized_ssp_map) {
+      ssp_out << std::setw(30) << ((double) it.first / 1000.0); // write ranges
        
       if ( curr_run > 0 ) {
-        randomized_ssp_map[it->first] = it->second->randomize( 0.0001 );
+        randomized_ssp_map[it.first] = it.second->randomize( 0.0001 );
       }
     }
     
     // last box range
-    ssp_out << ::std::setw(30) << (box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR) / 1000.0 << ::std::endl;
+    ssp_out << std::setw(30) << (box_range * BELLHOP_QUAD_SSP_RANGE_FACTOR) / 1000.0 << std::endl;
 
  
     NormSSPMap* write_ssp_map;
     if ( curr_run > 0 ) {
       write_ssp_map = &randomized_ssp_map;
     }
-    else write_ssp_map = &normalized_ssp_map;
-
-    NSMIter first_it = write_ssp_map->begin();
-    NSMRIter last_it = write_ssp_map->rbegin();
+    else {
+      write_ssp_map = &normalized_ssp_map;
+    }
+    auto first_it = write_ssp_map->begin();
+    auto last_it = write_ssp_map->rbegin();
 
     assert (first_it != write_ssp_map->end());
     assert (last_it != write_ssp_map->rend());
 
     for (int i = 0; i < curr_norm_ssp_depth_steps; i++) {
       // write first SSP at first box range
-      DConstIter first_it2 = first_it->second->at(i);
+      auto first_it2 = first_it->second->at(i);
       assert( first_it2 != first_it->second->end() );
-      ssp_out << ::std::setw(30) << first_it2->second;
+      ssp_out << std::setw(30) << first_it2->second;
 
       // write actual SSPs
-      for (NSMIter it = write_ssp_map->begin(); it != write_ssp_map->end(); it++) {
-        DConstIter it2 = it->second->at(i);
-        assert( it2 != it->second->end() );
-        ssp_out << ::std::setw(30) << it2->second;
+      for ( const auto& it : *write_ssp_map ) {
+        auto it2 = it.second->at(i);
+        assert( it2 != it.second->end() );
+        ssp_out << std::setw(30) << it2->second;
       }
 
       // write last SSP at last box range
-      DConstIter last_it2 = last_it->second->at(i);
+      auto last_it2 = last_it->second->at(i);
       assert( last_it2 != last_it->second->end() );
-      ssp_out << ::std::setw(30) << last_it2->second;
+      ssp_out << std::setw(30) << last_it2->second;
 
-      ssp_out << ::std::endl;
+      ssp_out << std::endl;
     }
 
     ssp_out.close();
@@ -461,7 +436,8 @@ void BellhopWoss::checkDepthOffsets(const CoordZ& coordinates, double& min_depth
   double total_depth = max_depth_value - min_depth_value; 
   double total_depth_offset = abs( max_depth_offset - min_depth_offset );
 
-  if ( total_depth_offset >= total_depth ) total_depth_offset = total_depth - total_depth/50.0;
+  if ( total_depth_offset >= total_depth ) 
+    total_depth_offset = total_depth - total_depth/50.0;
     
   if ( (coordinates.getDepth() + min_depth_offset) <= min_depth_value ) {
     min_depth_offset = min_depth_value + min_depth_value/50.0 - coordinates.getDepth();
@@ -480,30 +456,32 @@ void BellhopWoss::checkDepthOffsets(const CoordZ& coordinates, double& min_depth
   }
 
   if (debug) 
-    ::std::cerr << "BellhopWoss(" << woss_id << ")::checkDepthOffsets() WARNING, latitude = " 
-                << coordinates.getLatitude() << "; longitude = " << coordinates.getLongitude() 
-                << "; depth = " << (coordinates.getDepth())
-                << "; min depth value = " << min_depth_value << "; max depth value = " << max_depth_value 
-                << "; total depth offset = " << total_depth_offset << "; total depth = " << total_depth 
-                << "; new min depth offset = " << min_depth_offset << "; new max depth offset = " 
-                << max_depth_offset << ::std::endl;
+    std::cout << "BellhopWoss(" << woss_id << ")::checkDepthOffsets() WARNING, latitude = " 
+              << coordinates.getLatitude() << "; longitude = " << coordinates.getLongitude() 
+              << "; depth = " << (coordinates.getDepth())
+              << "; min depth value = " << min_depth_value << "; max depth value = " << max_depth_value 
+              << "; total depth offset = " << total_depth_offset << "; total depth = " << total_depth 
+              << "; new min depth offset = " << min_depth_offset << "; new max depth offset = " 
+              << max_depth_offset << std::endl;
   
 }
 
 
 void BellhopWoss::checkDepthOffsets() {
   double min_depth = min_normalized_ssp_depth;
-  if (min_depth <= 0.0) min_depth = 1.0e-1;
+  if (min_depth <= 0.0) 
+    min_depth = 1.0e-1;
 
   checkDepthOffsets(tx_coordz, tx_min_depth_offset, tx_max_depth_offset, min_depth, coordz_vector[0].getDepth() );
-  checkDepthOffsets(rx_coordz, rx_min_depth_offset, rx_max_depth_offset, min_depth, ::std::min(max_bathymetry_depth, max_normalized_ssp_depth) );
+  checkDepthOffsets(rx_coordz, rx_min_depth_offset, rx_max_depth_offset, min_depth, std::min(max_bathymetry_depth, max_normalized_ssp_depth) );
 }
 
 
 void BellhopWoss::checkRangeOffsets() {
   double total_range_offset = abs( rx_max_range_offset - rx_min_range_offset );
 
-  if ( total_range_offset >= 1.1*total_great_circle_distance ) total_range_offset = 1.1*total_great_circle_distance - total_great_circle_distance/50.0;
+  if ( total_range_offset >= 1.1*total_great_circle_distance ) 
+    total_range_offset = 1.1*total_great_circle_distance - total_great_circle_distance/50.0;
 
   if ( rx_min_range_offset <= -total_great_circle_distance ) {
     double new_value = -total_great_circle_distance;
@@ -526,38 +504,37 @@ void BellhopWoss::checkRangeOffsets() {
   }
 
   if (debug) 
-    ::std::cerr << "BellhopWoss(" << woss_id << ")::checkRangeOffsets() WARNING, tx latitude = " 
-                << tx_coordz.getLatitude() << "; tx longitude = " << tx_coordz.getLongitude() 
-                << "; rx latitude = " << rx_coordz.getLatitude() << "; rx longitude = " << rx_coordz.getLongitude() 
-                << "; total range offset = " << total_range_offset << "; total great circle distance = " << total_great_circle_distance
-                << ::std::endl << "new min rx range offset = " << rx_min_range_offset << "; new rx max range offset = " 
-                << rx_max_range_offset << ::std::endl;
+    std::cout << "BellhopWoss(" << woss_id << ")::checkRangeOffsets() WARNING, tx latitude = " 
+              << tx_coordz.getLatitude() << "; tx longitude = " << tx_coordz.getLongitude() 
+              << "; rx latitude = " << rx_coordz.getLatitude() << "; rx longitude = " << rx_coordz.getLongitude() 
+              << "; total range offset = " << total_range_offset << "; total great circle distance = " << total_great_circle_distance
+              << std::endl << "new min rx range offset = " << rx_min_range_offset << "; new rx max range offset = " 
+              << rx_max_range_offset << std::endl;
 }
 
 
 void BellhopWoss::checkAngles() {
   if ( total_great_circle_distance == 0.0 && total_distance != 0.0 ) {
-
     if (debug)
-      ::std::cout << "BellhopWoss(" << woss_id << ")::checkAngles() vertical channel: old angles = " << min_angle << "; " << max_angle << ::std::endl; 
+      std::cout << "BellhopWoss(" << woss_id << ")::checkAngles() vertical channel: old angles = " << min_angle << "; " << max_angle << std::endl; 
     
-    max_angle = ::std::max( ::std::abs( min_angle ), ::std::abs( max_angle ) );
+    max_angle = std::max( std::abs( min_angle ), std::abs( max_angle ) );
     min_angle = -max_angle; 
 
     if (debug)
-      ::std::cout << "BellhopWoss(" << woss_id << ")::checkAngles() vertical channel: new angles = " << min_angle << "; " << max_angle << ::std::endl; 
+      std::cout << "BellhopWoss(" << woss_id << ")::checkAngles() vertical channel: new angles = " << min_angle << "; " << max_angle << std::endl; 
   }
 }
 
 
 void BellhopWoss::writeBathymetryFile() {
-  ::std::ofstream baty_out (bathymetry_file.c_str());
+  std::ofstream baty_out (bathymetry_file.c_str());
   assert ( baty_out.is_open() );
 
   if (debug)
-    ::std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() bathymetry_type = " 
-                << bathymetry_type << "; bathymetry_method = " << bathymetry_method 
-                << "; sediment_map size = " << sediment_map.size() << ::std::endl;
+    std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() bathymetry_type = " 
+              << bathymetry_type << "; bathymetry_method = " << bathymetry_method 
+              << "; sediment_map size = " << sediment_map.size() << std::endl;
 
   baty_out.precision(WOSS_DECIMAL_PRECISION);
 
@@ -579,7 +556,7 @@ void BellhopWoss::writeBathymetryFile() {
     }
   }
 
-  ::std::stringstream temp_buffer;
+  std::stringstream temp_buffer;
   temp_buffer.precision(WOSS_DECIMAL_PRECISION);
 
   double prev_depth = BELLHOP_NOT_SET;
@@ -592,7 +569,7 @@ void BellhopWoss::writeBathymetryFile() {
     int written_values = 0;
     bool has_last_depth_to_write = false;
 
-    for (int i = 0; i < (int) coordz_vector.size(); i++) {
+    for (int i = 0; i < static_cast<int> (coordz_vector.size()); i++) {
       double curr_depth = coordz_vector[i].getDepth();
 
       if ( curr_depth == prev_depth ) {
@@ -605,20 +582,20 @@ void BellhopWoss::writeBathymetryFile() {
         while (   use_geoacustic_syntax == true 
                && sedim_iter != sediment_map.end() && sedim_iter->first < i) {
 
-          temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[sedim_iter->first]/1000.0) 
-                      << ::std::setw(WOSS_STREAM_TAB_SPACE) 
-                      << ::std::min( prev_depth, max_normalized_ssp_depth ) 
-                      << ::std::setw(WOSS_STREAM_TAB_SPACE * 2) 
+          temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[sedim_iter->first]/1000.0) 
+                      << std::setw(WOSS_STREAM_TAB_SPACE) 
+                      << std::min( prev_depth, max_normalized_ssp_depth ) 
+                      << std::setw(WOSS_STREAM_TAB_SPACE * 2) 
                       << sedim_iter->second->getStringValues()
-                      << ::std::endl;
+                      << std::endl;
 
           written_values++;
 
           if (debug)
-            ::std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 1 iter = " <<  sedim_iter->first
-                        << "; i = " << i << "; range = " << range_vector[sedim_iter->first] << "; depth = " 
-                        << ::std::min( prev_depth, max_normalized_ssp_depth ) 
-                        << "; vals = " << written_values << ::std::endl;
+            std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 1 iter = " <<  sedim_iter->first
+                      << "; i = " << i << "; range = " << range_vector[sedim_iter->first] << "; depth = " 
+                      << std::min( prev_depth, max_normalized_ssp_depth ) 
+                      << "; vals = " << written_values << std::endl;
 
           if (sedim_iter->first == i-1)
           {
@@ -632,9 +609,9 @@ void BellhopWoss::writeBathymetryFile() {
       if (has_last_depth_to_write == true) {
         has_last_depth_to_write = false; 
 
-        temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i-1]/1000.0) 
-                    << ::std::setw(WOSS_STREAM_TAB_SPACE) 
-                    << ::std::min( prev_depth, max_normalized_ssp_depth );
+        temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i-1]/1000.0) 
+                    << std::setw(WOSS_STREAM_TAB_SPACE) 
+                    << std::min( prev_depth, max_normalized_ssp_depth );
 
         if ( use_geoacustic_syntax == true ) {
           // use previous value
@@ -642,22 +619,22 @@ void BellhopWoss::writeBathymetryFile() {
             sedim_iter--;
           }
 
-          temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE * 2) 
+          temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE * 2) 
                       << (sedim_iter == sediment_map.end() // if we are at the end
                           ? sediment_map.rbegin()->second->getStringValues() // then use rbegin()
                           : sedim_iter->second->getStringValues() ); // else use sedim_iter
         }
 
-        temp_buffer << ::std::endl;
+        temp_buffer << std::endl;
 
         written_values++;
 
         if (debug) 
-          ::std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 2 iter = " 
-                      << (sedim_iter == sediment_map.end() ? (sediment_map.rbegin()->first) : sedim_iter->first )
-                      << "; i = " << i-1 << "; range = " << range_vector[i-1] << "; depth = " 
-                      << ::std::min( prev_depth, max_normalized_ssp_depth ) 
-                      << "; vals = " << written_values << ::std::endl;
+          std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 2 iter = " 
+                    << (sedim_iter == sediment_map.end() ? (sediment_map.rbegin()->first) : sedim_iter->first )
+                    << "; i = " << i-1 << "; range = " << range_vector[i-1] << "; depth = " 
+                    << std::min( prev_depth, max_normalized_ssp_depth ) 
+                    << "; vals = " << written_values << std::endl;
         
         // go back to correct value
         if (( use_geoacustic_syntax == true ) && (sedim_iter != sediment_map.end())) {
@@ -666,35 +643,35 @@ void BellhopWoss::writeBathymetryFile() {
       }
       prev_depth = curr_depth;
 
-      temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) 
-                  << ::std::setw(WOSS_STREAM_TAB_SPACE) 
-                  << ::std::min( curr_depth, max_normalized_ssp_depth );
+      temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) 
+                  << std::setw(WOSS_STREAM_TAB_SPACE) 
+                  << std::min( curr_depth, max_normalized_ssp_depth );
 
       if ( use_geoacustic_syntax == true ) {
-        temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE * 2) 
+        temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE * 2) 
                     << (sedim_iter == sediment_map.end() // if we are at the end
                         ? sediment_map.rbegin()->second->getStringValues() // then use rbegin()
                         : sedim_iter->second->getStringValues() ); // else use sedim_iter
       }
 
-      temp_buffer << ::std::endl;
+      temp_buffer << std::endl;
 
       written_values++;
 
       if (debug) 
-        ::std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 3 iter = "                      
-                    << (sedim_iter == sediment_map.end() ? sediment_map.rbegin()->first : sedim_iter->first )
-                    << "; i = " << i << "; range = " << range_vector[i]
-                    << "; depth = " << ::std::min( curr_depth, max_normalized_ssp_depth ) 
-                    << "; vals = " << written_values << ::std::endl;
+        std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 3 iter = "                      
+                  << (sedim_iter == sediment_map.end() ? sediment_map.rbegin()->first : sedim_iter->first )
+                  << "; i = " << i << "; range = " << range_vector[i]
+                  << "; depth = " << std::min( curr_depth, max_normalized_ssp_depth ) 
+                  << "; vals = " << written_values << std::endl;
 
       if (( use_geoacustic_syntax == true ) && (sedim_iter != sediment_map.end())) {
         sedim_iter++;
       }
     }
 
-    baty_out << "\'"<< bathymetry_type << "\'" << ::std::endl;
-    baty_out << written_values << ::std::endl;
+    baty_out << "\'"<< bathymetry_type << "\'" << std::endl;
+    baty_out << written_values << std::endl;
   }
   else { // Bathymetry write method S - Slope
     if (debug) 
@@ -711,74 +688,74 @@ void BellhopWoss::writeBathymetryFile() {
         while (   use_geoacustic_syntax == true 
                && sedim_iter != sediment_map.end() && sedim_iter->first < i) {
 
-          temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[sedim_iter->first]/1000.0) 
-                      << ::std::setw(WOSS_STREAM_TAB_SPACE) 
-                      << ::std::min( prev_depth, max_normalized_ssp_depth ) 
-                      << ::std::setw(WOSS_STREAM_TAB_SPACE * 2) 
+          temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[sedim_iter->first]/1000.0) 
+                      << std::setw(WOSS_STREAM_TAB_SPACE) 
+                      << std::min( prev_depth, max_normalized_ssp_depth ) 
+                      << std::setw(WOSS_STREAM_TAB_SPACE * 2) 
                       << sedim_iter->second->getStringValues()
-                      << ::std::endl;
+                      << std::endl;
 
           written_values++;
 
           if (debug)
-            ::std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 1 iter = " 
-                        << (sedim_iter == sediment_map.end() ? 
-                           sediment_map.rbegin()->first : sedim_iter->first )
-                        << "; range = " << range_vector[sedim_iter->first] << "; depth = " 
-                        << ::std::min( prev_depth, max_normalized_ssp_depth ) 
-                        << "; vals = " << written_values << ::std::endl;
+            std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 1 iter = " 
+                      << (sedim_iter == sediment_map.end() ? 
+                          sediment_map.rbegin()->first : sedim_iter->first )
+                      << "; range = " << range_vector[sedim_iter->first] << "; depth = " 
+                      << std::min( prev_depth, max_normalized_ssp_depth ) 
+                      << "; vals = " << written_values << std::endl;
 
           sedim_iter++;
         }
 
-        temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) 
-                    << ::std::setw(WOSS_STREAM_TAB_SPACE) 
-                    << ::std::min( (prev_depth+curr_depth)/2.0, max_normalized_ssp_depth );
+        temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) 
+                    << std::setw(WOSS_STREAM_TAB_SPACE) 
+                    << std::min( (prev_depth+curr_depth)/2.0, max_normalized_ssp_depth );
 
         if ( use_geoacustic_syntax == true ) {
-          temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE * 2) 
+          temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE * 2) 
                       << (sedim_iter == sediment_map.end() // if we are at the end
                           ? sediment_map.rbegin()->second->getStringValues() // then use rbegin()
                           : sedim_iter->second->getStringValues() ); // else use sedim_iter
         }
 
-        temp_buffer << ::std::endl;
+        temp_buffer << std::endl;
 
         written_values++;
 
         if (debug) 
-          ::std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 2; iter = " 
-                      << ( sedim_iter == sediment_map.end() ? sediment_map.rbegin()->first : sedim_iter->first )
-                      << "; i = " << i << "; range = " << range_vector[i] << "; depth = " 
-                      << ::std::min( (prev_depth+curr_depth)/2.0, max_normalized_ssp_depth ) 
-                      << "; vals = " << written_values << ::std::endl;
+          std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 2; iter = " 
+                    << ( sedim_iter == sediment_map.end() ? sediment_map.rbegin()->first : sedim_iter->first )
+                    << "; i = " << i << "; range = " << range_vector[i] << "; depth = " 
+                    << std::min( (prev_depth+curr_depth)/2.0, max_normalized_ssp_depth ) 
+                    << "; vals = " << written_values << std::endl;
 
         if (( use_geoacustic_syntax == true ) && (sedim_iter != sediment_map.end())) {
           sedim_iter++;
         }
       }
       else if (i == 0 || i == ((int) coordz_vector.size())-1) { //On first and last point, use the actual value
-        temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) 
-                    << ::std::setw(WOSS_STREAM_TAB_SPACE)
-                    << ::std::min( curr_depth, max_normalized_ssp_depth );
+        temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[i]/1000.0) 
+                    << std::setw(WOSS_STREAM_TAB_SPACE)
+                    << std::min( curr_depth, max_normalized_ssp_depth );
 
         if ( use_geoacustic_syntax == true ) {
-          temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE * 2) 
+          temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE * 2) 
                       << ( sedim_iter == sediment_map.end() // if we are at the end
                           ? sediment_map.rbegin()->second->getStringValues() // then use rbegin()
                           : sedim_iter->second->getStringValues() ); // else use sedim_iter
         }
 
-        temp_buffer << ::std::endl;
+        temp_buffer << std::endl;
 
         written_values++;
 
         if (debug) 
-          ::std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 3; iter = " 
-                      << (sedim_iter == sediment_map.end() ? sediment_map.rbegin()->first : sedim_iter->first )
-                      << "; i = " << i << "; range = " << range_vector[i] << "; depth = " 
-                      << ::std::min( curr_depth, max_normalized_ssp_depth ) 
-                      << "; vals = " << written_values << ::std::endl;
+          std::cout << "BellhopWoss(" << woss_id << ")::writeBathymetryFile() 3; iter = " 
+                    << (sedim_iter == sediment_map.end() ? sediment_map.rbegin()->first : sedim_iter->first )
+                    << "; i = " << i << "; range = " << range_vector[i] << "; depth = " 
+                    << std::min( curr_depth, max_normalized_ssp_depth ) 
+                    << "; vals = " << written_values << std::endl;
 
         if (( use_geoacustic_syntax == true ) && (sedim_iter != sediment_map.end())) {
           sedim_iter++;
@@ -788,8 +765,8 @@ void BellhopWoss::writeBathymetryFile() {
       prev_depth = curr_depth;
     }
 
-    baty_out << "\'"<< bathymetry_type << "\'" << ::std::endl; 
-    baty_out << written_values << ::std::endl;
+    baty_out << "\'"<< bathymetry_type << "\'" << std::endl; 
+    baty_out << written_values << std::endl;
   }
 
   baty_out << temp_buffer.str();
@@ -798,7 +775,7 @@ void BellhopWoss::writeBathymetryFile() {
 
 
 void BellhopWoss::writeBeamPatternFile() {
-  ::std::ofstream beam_out ( beam_pattern_file.c_str() );
+  std::ofstream beam_out ( beam_pattern_file.c_str() );
   assert ( beam_out.is_open() );
   beam_out.precision(WOSS_DECIMAL_PRECISION);
   transducer->writeVertBeamPattern( beam_out, tx_coordz, rx_coordz, bp_initial_bearing, bp_vertical_rotation, bp_horizontal_rotation, bp_mult_costant, bp_add_costant );
@@ -807,11 +784,11 @@ void BellhopWoss::writeBeamPatternFile() {
 
 
 void BellhopWoss::writeAltimetryFile( int curr_run ) { 
-  ::std::ofstream aty_out (altimetry_file.c_str());
+  std::ofstream aty_out (altimetry_file.c_str());
   assert ( aty_out.is_open() );
   aty_out.precision(WOSS_DECIMAL_PRECISION);
   
-  ::std::stringstream temp_buffer;
+  std::stringstream temp_buffer;
   temp_buffer.precision(WOSS_DECIMAL_PRECISION);
   
   double prev_depth = BELLHOP_NOT_SET;
@@ -819,24 +796,24 @@ void BellhopWoss::writeAltimetryFile( int curr_run ) {
   bool has_last_depth_to_write = false;
   
   int range_counter = 0;
-  Altimetry* curr_alt = NULL;
-  bool has_to_delete = false;
+  Altimetry* curr_alt = nullptr;
+  std::unique_ptr<Altimetry> alt_uniq = nullptr;
   
   if ( curr_run > 0 ) {
-    curr_alt = altimetry_value->randomize( 0.0001 );
+    alt_uniq = altimetry_value->randomize( 0.0001 );
+    curr_alt = alt_uniq.get();
     min_altimetry_depth = curr_alt->getMinAltimetryValue();
     max_altimetry_depth = curr_alt->getMaxAltimetryValue();
-    has_to_delete = true;
   }
-  else curr_alt = altimetry_value;
+  else curr_alt = altimetry_value.get();
   
   if (debug) 
-    ::std::cout << "BellhopWoss(" << woss_id << ")::writeAltimetryFile() altimetry size " 
-                << altimetry_value->size() << ::std::endl;
+    std::cout << "BellhopWoss(" << woss_id << ")::writeAltimetryFile() altimetry size " 
+              << altimetry_value->size() << std::endl;
 
-  for (AltCIt it = curr_alt->begin(); it != curr_alt->end(); it++) {
-    double curr_depth = it->second;
-    
+  for (const auto& it : *curr_alt) {
+    double curr_depth = it.second;
+
     if ( curr_depth == prev_depth ) {
       total_same_values++;
       range_counter++;
@@ -848,45 +825,42 @@ void BellhopWoss::writeAltimetryFile( int curr_run ) {
       total_same_values--;
       has_last_depth_to_write = false;
       
-      temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[range_counter-1]/1000.0) 
-                  << ::std::setw(WOSS_STREAM_TAB_SPACE) << prev_depth << ::std::endl;
+      temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[range_counter-1]/1000.0) 
+                  << std::setw(WOSS_STREAM_TAB_SPACE) << prev_depth << std::endl;
 
       if (debug) 
-        ::std::cout << "BellhopWoss(" << woss_id << ")::writeAltimetryFile() range = " 
-                    << range_vector[range_counter-1]
-                    << "; depth = " << prev_depth << ::std::endl;
+        std::cout << "BellhopWoss(" << woss_id << ")::writeAltimetryFile() range = " 
+                  << range_vector[range_counter-1]
+                  << "; depth = " << prev_depth << std::endl;
     }
 
     prev_depth = curr_depth;
 
-    temp_buffer << ::std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[range_counter]/1000.0) 
-                << ::std::setw(WOSS_STREAM_TAB_SPACE) << curr_depth << ::std::endl;
+    temp_buffer << std::setw(WOSS_STREAM_TAB_SPACE) << (range_vector[range_counter]/1000.0) 
+                << std::setw(WOSS_STREAM_TAB_SPACE) << curr_depth << std::endl;
 
-//     ::std::cout.precision(WOSS_DECIMAL_PRECISION);
-    if (debug) ::std::cout << "BellhopWoss(" << woss_id << ")::writeAltimetryFile() range = " 
-                           << range_vector[range_counter]
-                           << "; depth = " << curr_depth << ::std::endl;
-    
+    if (debug)
+      std::cout << "BellhopWoss(" << woss_id << ")::writeAltimetryFile() range = " 
+                << range_vector[range_counter]
+                << "; depth = " << curr_depth << std::endl;
+
     range_counter++;
   }
     
-  aty_out << "\'"<< altimetry_type << "\'" << ::std::endl; 
-  aty_out << curr_alt->size() - total_same_values << ::std::endl;
+  aty_out << "\'"<< altimetry_type << "\'" << std::endl; 
+  aty_out << curr_alt->size() - total_same_values << std::endl;
   aty_out << temp_buffer.str();
   aty_out.close();
-  
-  if ( has_to_delete )
-    delete curr_alt;
 }
 
 
 bool BellhopWoss::initialize() {
-
   bool is_valid = ACToolboxWoss::initialize();
 
   assert( isValid() && is_valid );
 
   resetNormalizedDbSSP();
+
   normalizeDbSSP();
 
   checkDepthOffsets();
@@ -895,7 +869,7 @@ bool BellhopWoss::initialize() {
 
   checkAngles();
   
-  initBox( ::std::min(max_bathymetry_depth, max_normalized_ssp_depth), ::std::max(total_great_circle_distance,total_distance) + rx_max_range_offset );
+  initBox( std::min(max_bathymetry_depth, max_normalized_ssp_depth), std::max(total_great_circle_distance,total_distance) + rx_max_range_offset );
   
   writeAllCfgFiles();
   
@@ -904,14 +878,11 @@ bool BellhopWoss::initialize() {
 
 
 bool BellhopWoss::initPressResReader( double curr_frequency ) {
-  ResReader* ptr = new ShdResReader(this);
-  RRMPair ret_pair = res_reader_map.insert( ::std::make_pair( curr_frequency, ptr ) );
-  
-  if ( ret_pair.second == false) {
-    delete ptr;
-  }
-  
-  if ( res_reader_map[curr_frequency] != NULL ) {
+  auto ptr = std::make_unique<ShdResReader>(*this);
+
+  res_reader_map.try_emplace( curr_frequency, std::move(ptr) );
+
+  if ( res_reader_map[curr_frequency] != nullptr ) {
     res_reader_map[curr_frequency]->setFileName(shd_file);
     return true;
   }
@@ -921,26 +892,22 @@ bool BellhopWoss::initPressResReader( double curr_frequency ) {
 
 
 bool BellhopWoss::initTimeArrResReader( double curr_frequency ) {
-  ResReader* ptr = NULL;
-  
+  std::unique_ptr<ResReader> ptr = nullptr;
+
   if ( bellhop_op_mode == "A" ) {
-    ptr = new ArrAscResReader( this ); 
+    ptr = std::make_unique<ArrAscResReader>( *this ); 
   }
   else if ( bellhop_op_mode == "a" ) {
-    ptr = new ArrBinResReader( this );
+    ptr = std::make_unique<ArrBinResReader>( *this );
   }
 
-  RRMPair ret_pair = res_reader_map.insert( ::std::make_pair( curr_frequency, ptr ) );
+  res_reader_map.try_emplace( curr_frequency, std::move(ptr) );
 
-  if ( ret_pair.second == false) {
-    delete ptr;
-  }
-
-  if ( res_reader_map[curr_frequency] != NULL ) {
+  if ( res_reader_map[curr_frequency] != nullptr ) {
     res_reader_map[curr_frequency]->setFileName(arr_file);
     return true;
   }
-  
+
   return false;
 }
 
@@ -948,32 +915,30 @@ bool BellhopWoss::initTimeArrResReader( double curr_frequency ) {
 bool BellhopWoss::run() { 
   is_running = true;
   
-  assert((bellhop_arr_syntax != BELLHOP_CREATOR_ARR_FILE_INVALID) && (bellhop_shd_syntax != BELLHOP_CREATOR_SHD_FILE_INVALID));
+  assert((bellhop_arr_syntax != BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_INVALID) && (bellhop_shd_syntax != BellhopShdSyntax::BELLHOP_CREATOR_SHD_FILE_INVALID));
 
-  ::std::stringstream str_out;
+  std::stringstream str_out;
   
-  for ( FreqSIt it = frequencies.begin(); it != frequencies.end(); it++ ) {
-    double curr_frequency = *it;
-    
+  for ( const auto& curr_frequency : frequencies ) {
     for (int i = 0; i < total_runs; i++ ) {
-
       if (debug) 
-        ::std::cout << "BellhopWoss(" << woss_id << ")::run() frequency = " << curr_frequency << "; run = " << i << ::std::endl;
-    
+        std::cout << "BellhopWoss(" << woss_id << ")::run() frequency = " << curr_frequency << "; run = " << i << std::endl;
+
       initCfgFiles( curr_frequency, i );
-      
+
       if (debug) 
         str_out << "cd " << curr_path << " && " << bellhop_path << WOSS_BELLHOP_PROGRAM << " " << WOSS_BELLHOP_NAME << " > " << WOSS_BELLHOP_NAME << ".prt2";
       else 
-        str_out <<"cd " << curr_path << " && " << bellhop_path << WOSS_BELLHOP_PROGRAM << " " << WOSS_BELLHOP_NAME << " > " << "/dev/null";
+        str_out << "cd " << curr_path << " && " << bellhop_path << WOSS_BELLHOP_PROGRAM << " " << WOSS_BELLHOP_NAME << " > " << "/dev/null";
 
-      ::std::string command = str_out.str();
+      std::string command = str_out.str();
       str_out.str("");
-      
+
       int ret_value = -1;
-      if (system(NULL)) ret_value = system(command.c_str());
+      if (std::system(nullptr))
+        ret_value = std::system(command.c_str());
       if (ret_value != 0) {
-        ::std::cerr << "BellhopWoss(" << woss_id << ")::run() error! bellhop.exe aborted!" << ::std::endl;
+        std::cerr << "BellhopWoss(" << woss_id << ")::run() error! bellhop.exe aborted!" << std::endl;
 
         is_running = false;
         return false;
@@ -983,13 +948,16 @@ bool BellhopWoss::run() {
     }
   }
   is_running = false;
-  if (!has_run_once) has_run_once = true;
+
+  if (has_run_once == false) 
+    has_run_once = true;
+
   return true;
 }
 
 
 void BellhopWoss::initCfgFiles( double curr_frequency, int curr_run ) {
-  ::std::stringstream str_out;
+  std::stringstream str_out;
 
   str_out << work_dir_path << "woss" << woss_id 
           << "/freq" << curr_frequency << "/time" << (time_t)current_time << "/run" << curr_run << "/";
@@ -1009,7 +977,6 @@ void BellhopWoss::initCfgFiles( double curr_frequency, int curr_run ) {
 
 
 void BellhopWoss::writeCfgFiles( double curr_frequency, int curr_run ) {
-  
   bool is_ok = mkWorkDir( curr_frequency, curr_run );
   assert(is_ok);
   
@@ -1021,9 +988,11 @@ void BellhopWoss::writeCfgFiles( double curr_frequency, int curr_run ) {
   
   writeBathymetryFile();
   
-  if ( altimetry_value != NULL && altimetry_value->isValid() ) writeAltimetryFile( curr_run );
+  if ( altimetry_value != nullptr && altimetry_value->isValid() ) 
+    writeAltimetryFile( curr_run );
   
-  if ( transducer != NULL && transducer->isValid() ) writeBeamPatternFile();
+  if ( transducer != nullptr && transducer->isValid() ) 
+    writeBeamPatternFile();
   
   writeHeader( curr_frequency, curr_run );
   
@@ -1049,18 +1018,18 @@ void BellhopWoss::writeCfgFiles( double curr_frequency, int curr_run ) {
 
 
 void BellhopWoss::writeAllCfgFiles() {
-  for ( FreqSIt it = frequencies.begin(); it != frequencies.end(); it++ ) {   
+  for ( const auto& it : frequencies ) {
     for (int i = 0; i < total_runs; i++ ) {
-      writeCfgFiles( *it, i );
+      writeCfgFiles( it, i );
     }
   }
 }
 
 
 void BellhopWoss::removeAllCfgFiles() {
-  for ( FreqSIt it = frequencies.begin(); it != frequencies.end(); it++ ) {   
+  for ( const auto& it : frequencies ) {
     for (int i = 0; i < total_runs; i++ ) {
-      removeCfgFiles( *it, i );
+      removeCfgFiles( it, i );
     }
   }
 }
@@ -1074,49 +1043,51 @@ void BellhopWoss::removeCfgFiles( double curr_frequency, int curr_run ) {
 bool BellhopWoss::initResReader( double curr_frequency )  {
   assert( !(using_press_mode == false && using_time_arrival_mode == false) );
   
-  if ( using_press_mode ) return( initPressResReader(curr_frequency) && res_reader_map[curr_frequency]->initialize() );
-  if ( using_time_arrival_mode ) return( initTimeArrResReader(curr_frequency) && res_reader_map[curr_frequency]->initialize() );
+  if ( using_press_mode ) 
+    return( initPressResReader(curr_frequency) && res_reader_map[curr_frequency]->initialize() );
+  if ( using_time_arrival_mode ) 
+    return( initTimeArrResReader(curr_frequency) && res_reader_map[curr_frequency]->initialize() );
   return false;
 }
 
 
-Pressure* BellhopWoss::getAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, 
+std::unique_ptr<Pressure> BellhopWoss::getAvgPressure( double frequency, double tx_depth, double start_rx_depth, double start_rx_range, 
                                        double end_rx_depth, double end_rx_range ) const {
   assert( using_press_mode == true && res_reader_map.size() > 0 );
 
   checkBoundaries( frequency, tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range );
   
-  Pressure* ret_val = res_reader_map.find(frequency)->second->readAvgPressure(frequency, tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range );
+  auto ret_val = res_reader_map.find(frequency)->second->readAvgPressure(frequency, tx_depth, start_rx_depth, start_rx_range, end_rx_depth, end_rx_range );
   *ret_val /= (double) total_runs;
   return ( ret_val );
 }
 
 
-Pressure* BellhopWoss::getPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const {
+std::unique_ptr<Pressure> BellhopWoss::getPressure( double frequency, double tx_depth, double rx_depth, double rx_range ) const {
   assert( res_reader_map.size() > 0 );
 
   checkBoundaries( frequency, tx_depth, rx_depth, rx_range, rx_depth, rx_range );
-  Pressure* ret_val = res_reader_map.find(frequency)->second->readPressure(frequency, tx_depth, rx_depth, rx_range );
+  auto ret_val = res_reader_map.find(frequency)->second->readPressure(frequency, tx_depth, rx_depth, rx_range );
   *ret_val /= (double) total_runs;
   return ( ret_val );
 }
 
 
-TimeArr* BellhopWoss::getTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const {
+std::unique_ptr<TimeArr> BellhopWoss::getTimeArr( double frequency, double tx_depth, double rx_depth, double rx_range ) const {
   assert( res_reader_map.size() > 0 );
 
   checkBoundaries( frequency, tx_depth, rx_depth, rx_range, rx_depth, rx_range );
-  TimeArr* ret_val = res_reader_map.find(frequency)->second->readTimeArr( frequency, tx_depth, rx_depth, rx_range );
+  auto ret_val = res_reader_map.find(frequency)->second->readTimeArr( frequency, tx_depth, rx_depth, rx_range );
   
    if ( debug ) 
-     ::std::cout << "BellhopWoss(" << woss_id << ")::getTimeArr() ret_val = " 
-                 << *ret_val << ::std::endl;
+     std::cout << "BellhopWoss(" << woss_id << ")::getTimeArr() ret_val = " 
+               << *ret_val << std::endl;
 
   *ret_val /= (double) total_runs;
 
    if ( debug )
-     ::std::cout << "BellhopWoss(" << woss_id << ")::getTimeArr() total_runs = " 
-                 << total_runs << "; ret_val/total_runs = " << *ret_val << ::std::endl;
+     std::cout << "BellhopWoss(" << woss_id << ")::getTimeArr() total_runs = " 
+               << total_runs << "; ret_val/total_runs = " << *ret_val << std::endl;
 
   return ( ret_val );
 }
@@ -1124,8 +1095,10 @@ TimeArr* BellhopWoss::getTimeArr( double frequency, double tx_depth, double rx_d
 
 bool BellhopWoss::timeEvolve( const Time& time_value ) {
   if ( evolution_time_quantum < 0.0 ) {
-    if (!has_run_once) return true;
-    else return false;
+    if (has_run_once == false) 
+      return true;
+    else 
+      return false;
   }
   
   if ( !time_value.isValid() )
@@ -1133,45 +1106,44 @@ bool BellhopWoss::timeEvolve( const Time& time_value ) {
   
   Time t_value = time_value;
   
-  if ( t_value > end_time ) t_value = end_time;
-  else if ( t_value < start_time ) t_value = start_time;
+  if ( t_value > end_time ) 
+    t_value = end_time;
+  else if ( t_value < start_time ) 
+    t_value = start_time;
  
-   if ( debug ) 
-     ::std::cout << "BellhopWoss(" << woss_id << ")::timeEvolve() current_time = "
-                 << current_time << "; time_value = " 
-                 << t_value << "; evolution_time_quantum = " << evolution_time_quantum << ::std::endl;
+   if ( debug )
+     std::cout << "BellhopWoss(" << woss_id << ")::timeEvolve() current_time = "
+               << current_time << "; time_value = " 
+               << t_value << "; evolution_time_quantum = " << evolution_time_quantum << std::endl;
   
   if ( t_value == current_time ) {
-    if ( !has_run_once )
+    if ( has_run_once == false )
       return true;
     else 
       return false;
   }
   
-  double time_difference = ::std::abs(current_time - t_value);
+  double time_difference = std::abs(current_time - t_value);
   
-  if ( debug ) 
-    ::std::cout << "BellhopWoss(" << woss_id << ")::timeEvolve() time_difference = " << time_difference << ::std::endl;
+  if ( debug )
+    std::cout << "BellhopWoss(" << woss_id << ")::timeEvolve() time_difference = " << time_difference << std::endl;
   
   if ( ( evolution_time_quantum == 0.0 ) || ( time_difference >= evolution_time_quantum ) ) {
+    if ( debug )
+      std::cout << "BellhopWoss(" << woss_id << ")::timeEvolve() has to run" << std::endl; 
 
-    if ( debug ) 
-      ::std::cout << "BellhopWoss(" << woss_id << ")::timeEvolve() has to run" << ::std::endl; 
-   
     current_time = t_value; 
-    //removeAllCfgFiles();
     initialize();
-    
-    if ( altimetry_value != NULL && altimetry_value->isValid() ) {
-      Altimetry* new_value = altimetry_value->timeEvolve( time_value );
-      delete altimetry_value;
-      altimetry_value = NULL;
-      altimetry_value = new_value;
+
+    if ( altimetry_value != nullptr && altimetry_value->isValid() ) {
+      auto new_value = altimetry_value->timeEvolve( time_value );
+      altimetry_value.reset();
+      altimetry_value = std::move(new_value);
     }
     return true;
   } 
   
-  if ( !has_run_once )
+  if ( has_run_once == false )
     return true;
   else 
     return false;

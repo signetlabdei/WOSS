@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
 
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
-
-  
+ 
 
 #include <cassert>
 #include "bathymetry-utm-csv-db-creator.h"
@@ -51,15 +44,10 @@ BathyUtmCsvDbCreator::BathyUtmCsvDbCreator()
 }
 
 
-BathyUtmCsvDbCreator::~BathyUtmCsvDbCreator() {
-
-}
-
-
-WossDb* const BathyUtmCsvDbCreator::createWossDb() {
+std::unique_ptr<WossDb> BathyUtmCsvDbCreator::createWossDb() const {
   assert( pathname.length() > 0 );
 
-  BathyUtmCsvDb* woss_db = new BathyUtmCsvDb( pathname );
+  auto woss_db = std::make_unique<BathyUtmCsvDb>( pathname );
 
   woss_db->setCSVSeparator( separator );
   woss_db->setDbSpacing( db_spacing );
@@ -68,11 +56,11 @@ WossDb* const BathyUtmCsvDbCreator::createWossDb() {
   woss_db->setDbRangeNorthing( range_northing_start, range_northing_end );
   woss_db->setLandApproximationFlag( approx_land_to_sea_surface );
 
-  assert( initializeDb( woss_db ) );
+  assert( initializeDb( *woss_db ) );
   return( woss_db );
 }
 
 
-bool BathyUtmCsvDbCreator::initializeDb( WossDb* const woss_db ) {
+bool BathyUtmCsvDbCreator::initializeDb( WossDb& woss_db ) const {
   return( WossDbCreator::initializeDb( woss_db ) );
 }

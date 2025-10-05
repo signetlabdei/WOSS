@@ -1,9 +1,9 @@
 /* WOSS - World Ocean Simulation System -
  * 
- * Copyright (C) 2009 Federico Guerra
+ * Copyright (C) 2009 2025 Federico Guerra
  * and regents of the SIGNET lab, University of Padova
  *
- * Author: Federico Guerra - federico@guerra-tlc.com
+ * Author: Federico Guerra - WOSS@guerra-tlc.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */ 
-
-/*
- * This software has been developed by Federico Guerra and SIGNET lab,
- * University of Padova, in collaboration with the NATO Centre for 
- * Maritime Research and Experimentation (http://www.cmre.nato.int ; 
- * E-mail: pao@cmre.nato.int), whose support is gratefully acknowledged.
- */
 
 
 /**
@@ -41,30 +34,33 @@
 #define AC_TOOLBOX_WOSS_DEFINITIONS_H
 
 
+#include <vector>
+#include <map>
+#include <set>
+#include <memory>
 #include <ssp-definitions.h>
+#include <altimetry-definitions.h>
 #include "woss.h"
 
 
 namespace woss {
-  
-  
+
   class Sediment;
-  class Altimetry;
 
   /**
   * Vector of range values [m]
   **/
-  typedef ::std::vector< double > RangeVector;
+  using RangeVector = std::vector< double >;
 
   /**
   * A map of dynamically allocated woss::SSP
   **/
-  typedef ::std::map< int, SSP* > SSPMap;
+  using SSPMap = std::map< int, std::unique_ptr<SSP> >;
 
   /**
    * A map of dynamically woss::Sediment
    **/
-  typedef ::std::map< int, Sediment* > SedimentMap;
+  using SedimentMap = std::map< int, std::unique_ptr<Sediment> >;
 
   /**
   * \brief base class for implementing acoustic-toolbox channel simulators (Bellhop, Kraken, etc...) 
@@ -74,9 +70,7 @@ namespace woss {
   */
   class ACToolboxWoss : public WossResReader {
 
-
     public:
-
 
     /**
     * ACToolboxWoss default constructor. Default constructed objects are not valid
@@ -93,28 +87,22 @@ namespace woss {
     * @param end_freq end frequency [Hz]
     * @param freq_step frequency step [Hz]
     **/
-    ACToolboxWoss( const CoordZ& tx, const CoordZ& rx, const Time& start_t, const Time& end_t, double start_freq, double end_freq, double freq_step ) ;
+    ACToolboxWoss( const CoordZ& tx, const CoordZ& rx, const Time& start_t, const Time& end_t, double start_freq, double end_freq, double freq_step );
 
-    /**
-    * Destructor. It properly delete all pointers involved
-    **/
-    virtual ~ACToolboxWoss();
-
+    virtual ~ACToolboxWoss() override = default;
 
     /**
     * Initializes the enviroment for acoustic-toolbox channel simulator
     * @return <i>true</i> if method was successful, <i>false</i> otherwise
     **/
-    virtual bool initialize();
-
+    virtual bool initialize() override;
 
     /**
     * Checks the validity of ACToolboxWoss
     * @return <i>true</i> if it's valid, <i>false</i> otherwise
     **/
-    virtual bool isValid() const ;
+    virtual bool isValid() const override;
 
-  
     /**
     * Sets the total number of range steps
     * @param steps total number of range steps
@@ -127,7 +115,6 @@ namespace woss {
     * @param precision depth precision [m]
     **/
     ACToolboxWoss& setSSPDepthPrecision( long double precision ) { ssp_depth_precision = precision; return *this; }
-
 
     /**
     * Gets the total number of range steps
@@ -177,15 +164,12 @@ namespace woss {
     **/
     double getMaxBathymetryDepth() const { return max_bathymetry_depth; }
 
-
     protected:
-
 
     /**
     * Depth precision of all SSP that will be created [m]
     **/
     long double ssp_depth_precision;
-
 
     /**
     * Minimum bathymetry depth [m]
@@ -197,28 +181,25 @@ namespace woss {
     **/
     double max_bathymetry_depth;
 
-    
     /**
     * Minimum altimetry depth [m]
-    **/    
+    **/
     double min_altimetry_depth;
-    
+
     /**
     * Maximum altimetry depth [m]
-    **/    
+    **/
     double max_altimetry_depth;
-    
-    
+
     /**
     * Set of all minimum SSP depth [m] currently in use
     **/
-    ::std::set< double > min_ssp_depth_set;
+    std::set< double > min_ssp_depth_set;
 
     /**
     * Set of all maximum SSP depth [m] currently in use
     **/
-    ::std::set< double > max_ssp_depth_set;
-
+    std::set< double > max_ssp_depth_set;
 
     /**
     * Miminum number of currently in use SSP depth steps 
@@ -234,7 +215,6 @@ namespace woss {
     * Number of range steps
     **/
     int total_range_steps;
-
 
     /**
     * Vector of all CoordZ involved. Its size is equal to total_range_steps
@@ -259,8 +239,7 @@ namespace woss {
     /**
     * Altimetry in use
     **/
-    Altimetry* altimetry_value;
-    
+    std::unique_ptr<Altimetry> altimetry_value;
 
     /**
     * <i>True</i> if ssp_map is transformable
@@ -268,20 +247,19 @@ namespace woss {
     **/
     bool is_ssp_map_transformable;
 
-
     /**
     * Checks if the given SSP is not equal to previous values
     * @param value pointer to a valid SSP object
     * @returns <i>true</i> if input is unique, <i>false</i> otherwise
     **/
-    virtual bool checkSSPUnicity( SSP*& ptr );
+    virtual bool checkSSPUnicity( const SSP& ptr ) const;
 
     /**
     * Checks if the given Sediment is not equal to previous values
     * @param value pointer to a valid Sediment object
     * @returns <i>true</i> if input is unique, <i>false</i> otherwise
     **/
-    virtual bool checkSedimentUnicity( Sediment*& ptr );
+    virtual bool checkSedimentUnicity( const Sediment& ptr ) const;
 
     /**
     * Initializes range_vector
@@ -320,15 +298,12 @@ namespace woss {
 
     /**
     * Resets ssp_map
-    **/    
+    **/
     virtual void resetSSPMap(); 
-    
+
   };
 
-  
 }
-
 
 #endif /* AC_TOOLBOX_WOSS_DEFINITIONS_H */
 
- 
