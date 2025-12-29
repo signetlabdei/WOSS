@@ -1,5 +1,12 @@
 # WOSS changelog
 
+## v2.0.1
+
+- Added support for the user to provide Bellhop's executable name, thus enabling support for `bellhopcxx` , `bellhopcuda` programs. 
+- Fixed issue with woss::WossTest framework
+- Added new unit tests that cover the whole framework
+- Fixed minor issues with foundation classes
+
 ## v2.0.0
 
 - Complete refactory of the WOSS framework

@@ -227,8 +227,8 @@ void Transducer::beampattern_rotate( double angle, BeamPowerMap& map ) {
               << "; delta value " << delta_value_lin << std::endl;
               
   if ( min_angle != -180.0 || max_angle != 180.0 ) {
-    beam_power_temp[PDouble(-180.0, beam_precision) ] = 10.0*log10( min_angle_value_lin - (180.0 - std::abs(min_angle)) * (delta_value_lin / delta_angle) );
-    beam_power_temp[PDouble(180.0, beam_precision) ] = 10.0*log10( max_angle_value_lin + (180.0 - std::abs(max_angle)) * ( delta_value_lin / delta_angle) );
+    beam_power_temp[PDouble(-180.0, beam_precision) ] = 10.0*log10( std::abs(min_angle_value_lin - (180.0 - std::abs(min_angle)) * (delta_value_lin / delta_angle)) );
+    beam_power_temp[PDouble(180.0, beam_precision) ] = 10.0*log10( std::abs(max_angle_value_lin + (180.0 - std::abs(max_angle)) * ( delta_value_lin / delta_angle)) );
   }
   
   map.swap(beam_power_temp);

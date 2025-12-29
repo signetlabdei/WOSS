@@ -172,10 +172,13 @@ void WossBellhopScript::doConfig() {
     setBathyDbGebcoFormat(GEBCO_BATHY_TYPE::GEBCO_2D_15_SECONDS_BATHY_TYPE);
   }
   else if ((custom_ssp == "") || (custom_sedim == "") || (custom_bathy == "")) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM); 
   }
 
   //setWossBellhopPath();
+  setWossBellhopBinName(BellhopWoss::WOSS_BELLHOP_BIN_NAME);
+  //setWossBellhopBinName(BellhopWoss::WOSS_BELLHOPCXX_BIN_NAME);
+  //setWossBellhopBinName(BellhopWoss::WOSS_BELLHOPCUDA_BIN_PATH);
   setWossCreatorDebug(debug_level > 100 ? true : false);
   setWossWorkDirPath(res_path);
   setWossClearWorkDir(false);
@@ -230,13 +233,13 @@ void WossBellhopScript::doInit() {
 
   if ((db_path == "") && (custom_bathy == "") 
        && (custom_sedim == "") && (custom_ssp == "")) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM);
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM);
   }
 
   if (   (tx_coordz.isValid() == false) || (rx_coordz.isValid() == false) 
       || (frequency == 0.0))
   {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM);
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM);
   }
 }
 
@@ -258,13 +261,13 @@ void WossBellhopScript::doRun() {
   auto curr_time_arr_asc = curr_woss_manager->getWossTimeArr(tx_coordz, rx_coordz, frequency, frequency);
   
   if (curr_time_arr_asc == NULL) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
   }
 
   auto press_temp_asc = SDefHandler::instance().createPressure( *curr_time_arr_asc );
 
   if (press_temp_asc == NULL) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
   }
 
   // we need to erase the current woss in order to run it again with Pressure setting
@@ -275,17 +278,17 @@ void WossBellhopScript::doRun() {
   auto curr_time_arr_bin = curr_woss_manager->getWossTimeArr(tx_coordz, rx_coordz, frequency, frequency);
   
   if (curr_time_arr_bin == NULL) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
   }
 
   auto press_temp_bin = SDefHandler::instance().createPressure( *curr_time_arr_bin );
 
   if (press_temp_bin == NULL) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
   }
 
   if ( abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb()) > 1.0) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM);
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM);
   }
 
   // we need to erase the current woss in order to run it again with Pressure setting
@@ -296,7 +299,7 @@ void WossBellhopScript::doRun() {
   auto curr_pressure = curr_woss_manager->getWossPressure(tx_coordz, rx_coordz, frequency, frequency);
 
   if (curr_pressure == NULL) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
   }
 
   if (debug) {
@@ -314,7 +317,7 @@ int main(int argc, char* argv []) {
   WossBellhopScript* woss_bh_test = new WossBellhopScript();
 
   if (woss_bh_test == NULL) {
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
+     WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
   }
 
   if ((argc > 13) && (argc < 18)) {
@@ -400,7 +403,8 @@ int main(int argc, char* argv []) {
     {
       return 0;
     }
-    throw WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM);
+
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM);
   }
 
   woss_bh_test->run();

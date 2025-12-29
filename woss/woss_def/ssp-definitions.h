@@ -1197,7 +1197,7 @@ namespace woss {
     if ( &left == &right ) 
       return false; 
     return( left.ssp_map != right.ssp_map || left.temperature_map != right.temperature_map || left.pressure_map != right.pressure_map 
-        || left.salinity_map == right.salinity_map ); }
+        || left.salinity_map != right.salinity_map ); }
 
   inline const SSP operator+( const SSP& left, const SSP& right ) {
     SSP ret_val ( left );

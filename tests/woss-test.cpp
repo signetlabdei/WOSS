@@ -190,6 +190,7 @@ WossTest::WossTest ()
     normalized_ssp_depth_steps (WH_NORMALIZED_SSP_DEPTH_STEPS_DEFAULT),
     work_dir_path (WH_WORK_PATH_DEFAULT),
     bellhop_path (WH_STRING_DEFAULT),
+    bellhop_bin_name (woss::BellhopWoss::WOSS_BELLHOP_BIN_NAME),
     bellhop_mode (WH_BELLHOP_MODE_DEFAULT),
     bellhop_beam_options (WH_BEAM_OPTIONS_DEFAULT),
     bellhop_bathy_type (WH_BATHYMETRY_TYPE_DEFAULT),
@@ -371,6 +372,7 @@ void WossTest::init() {
     bellhop_creator->setSspDepthPrecision (ssp_depth_precision);
     bellhop_creator->setSspDepthSteps (normalized_ssp_depth_steps);
     bellhop_creator->setBellhopPath (bellhop_path);
+    bellhop_creator->setBellhopBinName (bellhop_bin_name);
     bellhop_creator->setBhMode (bellhop_mode);
     bellhop_creator->setBeamOptions (bellhop_beam_options);
     bellhop_creator->setBathymetryType (bellhop_bathy_type);

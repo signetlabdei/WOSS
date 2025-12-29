@@ -715,6 +715,15 @@ int BellhopCreatorTcl::command( int argc, const char*const* argv ) {
 
       return TCL_OK;
     }
+    else if(strcasecmp(argv[1], "setBellhopBinName") == 0) { 
+
+      bellhop_bin_name = argv[2];
+      
+      if (debug) 
+        std::cout << "BellhopCreatorTcl::command() setBellhopBinName called, bin name = " << argv[2] << std::endl;
+
+      return TCL_OK;
+    }
   }
   return( TclObject::command(argc,argv) );
 }

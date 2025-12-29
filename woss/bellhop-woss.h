@@ -85,6 +85,12 @@ namespace woss {
 
     public:
 
+    static constexpr inline const char* WOSS_BELLHOP_BIN_NAME = "bellhop.exe"; /**< bellhop binary name */
+
+    static constexpr inline const char* WOSS_BELLHOPCXX_BIN_NAME = "bellhopcxx"; /**< bellhopcxx binary name */ 
+
+    static constexpr inline const char* WOSS_BELLHOPCUDA_BIN_PATH = "bellhopcuda"; /**< bellhopcuda binary path */ 
+
     /**
     * BellhopWoss default constructor. Default constructed objects are not valid
     **/
@@ -297,6 +303,13 @@ namespace woss {
     BellhopWoss& setBellhopPath( const std::string& path ) { bellhop_path = path; return *this; }
 
     /**
+    * Sets the bellhop binary name
+    * @param name binary name
+    * @return reference to <b>*this</b>
+    */
+    BellhopWoss& setBellhopBinName( const std::string& name ) { bellhop_bin_name = name; return *this; }
+
+    /**
     * Sets the bellhop arr file syntax
     * @param syntax syntax to be used
     * @return reference to <b>*this</b>
@@ -470,6 +483,12 @@ namespace woss {
     */
     std::string getBellhopPath() const { return bellhop_path; }
 
+    /**
+    * Gets the bellhop binary name
+    * @return bellhop binary name
+    */
+    std::string getBellhopBinName() const { return bellhop_bin_name; }
+
    /**
     * Gets the .arr file sintax
     * @return arr file syntax
@@ -607,6 +626,11 @@ namespace woss {
     * Pathname of Bellhop program
     **/
     std::string bellhop_path;
+
+    /**
+    * Bellhop binary name
+    **/
+    std::string bellhop_bin_name;
     
     /**
      * .arr file syntax to be used during file parsing

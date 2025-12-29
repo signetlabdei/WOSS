@@ -88,7 +88,7 @@ WossBellhopTest::WossBellhopTest()
 }
 
 void WossBellhopTest::doConfig() {
-  setWossTestDebug(false);
+  setWossTestDebug(true);
 
   setWossRandomGenStream(1);
 
@@ -121,15 +121,18 @@ void WossBellhopTest::doConfig() {
 #endif // defined (WOSS_NETCDF_SUPPORT)
 
   //setWossBellhopPath();
+  setWossBellhopBinName(BellhopWoss::WOSS_BELLHOP_BIN_NAME);
+  //setWossBellhopBinName(BellhopWoss::WOSS_BELLHOPCXX_BIN_NAME);
+  //setWossBellhopBinName(BellhopWoss::WOSS_BELLHOPCUDA_BIN_PATH);
   setWossCreatorDebug(false);
   setWossWorkDirPath(res_path);
   setWossClearWorkDir(true);
   setWossDebug(false);
-  setWossSimTime(SimTime(Time(1, 8, 2018), Time(1, 8, 2018)));
+  setWossSimTime(SimTime(Time(1, 8, 2025), Time(1, 8, 2025)));
   setWossEvolutionTimeQuantum(-1.0);
   setWossTotalRuns(1);
   setWossFrequencyStep(0.0);
-  setWossTotalRangeSteps(50.0);
+  setWossTotalRangeSteps(3000.0);
   setWossTxMinDepthOffset(0.0);
   setWossTxMaxDepthOffset(0.0);
   setWossTotalTransmitters(1);
@@ -139,7 +142,7 @@ void WossBellhopTest::doConfig() {
   setWossTotalRxRanges(1);
   setWossRxMinRangeOffset(0.0);
   setWossRxMaxRangeOffset(0.0);
-  setWossTotalRays(2000);
+  setWossTotalRays(0);
   setWossMinAngle(-75.0);
   setWossMaxAngle(75.0);
   setWossUseThorpeAtt(true);
@@ -251,9 +254,15 @@ void WossBellhopTest::doRun() {
             WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
           }
 
-          if ( abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb()) > 1.0) {
+          double diff = abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb());
+
+          if (debug) {
+            cout << "abs press diff = " << diff << endl;
+          }
+
+          if (diff > 1.0) {
             stringstream ss;
-            ss << "abs press diff(" << abs(press_temp_bin->getTxLossDb() - press_temp_asc->getTxLossDb()) << ")";
+            ss << "abs press diff(" << diff << ")";
             WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
           }
 
@@ -284,12 +293,6 @@ void WossBellhopTest::doRun() {
             WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_MEMORY);
           }
 
-          if ( abs(press_temp_shd->getTxLossDb() - curr_pressure->getTxLossDb()) > 1.0) {
-            stringstream ss;
-            ss << "abs press diff(" << abs(press_temp_shd->getTxLossDb() - curr_pressure->getTxLossDb()) << ")";
-            WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
-          }
-
           if (debug) {
             cout << endl;
             cout << "curr_time_arr_asc = " << (*curr_time_arr_asc) << endl;
@@ -298,6 +301,18 @@ void WossBellhopTest::doRun() {
             cout << "time_arr_bin TL = " << (*press_temp_bin) << endl;
             cout << "curr_time_arr_press = " << (*curr_time_arr_press) << endl;
             cout << "curr_pressure = " << (*curr_pressure) << endl;
+          }
+
+          diff = abs(press_temp_shd->getTxLossDb() - curr_pressure->getTxLossDb());
+
+          if (debug) {
+            cout << "abs press shd diff = " << diff << endl;
+          }
+          
+          if ( diff > 1.0) {
+            stringstream ss;
+            ss << "abs press diff(" << diff << ")";
+            WOSS_EXCEPTION_INFO(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM, ss.str().c_str());
           }
         }
       }

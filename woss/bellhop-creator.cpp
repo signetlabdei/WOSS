@@ -41,7 +41,8 @@ using namespace woss;
 BellhopCreator::BellhopCreator() 
 : WossCreator(),
   use_thorpe_att(true),
-  bellhop_path(),  
+  bellhop_path(),
+  bellhop_bin_name(BellhopWoss::WOSS_BELLHOP_BIN_NAME),
   bellhop_arr_syntax(BellhopArrSyntax::BELLHOP_CREATOR_ARR_FILE_INVALID),
   bellhop_shd_syntax(BellhopShdSyntax::BELLHOP_CREATOR_SHD_FILE_INVALID),
   ccbellhop_mode(),
@@ -143,6 +144,7 @@ bool BellhopCreator::initializeBhWoss( BellhopWoss& woss_ref ) const {
                                 transducer_params.multiply_costant, transducer_params.add_costant )
           .setTransformSSPDepthSteps(ccnormalized_ssp_depth_steps.get( tx, rx ))
           .setBellhopPath(bellhop_path)
+          .setBellhopBinName(bellhop_bin_name)
           .setBellhopArrSyntax(bellhop_arr_syntax)
           .setBellhopShdSyntax(bellhop_shd_syntax)
           .setBathymetryType(ccbathymetry_type.get( tx, rx ))

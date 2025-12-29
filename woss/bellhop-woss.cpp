@@ -37,8 +37,6 @@
 
 static constexpr inline int BELLHOP_NOT_SET = (-3000);
 
-static constexpr inline const char* WOSS_BELLHOP_PROGRAM = "bellhop.exe"; /**< Bellhop program name */
-
 static constexpr inline const char* WOSS_BELLHOP_NAME = "bellhop";  /**< Bellhop configuration file name */
 
 static constexpr inline const char* WOSS_BELLHOP_ATI = ".ati"; /**< Bellhop altimetry file extension */
@@ -87,6 +85,7 @@ BellhopWoss::BellhopWoss()
   shd_file(),
   arr_file(),
   bellhop_path(""),
+  bellhop_bin_name(WOSS_BELLHOP_BIN_NAME),
   curr_path(),
   tx_min_depth_offset(0.0),
   tx_max_depth_offset(0.0),
@@ -927,9 +926,9 @@ bool BellhopWoss::run() {
       initCfgFiles( curr_frequency, i );
 
       if (debug) 
-        str_out << "cd " << curr_path << " && " << bellhop_path << WOSS_BELLHOP_PROGRAM << " " << WOSS_BELLHOP_NAME << " > " << WOSS_BELLHOP_NAME << ".prt2";
+        str_out << "cd " << curr_path << " && " << bellhop_path << bellhop_bin_name << " " << WOSS_BELLHOP_NAME << " > " << WOSS_BELLHOP_NAME << ".prt2";
       else 
-        str_out << "cd " << curr_path << " && " << bellhop_path << WOSS_BELLHOP_PROGRAM << " " << WOSS_BELLHOP_NAME << " > " << "/dev/null";
+        str_out << "cd " << curr_path << " && " << bellhop_path << bellhop_bin_name << " " << WOSS_BELLHOP_NAME << " > " << "/dev/null";
 
       std::string command = str_out.str();
       str_out.str("");

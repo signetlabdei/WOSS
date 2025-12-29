@@ -2,7 +2,7 @@
 
 ***Author: Federico Guerra - `WOSS@guerra-tlc.com`***
 
-***Version: 2.0.0***
+***Version: 2.0.1***
 
 This document provides a short techical description of the *World Ocean Simulation System* (WOSS) library 
 and of its optional integration into _Multi InteRfAce Cross Layer Extension_ (NS-Miracle) and _ns-3_.
@@ -15,7 +15,7 @@ according to a more accurate representation of propagation phenomena as describe
 WOSS is a *multi-threaded* framework that permits the integration of any existing underwater channel simulator that expects environmental data as input 
 and provides as output a channel realization represented using the channel profiles just mentioned.
  
-Currently WOSS integrates the Bellhop ray-tracing program [4], while the NS-Miracle integration library retains the previously mentioned formula for the noise power. 
+Currently WOSS integrates the Bellhop ray-tracing program or any of its equivalent forks [4], while the NS-Miracle integration library retains the previously mentioned formula for the noise power. 
  
 Bellhop calculations are performed across the whole bandwidth with custom resolution, 
 while noise calculations are performed at the geometric average of the highest and the lowest frequencies of the band being used, as pointed in [5]. 
@@ -48,7 +48,10 @@ These equations can be found in [1], [2].
  
 From version **2.0.0** WOSS has been refactored to modern C++ and support for C++17 is now mandatory.
 Furthermore it supports *command line execution* in order to generate channel simulation results that can be further analyzed via scripting automation.
-See the command line section.
+See the Command Line section.
+
+From version **2.0.1** WOSS supports the ability to customize the Bellhop executable name, thus enabling the user to plug other Bellhop variants, such as `bellhopcxx` and `bellhopcuda`.
+See woss::BellhopCreator class.
 
 Figs. 1.1 and 1.2 show the coherent sum of all channel taps, obtained with WOSS for an  example scenario. 
 
@@ -133,7 +136,10 @@ calculated with the `TEOS-10` exact formula [6] based on the temperature, salini
 - support for unit testing that are integrated with autotools.
 - support for modern C++17 syntax, idioms and features, like multithread with std::async or woss::ThreadPool, smart pointers etc
 
-See [Databases description](#databases-description) for further info on custom database, \ref transducer_page for further info on transducers, \ref altimetry for further info on altimetry models, \ref time_evo for further info on time evolution modeling.
+See [Databases description](../woss/woss_db/README.md#databases-description) for further info on custom database, 
+[Transducers](../woss/woss_def/README.md#underwater-acoustic-transducers) for further info on transducers, 
+[Altimetry](../woss/woss_def/README.md#altimetry-models) for further info on altimetry models, 
+[Time evolution](../woss/woss_def/README.md#time-evolution-modeling) for further info on time evolution modeling.
 
 ### ns-3 integration
 
@@ -145,7 +151,10 @@ for more information please refer to the official [woss-ns3 repository](https://
  1. R. Urick, _Principles of Underwater Sound_. McGraw-Hill, 1983.
  2. M. Stojanovic, “On the relationship between capacity and distance in an underwater acoustic communication channel,” _ACM Mobile Comput. and Commun. Review_, vol. 11, no. 4, pp. 34–43, 2007.
  3. F. Jensen, W. Kuperman, M. Porter, and H. Schmidt, _Computational Ocean Acoustics_. Springer-Verlag, 2000. {#reference_3}
- 4. Bellhop code, http://oalib.hlsresearch.com/Rays/index.html .
+ 4. Bellhop programs:
+    - Bellhop code, http://oalib.hlsresearch.com/Rays/index.html .
+    - A new Bellhop, https://github.com/A-New-BellHope/bellhop .
+    - BellhopCXX and BellhopCuda, https://github.com/A-New-BellHope/bellhopcuda .
  5. P. C. Etter, _Underwater acoustic modeling and simulation_. Spon Press, Taylor & Francis group, 2003.
  6. `TEOS-10` source code http://www.TEOS-10.org .
  7. World Ocean Atlas 2001, https://www.nodc.noaa.gov/OC5/WOA01/pr_woa01.html .

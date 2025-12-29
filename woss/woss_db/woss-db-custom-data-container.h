@@ -1542,7 +1542,8 @@ namespace woss {
 
     std::shared_ptr< Data > ret_val = std::move(lower_it->second->clone());
 
-    *ret_val *= alpha + *(upper_it->second) * beta;
+    *ret_val *= alpha;
+    *ret_val += *(upper_it->second) * beta;
   
     if (debug)
       std::cout << "CustomDataTimeContainer::calculateData() return value = " 

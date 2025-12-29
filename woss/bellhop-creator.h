@@ -740,10 +740,22 @@ namespace woss {
     BellhopCreator& setBellhopPath( const std::string& path ) { bellhop_path = path; return *this; }
 
     /**
+    * Sets the Bellhop binary name
+    * @param name Bellhop binary name
+    * @return reference to <b>*this</b>
+    */
+    BellhopCreator& setBellhopBinName( const std::string& name ) { bellhop_bin_name = name; return *this; }
+
+    /**
     * Gets the path of bellhop program
     * @return path string
     */
     std::string getBellhopPath() const { return bellhop_path; }
+
+    /** Gets the Bellhop binary name
+    * @return Bellhop binary name
+    */
+    std::string getBellhopBinName() const { return bellhop_bin_name; }
 
     /**
     * Sets the .arr file syntax to be used during file parsing
@@ -1418,6 +1430,11 @@ namespace woss {
     * Pathname of Bellhop program
     **/
     std::string bellhop_path;
+
+    /**
+    * Bellhop binary name
+    **/
+    std::string bellhop_bin_name;
 
     /**
      * Bellhop .arr file syntax to be used during parsing, factory value = invalid

@@ -17,7 +17,7 @@ The current WOSS version has the following [compatibilities](https://woss.dei.un
 
 From WOSS 2.0.0 the support of C++17 is mandatory and it is enforced by the build system.
 
-Download the recommended [Acoustic Toolbox library](https://woss.dei.unipd.it/#libraries)
+Download a recommended version from [Acoustic Toolbox library](https://woss.dei.unipd.it/#libraries)
 and follow installation instructions. The directory path that contains
 the binaries should be in the `$PATH` environment.
 

@@ -195,9 +195,9 @@ namespace woss {
 
   };
 
-  #define WOSS_EXCEPTION_INFO(err_type, info) WossException(err_type, __FILE__, __LINE__, __FUNCTION__, info)
+  #define WOSS_EXCEPTION_INFO(err_type, info) throw WossException(err_type, __FILE__, __LINE__, __FUNCTION__, info)
 
-  #define WOSS_EXCEPTION(err_type) WossException(err_type, __FILE__, __LINE__, __FUNCTION__, "")
+  #define WOSS_EXCEPTION(err_type) throw WossException(err_type, __FILE__, __LINE__, __FUNCTION__, "")
 
   /**
     * TestTimeReference provides the minimum functionality of the simulator time reference
@@ -945,6 +945,19 @@ namespace woss {
     std::string getWossBellhopPath() const { return bellhop_path; }
 
     /**
+    * Sets the Woss channel simulator bellhop binary name
+    * @param name bellhop binary name
+    * @return reference to this instance
+    **/
+    WossTest& setWossBellhopBinName(const std::string& name) { bellhop_bin_name = name; return *this; }
+
+    /**
+    * Gets the Woss channel simulator bellhop binary name
+    * @return bellhop binary name
+    **/
+    std::string getWossBellhopBinName() const { return bellhop_bin_name; }
+
+    /**
     * Configures the Woss channel bellhop running mode
     * @param mode bellhop running mode
     * @return reference to this instance
@@ -1263,6 +1276,7 @@ namespace woss {
     double normalized_ssp_depth_steps;  //!< woss object configuration: SSP depth quantization steps
     std::string work_dir_path;  //!< woss object configuration: path of the temporary directory
     std::string bellhop_path;  //!< woss object configuration: path of the Bellhop executable
+    std::string bellhop_bin_name;  //!< woss object configuration: Bellhop binary name
     std::string bellhop_mode;  //!< woss object configuration: Bellhop mode string
     std::string bellhop_beam_options;  //!< woss object configuration: Bellhop beam option string
     std::string bellhop_bathy_type;  //!< woss object configuration: Bellhop bathymetry type string

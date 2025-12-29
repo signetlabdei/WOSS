@@ -198,6 +198,9 @@ WOSS/Creator/Bellhop set box_range                    -3000.0
 set woss_creator [new "WOSS/Creator/Bellhop"]
 $woss_creator setWorkDirPath        "/dev/shm/woss/aloha_no_dbs/"
 $woss_creator setBellhopPath        ""
+$woss_creator setBellhopBinName     "bellhop.exe"
+#$woss_creator setBellhopBinName     "bellhopcxx"
+#$woss_creator setBellhopBinName     "bellhopcuda"
 $woss_creator setBellhopMode        0 0 "A"
 $woss_creator setBeamOptions        0 0 "B"
 $woss_creator setBathymetryType     0 0 "LL"
@@ -209,16 +212,16 @@ $woss_creator setSimulationTimes    0 0 1 12 2009 0 0 1 1 12 2009 0 0 1
 ### choose between single-threaded or multithreaded WossManager
 ### by uncomment/comment the followings lines
 
-#WOSS/Manager/Simple set debug                       0
-#WOSS/Manager/Simple set is_time_evolution_active  -1.0
-#WOSS/Manager/Simple set space_sampling              0.0
-#set woss_manager [new "WOSS/Manager/Simple"]
+WOSS/Manager/Simple set debug                       0
+WOSS/Manager/Simple set is_time_evolution_active  -1.0
+WOSS/Manager/Simple set space_sampling              0.0
+set woss_manager [new "WOSS/Manager/Simple"]
 
-WOSS/Manager/Simple/MultiThread set debug                     0
-WOSS/Manager/Simple/MultiThread set is_time_evolution_active  -1.0
-WOSS/Manager/Simple/MultiThread set space_sampling            0.0
-set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
-$woss_manager setConcurrentThreads 0
+#WOSS/Manager/Simple/MultiThread set debug                     0
+#WOSS/Manager/Simple/MultiThread set is_time_evolution_active  -1.0
+#WOSS/Manager/Simple/MultiThread set space_sampling            0.0
+#set woss_manager [new "WOSS/Manager/Simple/MultiThread"]
+#$woss_manager setConcurrentThreads 0
 #$woss_manager setThreadPoolUsage   1
 
 

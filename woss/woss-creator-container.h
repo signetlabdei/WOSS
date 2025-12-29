@@ -310,7 +310,7 @@ namespace woss {
   inline std::shared_ptr<Location> WossCreatorContainer< Data >::createLocation( const CoordZ& coordinates ) {
     if ( coordinates == ALL_COORDZ ) 
       return nullptr;
-    return std::move( SDefHandler::instance().createLocation() );
+    return std::move( SDefHandler::instance().createLocation(coordinates) );
   }
 
 
@@ -510,11 +510,29 @@ namespace woss {
   template< typename Data >
   inline void WossCreatorContainer< Data >::erase( const CoordZ& tx, const CoordZ& rx ) { 
     for ( auto it = data_container.begin(); it != data_container.end();  ) {
-      
-      if ( it->first->isEquivalentTo( tx ) ) {
-        
+      bool tx_found = false;
+ 
+      if ( it->first != ALL_LOCATIONS ) {
+         if ( it->first->isEquivalentTo( tx ) ) 
+            tx_found = true;
+      } else {
+         if ( tx == ALL_COORDZ ) 
+            tx_found = true;
+      }
+
+      if ( tx_found ) {
         for ( auto it2 = it->second.begin(); it2 != it->second.end(); ) {
-          if ( it2->first->isEquivalentTo( rx ) ) 
+           bool rx_found = false;
+
+           if ( it2->first != ALL_LOCATIONS ) {
+              if ( it2->first->isEquivalentTo( rx ) ) 
+                rx_found = true;
+           } else {
+              if ( rx == ALL_COORDZ ) 
+                rx_found = true;
+           }
+
+          if ( rx_found ) 
             it->second.erase(it2++);
           else 
             ++it2;
@@ -695,7 +713,7 @@ namespace woss {
   inline std::shared_ptr<Location> WossCreatorContainer< CustomTransducer >::createLocation( const CoordZ& coordinates ) {
     if ( coordinates == ALL_COORDZ ) 
       return nullptr;
-    return std::move(SDefHandler::instance().createLocation());
+    return std::move(SDefHandler::instance().createLocation(coordinates));
   }
 
 
@@ -753,9 +771,29 @@ namespace woss {
  
   inline void WossCreatorContainer< CustomTransducer >::erase( const CoordZ& tx, const CoordZ& rx ) { 
     for ( DCIter it = data_container.begin(); it != data_container.end();  ) {
-      if ( it->first->isEquivalentTo( tx ) ) {
+      bool tx_found = false;
+
+      if ( it->first != ALL_LOCATIONS ) {
+         if ( it->first->isEquivalentTo( tx ) ) 
+          tx_found = true;
+      } else {
+         if ( tx == ALL_COORDZ ) 
+          tx_found = true;
+      }
+
+      if ( tx_found ) {
         for ( ICIter it2 = it->second.begin(); it2 != it->second.end(); ) {
-          if ( it2->first->isEquivalentTo( rx ) ) {
+           bool rx_found = false;
+
+           if ( it2->first != ALL_LOCATIONS ) {
+              if ( it2->first->isEquivalentTo( rx ) ) 
+                rx_found = true;
+           } else {
+              if ( rx == ALL_COORDZ ) 
+                rx_found = true;
+           }
+
+          if ( rx_found ) {
             it->second.erase(it2++);
           }
           else ++it2;

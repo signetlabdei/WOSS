@@ -55,11 +55,13 @@ Pressure::Pressure( const std::complex<double>& press )
 
 
 Pressure::Pressure( const TimeArr& time_arr ) {
-  if ( !time_arr.isValid() ) 
+  if ( !time_arr.isValid() ) {
     complex_pressure = Pressure::createNotValid();
-  
-  for ( const auto& it : time_arr ) {
-    complex_pressure += it.second;
+  }
+  else {
+    for ( const auto& it : time_arr ) {
+      complex_pressure += it.second;
+    }
   }
 }
 

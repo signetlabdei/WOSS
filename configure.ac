@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-AC_INIT([WOSS], [2.0.0], [woss@guerra-tlc.com])
+AC_INIT([WOSS], [2.0.1], [woss@guerra-tlc.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_MSG_NOTICE([WOSS AC_PACKAGE_VERSION])

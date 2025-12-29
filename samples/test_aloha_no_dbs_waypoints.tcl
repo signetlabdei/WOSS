@@ -260,6 +260,10 @@ WOSS/Creator/Bellhop set ssp_seed                     10
 
 set woss_creator [new WOSS/Creator/Bellhop]
 $woss_creator setWorkDirPath       "/dev/shm/woss/test_aloha_no_dbs_waypoints/woss_channel_"
+$woss_creator setBellhopPath        ""
+$woss_creator setBellhopBinName     "bellhop.exe"
+#$woss_creator setBellhopBinName     "bellhopcxx"
+#$woss_creator setBellhopBinName     "bellhopcuda"
 $woss_creator setBellhopMode       0 0 "A"
 $woss_creator setBeamOptions       0 0 "B"
 $woss_creator setBathymetryType    0 0 "L"
