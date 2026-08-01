@@ -36,13 +36,13 @@
  * 
  * some syntax examples
  * 
- * /<wossdir>/tests/.libs/woss-bellhop-script-bin 1 1 /home/<user>/ocean_databases/dbs/ /bathymetry/GEBCO_2025_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500
+ * /<wossdir>/tests/.libs/woss-bellhop-script-bin 1 1 /home/<user>/ocean_databases/dbs/ /bathymetry/GEBCO_2026_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500
  * 
- * /<wossdir>/tests/.libs/woss-bellhop-script-bin 1 1 /home/<user>/ocean_databases/dbs/ /bathymetry/GEBCO_2025_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "5|0|100|300|200|400|500|600|550|800|760"
+ * /<wossdir>/tests/.libs/woss-bellhop-script-bin 1 1 /home/<user>/ocean_databases/dbs/ /bathymetry/GEBCO_2026_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "5|0|100|300|200|400|500|600|550|800|760"
  * 
- * /<wossdir>/tests/.libs/woss-bellhop-script-bin 1 1 /home/<user>/ocean_databases/dbs/ /bathymetry/GEBCO_2025_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "#" "TestSediment|1560.0|200.0|1.5|0.9|0.8|300.0"
+ * /<wossdir>/tests/.libs/woss-bellhop-script-bin 1 1 /home/<user>/ocean_databases/dbs/ /bathymetry/GEBCO_2026_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "#" "TestSediment|1560.0|200.0|1.5|0.9|0.8|300.0"
  * 
- * /<wossdir>/tests/.libs/woss-bellhop-script-bin 1 1 /home/<user>/ocean_databases/dbs/ /bathymetry/GEBCO_2025_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "5|0|100|300|200|400|500|600|550|800|760" "TestSediment|1560.0|200.0|1.5|0.9|0.8|300.0" "12|0|1508.42|10|1508.02|20|1507.71|30|1507.53|50|1507.03|75|1507.56|100|1508.08|125|1508.49|150|1508.91|200|1509.75|250|1510.58|300|1511.42"
+ * /<wossdir>/tests/.libs/woss-bellhop-script-bin 1 1 /home/<user>/ocean_databases/dbs/ /bathymetry/GEBCO_2026_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "5|0|100|300|200|400|500|600|550|800|760" "TestSediment|1560.0|200.0|1.5|0.9|0.8|300.0" "12|0|1508.42|10|1508.02|20|1507.71|30|1507.53|50|1507.03|75|1507.56|100|1508.08|125|1508.49|150|1508.91|200|1509.75|250|1510.58|300|1511.42"
  */
 
 #include <iostream>
@@ -132,7 +132,7 @@ WossBellhopScript::WossBellhopScript()
   rx_coordz(),
   frequency(0.0),
   db_path(),
-  bathy_db_file_path("/bathymetry/GEBCO_2025_sub_ice.nc"),
+  bathy_db_file_path("/bathymetry/GEBCO_2026_sub_ice.nc"),
   ssp_db_file_path("/ssp/WOA2023/WOA2023_SSP_June.nc"),
   res_path("./bh_script_out/"),
   custom_ssp(),
@@ -155,16 +155,21 @@ void WossBellhopScript::doConfig() {
 
   setWossDbManagerDebug(debug_level > 10 ? true : false);
 
+#if defined (WOSS_NETCDF_SUPPORT)
   if (db_path != "") {
+#if defined (WOSS_NETCDF4_SUPPORT)
     setSedimDeck41DbType(DECK41DbType::DECK41_DB_V2_TYPE);
+#endif // defined (WOSS_NETCDF4_SUPPORT)
     setSedimDbCoordFilePath(db_path + "/seafloor_sediment/DECK41_V2_coordinates.nc");
     setSedimDbMarsdenFilePath(db_path + "/seafloor_sediment/DECK41_V2_marsden_square.nc");
     setSedimDbMarsdenOneFilePath(db_path + "/seafloor_sediment/DECK41_V2_marsden_one_degree.nc");
 
     setSspDbFilePath(db_path + ssp_db_file_path);
 
+#if defined (WOSS_NETCDF4_SUPPORT)
     /// valid for 2001 2013, 2018 and 2023 WOA SSP NetCDF db files
     setSspWoaDbType(WOADbType::WOA_DB_TYPE_2013);
+#endif // defined (WOSS_NETCDF4_SUPPORT)
 
     setBathyDbFilePath(db_path + bathy_db_file_path);
 
@@ -174,6 +179,11 @@ void WossBellhopScript::doConfig() {
   else if ((custom_ssp == "") || (custom_sedim == "") || (custom_bathy == "")) {
     WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM); 
   }
+#else
+  if ((custom_ssp == "") || (custom_sedim == "") || (custom_bathy == "")) {
+    WOSS_EXCEPTION(WossErrorType::WOSS_ERROR_OUT_OF_RANGE_PARAM); 
+  }
+#endif // defined (WOSS_NETCDF_SUPPORT)
 
   //setWossBellhopPath();
   setWossBellhopBinName(BellhopWoss::WOSS_BELLHOP_BIN_NAME);

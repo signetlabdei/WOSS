@@ -371,7 +371,7 @@ bool Transducer::import( std::istream& stream_in ) {
               << "; tvr prec " << tvr_precision << "; ocv prec " << ocv_precision 
               << "; cond prec " << conductance_precision << "; beam prec " << beam_precision << std::endl;
 
-  bool is_ok = import( stream_in, tvr_map, tvr_precision );
+  [[maybe_unused]] bool is_ok = import( stream_in, tvr_map, tvr_precision );
   assert( is_ok );
   is_ok = import( stream_in, ocv_map, ocv_precision );
   assert( is_ok );  
@@ -435,7 +435,7 @@ bool Transducer::importBinary( std::fstream& file_in ) {
               << "; tvr prec " << tvr_precision << "; ocv prec " << ocv_precision 
               << "; cond prec " << conductance_precision << "; beam prec " << beam_precision << std::endl;  
   
-  bool is_ok = importBinary( file_in, tvr_map, tvr_precision );
+  [[maybe_unused]] bool is_ok = importBinary( file_in, tvr_map, tvr_precision );
   assert( is_ok );
   is_ok = importBinary( file_in, ocv_map, ocv_precision );
   assert( is_ok );  
@@ -469,7 +469,7 @@ bool Transducer::write( std::ostream& stream_out ) const {
              << std::setw(TRANSDUCER_WRITE_MARGIN) << conductance_precision
              << std::setw(TRANSDUCER_WRITE_MARGIN) << beam_precision << std::endl;
   
-  bool is_ok = write( stream_out, tvr_map );
+  [[maybe_unused]] bool is_ok = write( stream_out, tvr_map );
   assert( is_ok );
   is_ok = write( stream_out, ocv_map );
   assert( is_ok );
@@ -512,7 +512,7 @@ bool Transducer::writeBinary( std::fstream& file_out ) const {
   file_out.write( (char*) (&conductance_precision), sizeof(long double) );
   file_out.write( (char*) (&beam_precision), sizeof(long double) );
   
-  bool is_ok = writeBinary( file_out, tvr_map );
+  [[maybe_unused]] bool is_ok = writeBinary( file_out, tvr_map );
   assert( is_ok );
   is_ok = writeBinary( file_out, ocv_map );
   assert( is_ok );

@@ -103,7 +103,16 @@ ArrAscResReader::ArrAscResReader( const Woss& woss )
 
 
 bool ArrAscResReader::initialize() {
-  assert( file_name.size() > 0 );
+  if ( file_name.size() == 0 )
+  {
+    if (woss_ref.usingDebug()) {
+      std::cout << "ArrAscResReader(" << woss_ref.getWossId()
+                << ")::initialize() ERROR, file_name " << file_name 
+                << " size == 0" << std::endl;
+    }
+    assert(false);
+    return false;
+  }
 
   return( getArrAscHeader() && getArrAscFile() );
 }
@@ -325,7 +334,7 @@ bool ArrAscResReader::getArrAscFile() {
             else
             {
               // syntax must be defined
-              assert(0);
+              assert(false);
             }
 
             arr_file.arr_values[isd * arr_file.Nrd * arr_file.Nrr + ird * arr_file.Nrr + irr].sumValue( curr_delay,  *curr_pressure_ptr);

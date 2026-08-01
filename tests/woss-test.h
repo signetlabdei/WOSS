@@ -39,7 +39,6 @@
 #include <cstdio>
 #include <iostream>
 #include <memory>
-#include <source_location>
 #include <ssp-definitions.h>
 #include <sediment-definitions.h>
 #include <altimetry-definitions.h>

@@ -37,7 +37,7 @@ libWOSS_la_SOURCES = ./woss_def/definitions.h ./woss_def/definitions.cpp \
                      ./woss_def/transducer-handler.h ./woss_def/transducer-handler.cpp \
 		     ./woss_def/altimetry-definitions.h ./woss_def/altimetry-definitions.cpp \
 		     woss.h woss.cpp res-reader.h res-reader.cpp \
-                     woss-creator-container.h woss-creator-container.cpp woss-creator.h woss-creator.cpp \
+                     woss-creator-container.h woss-creator.h woss-creator.cpp \
                      woss-manager.h woss-manager.cpp woss-manager-simple.h \
                      ac-toolbox-woss.h ac-toolbox-woss.cpp ac-toolbox-shd-reader.h ac-toolbox-shd-reader.cpp \
                      ac-toolbox-arr-asc-reader.h ac-toolbox-arr-asc-reader.cpp ac-toolbox-arr-bin-reader.h ac-toolbox-arr-bin-reader.cpp \

@@ -87,6 +87,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
+IMPLICIT_DIR_DOCS      = NO
 USE_MDFILE_AS_MAINPAGE = doc/README.md
 INPUT                  = doc/README.md doc/imgs woss/ woss/woss_def/ woss/woss_db/ tests/ woss_phy/ INSTALL.md CHANGELOG.md COPYRIGHT.md LICENSE.md ACKNOWLEDGEMENTS.md
 FILE_PATTERNS          = 

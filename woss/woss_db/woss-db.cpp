@@ -81,8 +81,9 @@ WossNetcdfDb::WossNetcdfDb( const std::string& name )
 
 
 WossNetcdfDb::~WossNetcdfDb() { 
-  bool is_ok = closeConnection();
-  assert(is_ok);
+  if(closeConnection() == false) {
+    assert(false);
+  }
 }
 
 
@@ -118,8 +119,9 @@ WossTextualDb::WossTextualDb( const std::string& name )
 
 
 WossTextualDb::~WossTextualDb() { 
-  bool is_ok = closeConnection();
-  assert(is_ok);
+  if(closeConnection() == false) {
+    assert(false);
+  }
 }
 
 

@@ -937,7 +937,7 @@ bool BellhopWoss::run() {
       if (std::system(nullptr))
         ret_value = std::system(command.c_str());
       if (ret_value != 0) {
-        std::cerr << "BellhopWoss(" << woss_id << ")::run() error! bellhop.exe aborted!" << std::endl;
+        std::cerr << "BellhopWoss(" << woss_id << ")::run() error, " << bellhop_bin_name << " aborted!" << std::endl;
 
         is_running = false;
         return false;

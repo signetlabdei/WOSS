@@ -104,14 +104,15 @@ std::unique_ptr<Woss> const BellhopCreator::createWoss( const CoordZ& tx, const 
   assert( time.start_time.isValid() && time.end_time.isValid() );
 
   auto ret_value = std::make_unique<BellhopWoss>( tx, rx, time.start_time, time.end_time, start_frequency, end_frequency, getFrequencyStep() );
-  assert( initializeBhWoss(*ret_value));
+  if (initializeBhWoss(*ret_value) == false) {
+    assert(false);
+  }
   return ret_value;
 }
 
 
 bool BellhopCreator::initializeWoss( Woss& woss_ref ) const {
-  assert( WossCreator::initializeWoss(woss_ref) );
-  return( woss_ref.initialize() );
+  return( WossCreator::initializeWoss(woss_ref) && woss_ref.initialize() );
 }
 
 

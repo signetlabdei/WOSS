@@ -49,7 +49,7 @@ Where:
 
 ### Syntax examples:
 
-- `./woss-bellhop-script-bin 1 1 /home/user/ns/ocean_database/dbs/ /bathymetry/GEBCO_2025_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500`
-- `./woss-bellhop-script-bin 1 1 /home/user/ns/ocean_database/dbs/ /bathymetry/GEBCO_2025_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "5|0|100|300|200|400|500|600|550|800|760"`
-- `./woss-bellhop-script-bin 1 1 /home/user/ns/ocean_database/dbs/ /bathymetry/GEBCO_2025_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "#" "TestSediment|1560.0|200.0|1.5|0.9|0.8|300.0"`
-- `./woss-bellhop-script-bin 1 1 /home/user/ns/ocean_database/dbs/ /bathymetry/GEBCO_2025_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "5|0|100|300|200|400|500|600|550|800|760" "TestSediment|1560.0|200.0|1.5|0.9|0.8|300.0" "12|0|1508.42|10|1508.02|20|1507.71|30|1507.53|50|1507.03|75|1507.56|100|1508.08|125|1508.49|150|1508.91|200|1509.75|250|1510.58|300|1511.42"`
+- `./woss-bellhop-script-bin 1 1 /home/user/ns/ocean_database/dbs/ /bathymetry/GEBCO_2026_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500`
+- `./woss-bellhop-script-bin 1 1 /home/user/ns/ocean_database/dbs/ /bathymetry/GEBCO_2026_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "5|0|100|300|200|400|500|600|550|800|760"`
+- `./woss-bellhop-script-bin 1 1 /home/user/ns/ocean_database/dbs/ /bathymetry/GEBCO_2026_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "#" "TestSediment|1560.0|200.0|1.5|0.9|0.8|300.0"`
+- `./woss-bellhop-script-bin 1 1 /home/user/ns/ocean_database/dbs/ /bathymetry/GEBCO_2026_sub_ice.nc /ssp/WOA2023/WOA2023_SSP_June.nc ./bh_script_out/ 42.59 10.125 60 42.59 10.131 2 1500 "5|0|100|300|200|400|500|600|550|800|760" "TestSediment|1560.0|200.0|1.5|0.9|0.8|300.0" "12|0|1508.42|10|1508.02|20|1507.71|30|1507.53|50|1507.03|75|1507.56|100|1508.08|125|1508.49|150|1508.91|200|1509.75|250|1510.58|300|1511.42"`

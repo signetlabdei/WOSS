@@ -61,14 +61,14 @@ set opt(cbr_period)    400
 set opt(stoptime)      100000.0
 set opt(rep_num)       10
 
-set opt(node_bathy_offset) -5.0 
+set opt(node_bathy_offset) -9.0 
 
 #sink depth [m]
 set opt(sink_depth)           1.5
 set opt(sink_min_angle)       0.0
 set opt(sink_max_angle)       90.0
 set opt(node_min_angle)       -90.0
-set opt(node_max_angle)       0.0
+set opt(node_max_angle)       30.0
 
 set opt(starttime)         0.1
 set opt(txduration) [expr $opt(stoptime) - $opt(starttime)]
@@ -88,10 +88,10 @@ set opt(cltracefilename) "/dev/null"
 set opt(cltracefile) [open $opt(cltracefilename) w]
 
 set opt(db_path)        "insert_db_path_here"
-#set opt(db_path)        "/home/fedwar/ns/ocean_databases/dbs/"
+#set opt(db_path)        "/opt/ns/ocean_databases/WOSS-dbs-v1.7.1/dbs/"
 
 set opt(db_path_gebco)  "insert_db_path_gebco_path_here"
-#set opt(db_path_gebco)  "/home/fedwar/ns/ocean_databases/dbs/"
+#set opt(db_path_gebco)  "/opt/ns/ocean_databases/WOSS-dbs-v1.7.1/dbs/"
 
 set opt(db_res_path)    "."
 
@@ -184,7 +184,8 @@ set db_bathy [new "WOSS/Creator/Database/NetCDF/Bathymetry/GEBCO"]
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2022.nc" 
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2023.nc" 
 #$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2024.nc"
-$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2025_sub_ice.nc"
+#$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2025_sub_ice.nc"
+$db_bathy setDbPathName "${opt(db_path_gebco)}/bathymetry/GEBCO_2026_sub_ice.nc"
 
 
 #$db_bathy useOneMinutePrecision

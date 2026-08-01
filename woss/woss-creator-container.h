@@ -39,6 +39,7 @@
 #include <memory>
 #include <iostream>
 #include <definitions-handler.h>
+#include <type_traits>
 
 
 namespace woss {
@@ -421,6 +422,7 @@ namespace woss {
   template< typename Data >
   inline Data WossCreatorContainer< Data >::get( const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx ) const { 
     auto it = const_cast< typename WossCreatorContainer< Data >::DataContainer& >(data_container).find( tx );
+    bool tx_changed_to_all_locations = false;
 
     if ( tx != ALL_LOCATIONS ) {
       if ( it == data_container.end() ) {
@@ -429,6 +431,7 @@ namespace woss {
                     << "; trying ALL_LOCATIONS"<< std::endl;
 
         it = const_cast< typename WossCreatorContainer< Data >::DataContainer& >(data_container).find( ALL_LOCATIONS );
+        tx_changed_to_all_locations = true;
       }
 
       if ( debug ) 
@@ -451,8 +454,30 @@ namespace woss {
           std::cout << "WossCreatorContainer::get() rx location found = " << *rx << std::endl;
       }
       
-      if ( it2 != it->second.end() ) 
-        return it2->second;
+      if ( it2 != it->second.end() ) {
+        // Special handling for CustomTransducer
+        if constexpr (std::is_same_v<Data, CustomTransducer>) {
+          // If we're getting a CustomTransducer, we need to rotate the angles based on location orientation
+          const auto& original_data = it2->second;
+          if (tx_changed_to_all_locations == true) {
+            return CustomTransducer(original_data);
+          } else {
+            if ( debug ) 
+              std::cout << "WossCreatorContainer::get() rotating angle" << std::endl;
+
+            return CustomTransducer(
+              original_data.type,
+              it->first->getBearing(),
+              (original_data.initial_vert_rotation + it->first->getVerticalOrientation()),
+              (original_data.initial_horiz_rotation + it->first->getHorizontalOrientation()),
+              original_data.multiply_costant,
+              original_data.add_costant
+            );
+          }
+        } else {
+          return it2->second;
+        }
+      }
     }
      
     std::cerr << "WARNING: WossCreatorContainer::get() no tx nor rx location found, returning default constructor!!" << std::endl;
@@ -470,25 +495,64 @@ namespace woss {
   template< typename Data >
   inline Data WossCreatorContainer< Data >::get( const CoordZ& tx, const CoordZ& rx ) const { 
     auto it = const_cast< WossCreatorContainer< Data >& >(*this).find( tx );
-    
+    bool tx_changed_to_all_coordz = false;
+
     if ( tx != ALL_COORDZ ) {
-      if ( it == data_container.end() ) 
+      if ( it == data_container.end() ) {
+        if ( debug ) 
+          std::cout << "WossCreatorContainer::get() no tx coord found = " << tx 
+                    << "; trying ALL_COORDZ"<< std::endl;
+
         it = const_cast< WossCreatorContainer< Data >& >(*this).find( ALL_COORDZ );
+        tx_changed_to_all_coordz = true;
+      }
+
+      if ( debug ) 
+        std::cout << "WossCreatorContainer::get() tx coord found = " << tx << std::endl;
     }
     
     if ( it != data_container.end() ) {
       auto it2 = const_cast< WossCreatorContainer< Data >& >(*this).find( rx, it );
 
       if ( rx != ALL_COORDZ ) {
-        if ( it2 == it->second.end() ) 
+        if ( it2 == it->second.end() ) {
+          if ( debug ) 
+            std::cout << "WossCreatorContainer::get() no rx coord found = " << rx 
+                      << "; trying ALL_COORDZ"<< std::endl;
+
           it2 = const_cast< WossCreatorContainer< Data >& >(*this).find( ALL_COORDZ, it );
+        }
+
+        if ( debug ) 
+          std::cout << "WossCreatorContainer::get() rx coord found = " << rx << std::endl;
       }
 
       if ( it2 != it->second.end() ) {
         if ( debug ) 
           std::cout << "WossCreatorContainer::get() value found = " << it2->second << std::endl;
 
-        return it2->second;
+        // Special handling for CustomTransducer
+        if constexpr (std::is_same_v<Data, CustomTransducer>) {
+          // If we're getting a CustomTransducer, we need to rotate the angles based on location orientation
+          const auto& original_data = it2->second;
+          if (tx_changed_to_all_coordz == true) {
+            return CustomTransducer(original_data);
+          } else {
+            if ( debug ) 
+              std::cout << "WossCreatorContainer::get() rotating angle" << std::endl;
+
+            return CustomTransducer(
+              original_data.type,
+              it->first->getBearing(),
+              (original_data.initial_vert_rotation + it->first->getVerticalOrientation()),
+              (original_data.initial_horiz_rotation + it->first->getHorizontalOrientation()),
+              original_data.multiply_costant,
+              original_data.add_costant
+            );
+          }
+        } else {
+          return it2->second;
+        }
       }
     }
     std::cerr << "WARNING: WossCreatorContainer::get() no tx nor rx coordinates found, returning default constructor!!" << std::endl;
@@ -500,10 +564,11 @@ namespace woss {
   template< typename Data >
   inline void WossCreatorContainer< Data >::erase( const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx ) { 
     auto it = data_container.find(tx);
-    if ( it != data_container.end() ) 
+    if ( it != data_container.end() ) {
       it->second.erase( rx );
-    if ( it->second.empty() ) 
-      data_container.erase(it);
+      if ( it->second.empty() ) 
+        data_container.erase(it);
+    }
   }
  
  
@@ -555,7 +620,17 @@ namespace woss {
  
   template< typename Data >
   inline void WossCreatorContainer< Data >::replace( const Data& data, const CoordZ& tx, const CoordZ& rx ) { 
-    data_container[ createLocation(tx) ][ createLocation(rx) ] = data;
+    auto it = find( tx );
+    if ( it == data_container.end() ) {
+      data_container[ createLocation(tx) ][ createLocation(rx) ] = data; 
+      return;
+    }
+    auto it2 = find( rx, it );
+    if ( it2 == it->second.end() ) {
+      (it->second)[ createLocation(rx) ] = data;
+      return;
+    }
+    it2->second = data;
   }
  
  
@@ -565,265 +640,7 @@ namespace woss {
   }
 
 
-  ////////
+} // namespace woss
 
-  /**
-  * \brief Full specialization for woss::CustomTransducer
-  *
-  * Full specialization for woss::CustomTransducer
-  */
-  template<> 
-  class WossCreatorContainer< CustomTransducer > {
-
-    public:
-
-    static std::shared_ptr<Location> ALL_LOCATIONS;
-    
-    static const CoordZ ALL_COORDZ;
-
-    WossCreatorContainer() = default;
-    
-    ~WossCreatorContainer() = default;
-
-    bool isEmpty() const;
-    
-    int size() const;
-
-    /**
-    * Inserts an object into the container. If the keys are already present, the object is NOT inserted and it
-    * is deleted
-    * @param data const reference to a CustomTransducer object to be inserted
-    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
-    * @param rx const reference to a std::shared_ptr to a valid receiver Location
-    * @return <i>true</i> if it's empty, <i>false</i> otherwise
-    **/      
-    bool insert( const CustomTransducer& data, const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx );
-    
-    /**
-    * Inserts an object into the container. If the keys are already present, the object is NOT inserted and it
-    * is deleted
-    * @param data const pointer to a CustomTransducer object to be inserted
-    * @param tx const reference to a valid transmitter CoordZ
-    * @param rx const reference to a valid receiver CoordZ
-    * @return <i>true</i> if it's empty, <i>false</i> otherwise
-    **/      
-    bool insert( const CustomTransducer& data, const CoordZ& tx, const CoordZ& rx );
-
-    /**
-    * Returns a CustomTransducer for given keys. If the keys are not found a nullptr pointer is returned
-    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
-    * @param rx const reference to a std::shared_ptr to a valid receiver Location
-    * @return a pointer to a rotated CustomTransducer object
-    **/
-    CustomTransducer get( const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx ) const;
-
-    /**
-    * Returns a CustomTransducer pointer for given keys. If the keys are not found a nullptr pointer is returned
-    * @param tx const reference to a valid transmitter CoordZ
-    * @param rx const reference to a valid receiver CoordZ
-    * @return a pointer to a rotated CustomTransducer object
-    **/
-    CustomTransducer get( const CoordZ& tx, const CoordZ& rx ) const;
-
-    /**
-    * Returns a reference to the CustomTransducer associated to transmitter and receiver Location equal to ALL_LOCATIONS.
-    * If no keys were present, the CustomTransducer is defaulted constructed and a reference to it is returned.
-    * The user has to properly delete the pointer prior changing it
-    * @return a reference to a Data pointer
-    **/
-    CustomTransducer& accessAllLocations();
-
-    /**
-    * Erases an CustomTransducer from the container. If the keys are already present, the previous object is deleted
-    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
-    * @param rx const reference to a std::shared_ptr to a valid receiver Location
-    * @return <i>true</i> if it's empty, <i>false</i> otherwise
-    **/
-    void erase( const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx );
-
-   /**
-    * Erases an CustomTransducer from the container. If the keys are already present, the previous object is deleted
-    * @param tx const reference to a valid transmitter CoordZ
-    * @param rx const reference to a valid receiver CoordZ
-    * @return <i>true</i> if it's empty, <i>false</i> otherwise
-    **/
-    void erase( const CoordZ& tx, const CoordZ& rx );
-
-    /**
-    * Replaces a pointer into the container. If the keys are already present, the previous object is deleted
-    * @param data const reference to a CustomTransducer object to be inserted
-    * @param tx const reference to a std::shared_ptr to a valid transmitter Location
-    * @param rx const reference to a std::shared_ptr to a valid receiver Location
-    * @return <i>true</i> if it's empty, <i>false</i> otherwise
-    **/
-    void replace( const CustomTransducer& data, const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx );
-
-    /**
-    * Replaces a pointer into the container. If the keys are already present, the previous object is deleted
-    * @param data const pointer to a CustomTransducer object to be inserted
-    * @param tx const reference to a valid transmitter CoordZ
-    * @param rx const reference to a valid receiver CoordZ
-    * @return <i>true</i> if it's empty, <i>false</i> otherwise
-    **/
-    void replace( const CustomTransducer& data, const CoordZ& tx, const CoordZ& rx );
-
-    void clear();
-
-    void setDebug( bool flag ) { debug = flag; }
-    
-    bool isUsingDebug() const { return debug; }
-
-    protected:
-
-    using InnerContainer = std::map< std::shared_ptr<Location>, CustomTransducer >;
-    using ICIter = InnerContainer::iterator;
-    using ICRIter = InnerContainer::reverse_iterator;
-    using ICCIter = InnerContainer::const_iterator ;
-    using ICCRIter = InnerContainer::const_reverse_iterator;
-
-    using DataContainer = std::map< std::shared_ptr<Location>, InnerContainer >;
-    using DCIter = DataContainer::iterator;
-    using DCCIter = DataContainer::const_iterator;
-    using DCRIter = DataContainer::reverse_iterator;
-    using DCRCIter = DataContainer::const_reverse_iterator;
-  
-    DCIter find( const CoordZ& coordinates );
-    
-    ICIter find( const CoordZ& coordinates, const DCIter& iter );
-
-    std::shared_ptr<Location> createLocation( const CoordZ& coordinates );
-    
-    DataContainer data_container;
-
-    bool debug = false;
-
-  };
-
-
-  inline bool WossCreatorContainer< CustomTransducer >::isEmpty() const {
-    return data_container.empty();
-  }
-
-
-  inline int WossCreatorContainer< CustomTransducer >::size() const {
-    return data_container.size();
-  }
-
-
-  inline std::shared_ptr<Location> WossCreatorContainer< CustomTransducer >::createLocation( const CoordZ& coordinates ) {
-    if ( coordinates == ALL_COORDZ ) 
-      return nullptr;
-    return std::move(SDefHandler::instance().createLocation(coordinates));
-  }
-
-
-  inline bool WossCreatorContainer< CustomTransducer >::insert( const CustomTransducer& data, const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx ) { 
-    auto it = data_container.find(tx);
-    if ( it == data_container.end() ) {
-      data_container[tx][rx] = data;
-      return true;
-    }
-    auto it2 = it->second.find(rx);
-    if ( it2 == it->second.end() ) {
-      (it->second)[rx] = data;
-      return true;
-    }
-    return false;
-  }
- 
- 
-  inline bool WossCreatorContainer< CustomTransducer >::insert( const CustomTransducer& data, const CoordZ& tx, const CoordZ& rx ) { 
-    auto it = find( tx );
-    if ( it == data_container.end() ) {
-      data_container[ createLocation(tx) ][ createLocation(rx) ] = data; 
-      return true;
-    }
-    auto it2 = find( rx, it );
-    if ( it2 == it->second.end() ) {
-      (it->second)[ createLocation(rx) ] = data;
-      return true;
-    }
-    return false;
-  }
- 
-  
-  inline CustomTransducer& WossCreatorContainer< CustomTransducer >::accessAllLocations() {
-    return data_container[ALL_LOCATIONS][ALL_LOCATIONS];
-  }
- 
- 
-  inline void WossCreatorContainer< CustomTransducer >::erase( const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx ) { 
-    DCIter it = data_container.find(tx);
-    if ( it != data_container.end() ) {
-      
-      ICIter it2 = it->second.find( rx );
-      
-      if ( it2 != it->second.end() ) {
-        it->second.erase( it2 );
-      }
-      
-    }
-    if ( it->second.empty() ) { 
-      data_container.erase(it);
-    }
-  }
- 
- 
-  inline void WossCreatorContainer< CustomTransducer >::erase( const CoordZ& tx, const CoordZ& rx ) { 
-    for ( DCIter it = data_container.begin(); it != data_container.end();  ) {
-      bool tx_found = false;
-
-      if ( it->first != ALL_LOCATIONS ) {
-         if ( it->first->isEquivalentTo( tx ) ) 
-          tx_found = true;
-      } else {
-         if ( tx == ALL_COORDZ ) 
-          tx_found = true;
-      }
-
-      if ( tx_found ) {
-        for ( ICIter it2 = it->second.begin(); it2 != it->second.end(); ) {
-           bool rx_found = false;
-
-           if ( it2->first != ALL_LOCATIONS ) {
-              if ( it2->first->isEquivalentTo( rx ) ) 
-                rx_found = true;
-           } else {
-              if ( rx == ALL_COORDZ ) 
-                rx_found = true;
-           }
-
-          if ( rx_found ) {
-            it->second.erase(it2++);
-          }
-          else ++it2;
-        }
-      } 
-      if ( it->second.empty() ) {
-        data_container.erase(it++);
-      }
-      else 
-        ++it;
-    }
-  }
- 
- 
-  inline void WossCreatorContainer< CustomTransducer >::replace( const CustomTransducer& data, const std::shared_ptr<Location>& tx, const std::shared_ptr<Location>& rx ) { 
-    data_container[tx][rx] = data;
-  }
- 
- 
-  inline void WossCreatorContainer< CustomTransducer >::replace( const CustomTransducer& data, const CoordZ& tx, const CoordZ& rx ) { 
-    std::shared_ptr<Location> tx_loc = createLocation(tx);
-    std::shared_ptr<Location> rx_loc = createLocation(rx);
-    data_container[tx_loc][rx_loc] = data;
-  }
- 
- 
-  inline void WossCreatorContainer< CustomTransducer >::clear() { 
-    data_container.clear();
-  }
-  
-}
 
 #endif // WOSS_CREATOR_CONTAINER_DEFINITIONS_H

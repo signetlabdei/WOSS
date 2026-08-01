@@ -28,7 +28,7 @@ LDADD = @NETCDF_LIBADD@ @NETCDF4_LIBADD@ @UW_WOSS_LIBADD@ @UW_WOSS_PHY_LIBADD@
 #TEST_EXTENSIONS = .sh
 
 # These are the tests programs.
-TESTPROGRAMS = woss-coord-definitions-test-bin woss-bellhop-test-bin woss-bellhop-script-bin woss-unit-test-bin
+TESTPROGRAMS = woss-unit-test-bin woss-coord-definitions-test-bin woss-bellhop-test-bin woss-bellhop-script-bin
 
 if NETCDF_BUILD
 #TESTPROGRAMS += 

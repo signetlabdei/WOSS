@@ -115,7 +115,7 @@ void WossBellhopTest::doConfig() {
 #if defined (WOSS_NETCDF4_SUPPORT)
     setSspWoaDbType(WOADbType::WOA_DB_TYPE_2013);
 #endif // defined (WOSS_NETCDF4_SUPPORT)
-    setBathyDbFilePath(db_path + "bathymetry/GEBCO_2025_sub_ice.nc");
+    setBathyDbFilePath(db_path + "bathymetry/GEBCO_2026_sub_ice.nc");
     setBathyDbGebcoFormat(GEBCO_BATHY_TYPE::GEBCO_2D_15_SECONDS_BATHY_TYPE);
   }
 #endif // defined (WOSS_NETCDF_SUPPORT)

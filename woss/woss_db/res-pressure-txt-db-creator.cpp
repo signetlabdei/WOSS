@@ -48,8 +48,9 @@ std::unique_ptr<WossDb> ResPressureTxtDbCreator::createWossDb() const {
 
   woss_db->setSpaceSampling(space_sampling);
 
-  bool ok = initializeDb( *woss_db );
-  assert( ok );
+  if( initializeDb( *woss_db ) == false) {
+    assert(false);
+  }
   
   return( woss_db );
 }

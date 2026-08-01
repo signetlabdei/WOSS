@@ -56,7 +56,10 @@ std::unique_ptr<WossDb> BathyUtmCsvDbCreator::createWossDb() const {
   woss_db->setDbRangeNorthing( range_northing_start, range_northing_end );
   woss_db->setLandApproximationFlag( approx_land_to_sea_surface );
 
-  assert( initializeDb( *woss_db ) );
+  if( initializeDb( *woss_db ) == false) {
+    assert(false);
+  }
+
   return( woss_db );
 }
 

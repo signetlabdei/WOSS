@@ -60,7 +60,7 @@ std::unique_ptr<TimeArr> WossManager::getWossTimeArr( const CoordZ& tx_coordz, c
 
   auto curr_woss = getWoss( tx_coordz, rx_coordz, start_frequency, end_frequency );
 
-  bool is_ok = curr_woss->timeEvolve(time_value);
+  [[maybe_unused]] bool is_ok = curr_woss->timeEvolve(time_value);
   assert(is_ok);
   is_ok = curr_woss->run();
   assert(is_ok);
@@ -115,7 +115,7 @@ std::unique_ptr<Pressure> WossManager::getWossPressure( const CoordZ& tx_coordz,
 
   auto curr_woss = getWoss( tx_coordz, rx_coordz, start_frequency, end_frequency );
   
-  bool is_ok = curr_woss->timeEvolve(time_value);
+  [[maybe_unused]] bool is_ok = curr_woss->timeEvolve(time_value);
   assert(is_ok);
   is_ok = curr_woss->run();
   assert(is_ok);
@@ -295,7 +295,7 @@ std::unique_ptr<TimeArr> WossManagerResDb::getWossTimeArr( const CoordZ& tx_coor
   
   sum->clear();
 
-  bool is_ok = true;
+  [[maybe_unused]] bool is_ok = true;
   auto curr_woss = getWoss( tx_coordz, rx_coordz, start_frequency, end_frequency );
 
   if ( curr_woss->timeEvolve(time_value) ) 
@@ -366,7 +366,7 @@ std::unique_ptr<Pressure> WossManagerResDb::getWossPressure( const CoordZ& tx_co
 
   sum_avg->clear();
 
-  bool is_ok = false;
+  [[maybe_unused]] bool is_ok = false;
   auto curr_woss = getWoss( tx_coordz, rx_coordz, start_frequency, end_frequency );
   
   if ( curr_woss->timeEvolve(time_value) ) 
@@ -422,7 +422,6 @@ PressureVector WossManagerResDbMT::getWossPressure( const CoordZPairVect& coordi
 
   if (use_thread_pool == false)
   {
-    unsigned int cnt = 0;
     auto coord_iter = coordinates.cbegin();
     unsigned int total_thread_created = 0;
     unsigned int total_thread_ended = 0;
@@ -488,7 +487,6 @@ PressureVector WossManagerResDbMT::getWossPressure( const CoordZPairVect& coordi
   unsigned int total_queries = coordinates.size();
 
   if (use_thread_pool == false) {
-    unsigned int cnt = 0;
     auto coord_iter = coordinates.cbegin();
     unsigned int total_thread_created = 0;
     unsigned int total_thread_ended = 0;
@@ -571,7 +569,6 @@ TimeArrVector WossManagerResDbMT::getWossTimeArr( const CoordZPairVect& coordina
   unsigned int total_queries = coordinates.size();
 
   if (use_thread_pool == false) {
-    unsigned int cnt = 0;
     auto coord_iter = coordinates.cbegin();
     unsigned int total_thread_created = 0;
     unsigned int total_thread_ended = 0;
@@ -638,7 +635,6 @@ TimeArrVector WossManagerResDbMT::getWossTimeArr( const CoordZPairVect& coordina
   unsigned int total_queries = coordinates.size();
 
   if (use_thread_pool == false) {
-    unsigned int cnt = 0;
     auto coord_iter = coordinates.cbegin();
     unsigned int total_thread_created = 0;
     unsigned int total_thread_ended = 0;
@@ -795,7 +791,7 @@ std::unique_ptr<TimeArr> WossManagerResDbMT::getWossTimeArr( const CoordZ& tx_co
   }
   else {
     bool has_to_run = curr_woss->timeEvolve(time_value);
-    bool is_ok = true;
+    [[maybe_unused]] bool is_ok = true;
 
     if ( has_to_run ) {
       active_woss[curr_woss] = std::move( std::make_unique<ThreadCondSignal>() );
@@ -947,7 +943,7 @@ std::unique_ptr<Pressure> WossManagerResDbMT::getWossPressure( const CoordZ& tx_
   }
   else {
     bool has_to_run = curr_woss->timeEvolve(time_value);
-    bool is_ok = true;
+    [[maybe_unused]] bool is_ok = true;
 
     if ( has_to_run ) {
       active_woss[curr_woss] = std::move( std::make_unique<ThreadCondSignal>() );

@@ -2,7 +2,7 @@
 
 ***Author: Federico Guerra - `WOSS@guerra-tlc.com`***
 
-***Version: 2.0.1***
+***Version: 2.1.0***
 
 This document provides a short techical description of the *World Ocean Simulation System* (WOSS) library 
 and of its optional integration into _Multi InteRfAce Cross Layer Extension_ (NS-Miracle) and _ns-3_.
@@ -52,6 +52,8 @@ See the Command Line section.
 
 From version **2.0.1** WOSS supports the ability to customize the Bellhop executable name, thus enabling the user to plug other Bellhop variants, such as `bellhopcxx` and `bellhopcuda`.
 See woss::BellhopCreator class.
+
+From version **2.1.0** WOSS supports the `cmake` build system. `autotools` files are kept for retrocompatibilty and they will be removed in the future.
 
 Figs. 1.1 and 1.2 show the coherent sum of all channel taps, obtained with WOSS for an  example scenario. 
 

@@ -76,6 +76,7 @@ Time::Time(int d, int mth, int y, int h, int m, int s)
   timeinfo.tm_hour = h;
   timeinfo.tm_min = m;
   timeinfo.tm_sec = s;
+  timeinfo.tm_isdst = -1;
 
   raw_time = mktime(&timeinfo);
   

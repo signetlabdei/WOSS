@@ -52,8 +52,10 @@ SedimDeck41DbCreator::SedimDeck41DbCreator()
 std::unique_ptr<WossDb> SedimDeck41DbCreator::createWossDb() const {
   auto woss_db = std::make_unique<SedimDeck41Db>("");
   
-  assert( initializeSedimDb( *woss_db ) );
-  
+  if( initializeSedimDb( *woss_db ) == false) {
+    assert(false);
+  }
+ 
   return( woss_db );
 }
 

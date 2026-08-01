@@ -59,7 +59,9 @@ std::unique_ptr<WossDb> SspWoa2005DbCreator::createWossDb() const {
   auto woss_db = std::make_unique<SspWoa2005Db>( pathname );
 #endif // defined (WOSS_NETCDF4_SUPPORT)
 
-  assert( initializeDb( *woss_db ) );
+  if( initializeDb( *woss_db ) == false) {
+    assert(false);
+  }
 
   return( woss_db );
 }

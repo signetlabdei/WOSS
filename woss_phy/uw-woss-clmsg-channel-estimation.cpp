@@ -51,5 +51,6 @@ ClMsgChannelEstimation::ClMsgChannelEstimation( int i, int j, std::unique_ptr<wo
 
 ClMessage* ClMsgChannelEstimation::copy() {
   // Supporting only synchronous messages!!!
-  assert(0);
+  assert(false);
+  return nullptr;
 }

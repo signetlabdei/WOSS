@@ -225,7 +225,9 @@ int WossControllerTcl::command( int argc, const char*const* argv ) {
       if (debug) 
         std::cout << "WossControllerTcl::command() initialize called"  << std::endl;
 
-      assert( woss::SWossController::instance().initialize() );
+      if (woss::SWossController::instance().initialize() == false) {
+        assert(false);
+      }
       return TCL_OK;
     }
   }

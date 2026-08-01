@@ -5,6 +5,8 @@
 *.csv
 *~
 .vscode*
+***/build
+***/Testing
 ***/Makefile.in
 ***/aclocal.m4
 ***/test-driver

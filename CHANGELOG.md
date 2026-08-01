@@ -1,5 +1,13 @@
 # WOSS changelog
 
+## v2.1.0
+
+- Added support for `cmake` build system. `autotools` files are kept for retrocompatibility but they will be removed in the future.
+- Fixed issue with woss::Time class and DST times
+- refactored containers class with c++17 syntax
+- fixed g++16 warnings
+- Added new unit tests that cover the whole framework
+
 ## v2.0.1
 
 - Added support for the user to provide Bellhop's executable name, thus enabling support for `bellhopcxx` , `bellhopcuda` programs. 

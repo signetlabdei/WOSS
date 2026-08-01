@@ -45,7 +45,10 @@ std::unique_ptr<WossDb> BathyGebcoDbCreator::createWossDb() const {
   
   woss_db->setGebcoType( gebco_type );
   
-  assert( initializeDb( *woss_db ) );
+  if( initializeDb( *woss_db ) == false)
+  {
+    assert(false);
+  }
   return( woss_db );
 }
 
